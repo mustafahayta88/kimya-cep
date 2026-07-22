@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#0D1117">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Kimya</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0D1117;color:#E6EDF3;overflow-x:hidden;padding-bottom:60px}
+#hdr{background:#0D1117;border-bottom:1px solid #333;padding:10px 14px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
+#hdr h1{color:#00F0FF;font-size:18px;font-weight:700}
+#hdr span{color:#8B949E;font-size:11px}
+#tabs{display:flex;overflow-x:auto;gap:2px;padding:6px 6px 0;background:#0D1117;position:sticky;top:44px;z-index:10;scrollbar-width:none}
+#tabs::-webkit-scrollbar{display:none}
+.tab{padding:6px 10px;border-radius:6px 6px 0 0;font-size:12px;font-weight:600;color:#8B949E;background:transparent;border:none;cursor:pointer;white-space:nowrap;transition:.2s;flex-shrink:0}
+.tab.act{color:#00F0FF;background:#161B22}
+.tc{display:none;padding:6px}.tc.act{display:block}
+canvas{width:100%;height:auto;border-radius:6px;display:block;background:#0D1117;margin-bottom:4px}
+.dc{background:#161B22;border:1px solid #333;border-radius:6px;padding:10px;margin-bottom:6px;font-size:12px;line-height:1.5;color:#CCC}
+.dc b{color:#00F0FF}.dc .g{color:#39FF14;font-weight:700}.dc .s{color:#AAA;font-size:11px}
+input[type=text]{background:#161B22;border:1px solid #333;border-radius:6px;color:#E6EDF3;padding:8px 10px;font-size:13px;width:100%;outline:none}
+input[type=text]:focus{border-color:#00F0FF}
+button{background:#21262D;border:1px solid #444;border-radius:6px;color:#E6EDF3;padding:6px 12px;font-size:12px;cursor:pointer;transition:.2s}
+button:active{background:#333}
+.br{display:flex;gap:3px;flex-wrap:wrap;margin:6px 0}.br button{flex:1;min-width:50px;font-size:10px;padding:5px 3px;background:#21262D;border:1px solid #444;border-radius:4px}
+.br button.sel{background:#00F0FF22;border-color:#00F0FF;color:#00F0FF}
+.rb{background:#161B22;border:1px solid #333;border-radius:6px;padding:10px;margin:4px 0;font-size:11px;line-height:1.6}
+.rb .l{color:#00F0FF;font-weight:600}.rb .v{color:#39FF14}
+#rp{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0}#rp button{flex:1;min-width:48px;font-size:9px;padding:4px 2px;background:#1E2A3A;border:1px solid #444}
+</style>
+</head>
+<body>
+
+<div id="hdr"><h1>Kimya</h1><span id="st">0 element</span></div>
+
+<div id="tabs">
+<button class="tab act" data-i="0">Reaksiyon</button>
+<button class="tab" data-i="1">Izomeri</button>
+<button class="tab" data-i="2">Polimer</button>
+<button class="tab" data-i="3">Petrol</button>
+<button class="tab" data-i="4">Biyomolekul</button>
+<button class="tab" data-i="5">Redoks</button>
+</div>
+
+<div class="tc act" id="t0"><canvas id="c0" height="400"></canvas><div class="dc" id="d0">Reaksiyon turu secin</div><div class="br" id="b0"></div></div>
+<div class="tc" id="t1"><canvas id="c1" height="400"></canvas><div class="dc" id="d1">Izomeri turu secin</div><div class="br" id="b1"></div></div>
+<div class="tc" id="t2"><canvas id="c2" height="400"></canvas><div class="dc" id="d2">Polimer turu secin</div><div class="br" id="b2"></div></div>
+<div class="tc" id="t3"><canvas id="c3" height="400"></canvas><div class="dc" id="d3">Petrol turu secin</div><div class="br" id="b3"></div></div>
+<div class="tc" id="t4"><canvas id="c4" height="400"></canvas><div class="dc" id="d4">Biyomolekul turu secin</div><div class="br" id="b4"></div></div>
+<div class="tc" id="t5"><canvas id="c5" height="360"></canvas>
+<div style="display:flex;gap:6px;margin-bottom:4px"><input type="text" id="rx1" placeholder="Element 1"><input type="text" id="rx2" placeholder="Element 2"><button id="rxb">Analiz</button></div>
+<div id="rp"></div><div class="rb" id="rxt">Iki element girerek Redoks analizi yapin</div></div>
+
+<script>
+// === ELEMENT DATA ===
+var EL = {H:{n:'Hidrojen',en:2.20},He:{n:'Helyum',en:0},Li:{n:'Lityum',en:0.98},Be:{n:'Berilyum',en:1.57},B:{n:'Bor',en:2.04},C:{n:'Karbon',en:2.55},N:{n:'Azot',en:3.04},O:{n:'Oksijen',en:3.44},F:{n:'Flor',en:3.98},Ne:{n:'Neon',en:0},Na:{n:'Sodyum',en:0.93},Mg:{n:'Magnezyum',en:1.31},Al:{n:'Aluminyum',en:1.61},Si:{n:'Silisyum',en:1.90},P:{n:'Fosfor',en:2.19},S:{n:'Kukurt',en:2.58},Cl:{n:'Klor',en:3.16},Ar:{n:'Argon',en:0},K:{n:'Potasyum',en:0.82},Ca:{n:'Kalsiyum',en:1.00},Br:{n:'Brom',en:2.96},I:{n:'Iyot',en:2.66}};
+document.getElementById('st').textContent = Object.keys(EL).length + ' element';
+
+// === TABS ===
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click',function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('act')});
+    t.classList.add('act');
+    document.querySelectorAll('.tc').forEach(function(x){x.classList.remove('act')});
+    document.getElementById('t'+t.dataset.i).classList.add('act');
+    setTimeout(drawAll, 50);
+  });
+});
+
+// === HELPERS ===
+var PI = Math.PI, TAU = 2*PI;
+function bg(c){c.fillStyle='#0D1117';c.fillRect(0,0,c.canvas.width,c.canvas.height)}
+function circ(c,x,y,r,fi,st,sw){
+  c.beginPath();c.arc(x,y,r,0,TAU);
+  if(fi){c.fillStyle=fi;c.fill()}if(st){c.strokeStyle=st;c.lineWidth=sw||3;c.stroke()}
+}
+function ln(c,x1,y1,x2,y2,co,w){c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.strokeStyle=co;c.lineWidth=w||4;c.stroke()}
+function at(c,x,y,e,fi,st,sz){
+  circ(c,x,y,ar,fi||'#6B6B6B',st||'#444',3);
+  c.font=(sz||ar*0.9)+'px -apple-system,system-ui,sans-serif';c.fillStyle='#FFF';c.textAlign='center';c.textBaseline='middle';
+  c.fillText(e,x,y)
+}
+function bl(c,x1,y1,x2,y2,t,c1,c2){ln(c,x1,y1,x2,y2,t===2?(c2||'#00F0FF'):(c1||'#8B949E'),4)}
+function arr(c,x1,y1,x2,y2,co){
+  ln(c,x1,y1,x2,y2,co||'#39FF14',4);
+  var a=Math.atan2(y2-y1,x2-x1);c.beginPath();c.moveTo(x2,y2);
+  c.lineTo(x2-14*Math.cos(a-0.4),y2-14*Math.sin(a-0.4));c.lineTo(x2-14*Math.cos(a+0.4),y2-14*Math.sin(a+0.4));c.closePath();c.fillStyle=co||'#39FF14';c.fill()
+}
+function tx(c,t,x,y,co,sz){
+  c.font=(sz||14)+'px -apple-system,system-ui,sans-serif';c.fillStyle=co||'#E6EDF3';c.textAlign='center';c.textBaseline='middle';
+  c.fillText(t,x,y)
+}
+
+// === DRAW ALL ===
+var cur = [0,0,0,0,0,0];
+var INFOS = [
+  ['Yer Degistirme (SN2): Nu: + R-L -> R-Nu + L. Nu: (OH-, CN-, vs.) ayrilan grubu (L=Cl, Br, I) yerinden cikarir. Tek basamakli, eszamanli.','Katilma (Elektrofilik): C=C cift bagina HX (X=Cl, Br) eklenir. Markovnikov kurali: H cok H'li C'ye gider.','Ayrilma (Eliminasyon): Alkol+H+ -> Alken+H2O. OH protonlanir, H2O ayrilir, cift bag olusur.','Yukseltgenme: Alkol -> Keton/Asit (Cr2O7/H2SO4 ile). R-OH + [O] -> R=O + H2O.','Indirgenme: Keton/Asit -> Alkol (LiAlH4/NaBH4 ile). C=O + 2H -> CH-OH.','Nukleofilik Yer Degistirme (SN1): R-L -> R+ + L- (once), sonra Nu: -> R-Nu. Karbokatyon ara urunu, iki basamakli.'],
+  ['Yapi (Yapisal) Izomeri: Ayni formulu farkli yapi. Zincir (butan vs izobutan), konum (1-kloropropan vs 2-kloropropan), fonksiyonel grup (etanol vs dimetileter).','Geometrik (Cis-Trans) Izomeri: C=C cift baginda veya halkali yapida. Cis: ayni tarafta, Trans: karsi tarafta. Siklohekzanol ornegi.','Optik (Enantiyomer) Izomeri: Kiral merkez (4 farkli grup). D-L izomerleri (amino asitler/sekerler). Polarized isigi dondurme. Optikce aktif.','Tautomeria: Protonun yer degistirmesi ile olusan izomeri. Keto-enol tautomerisi (aldehit/keton <-> enol formu).','Konformasyon Izomeri: Tek bag etrafinda donme ile olusan farkli 3D yapilar. Etan: gergin (eclipsed) ve kaymis (staggered). Newman projeksiyonu.'],
+  ['Katilma (Zincir) Polimerlesmesi: Doymamis monomerlerin (C=C) radikal ile acilarak zincir olusturmasi. Orn: PE (polietilen), PP, PVC. Polimerizasyon derecesi n=1000-100000.','Yogunlasma (Basamak) Polimerlesmesi: Iki farkli fonksiyonel grubun su, metanol gibi kucuk molekul cikararak reaksiyonu. Orn: Nylon 6,6, Polyester.','Termoplastik: Dogrusal/dallanmis zincirler, zayif van der Waals kuvvetleri. Isitilinca yumusar, tekrar islenebilir. Orn: PE, PP, PVC, PS.','Termoset: Capraz bagli 3D ag yapisi. Bir kez sertlesir, tekrar erimez. Yksek sicaklik dayanimi. Orn: Bakalit, Epoksi.','Elastomer (Kaucuk): Zayif capraz bagli zincirler. Gerilimde uzar, birakinca eski haline doner. Dogal kaucuk: izopren. Vulkanizasyon.'],
+  ['Petrolun Bilesimi: C1-C60+ hidrokarbon karisimi. Fraksiyonel damitma ile ayrilir: Gaz(C1-C4), Benzin(C5-C9), Gaz yagi(C10-C13), Dizel(C14-C18), Yakit(C19-C25), Asfalt(>C25).','Alkanlar: CnH2n+2, C-C tek bag. Metan(CH4), Etan(C2H6), Propan(C3H8), Butan(C4H10). Karbon sayisi arttikca kaynama noktasi yukselir.','Kraking: Uzun zincir -> kisa zincir (benzin) + alken. Isi 500C veya katalitik (zeolit). Petrokimyanin temeli.','Reforming: Duz zincirli alkan -> halkali/aromatik HC. Oktan sayisi artar. Pt/Re katalizor, 500C. Benzin kalitesi yukselir.','Petrokimya Urunleri: Benzin(tasit), Plastik(ambalaj), Asfalt(yol), Gubre(tarim), Ilac(saglik), Polyester(tekstil).'],
+  ['Karbonhidratlar: Cn(H2O)n - sekerler, nisasta, seluloz. Glikoz(C6H12O6), Fruktoz. Disakkarit: Sakkaroz(seker). Polisakkarit: Nisasta, Glikojen, Seluloz.','Proteinler: Amino asitlerden olusur. 20 cesit amino asit. Peptid bagi (-CO-NH-) ile baglanir. Birincil, ikincil, ucuncul yapi. Enzimler protein.','Yaglar (Lipitler): Gliserol + 3 yag asidi (trigliserid). Doymus yag(kati), doymamis yag(sivi). Hucre zari fosfolipitlerinden olusur. Steroidler.','Vitaminler: Organik bilesikler, metabolizmada duzenleyici. Yagda cozunen (A,D,E,K) ve suda cozunen (C,B kompleks). Eksikliginde hastalik.','Nukleik Asitler (DNA/RNA): Nukleotidlerden olusur (fosfat+seker+baz). DNA cift sarmal, RNA tek zincir. Genetik bilgi tasir.'],
+  ['Redoks Analizi: Iki elementin elektronegatiflik (EN) degerlerini karsilastirarak elektron transferini belirleme. EN dusuk olan elektron verir (yukseltgenir), EN yuksek olan elektron alir (indirgenir).']
+];
+var BTN_NAMES = [
+  ['SN2','Katilma','Ayrilma','Yukselt.','Indirgen.','SN1'],
+  ['Yapi','Geometrik','Optik','Tautomeri','Konformasyon'],
+  ['Katilma','Yogunlasma','Termoplastik','Termoset','Elastomer'],
+  ['Bilesim','Alkanlar','Kraking','Reforming','Urunler'],
+  ['Karbohidrat','Protein','Yag','Vitamin','Nukleik Asit'],
+  ['Redoks']
+];
+
+function initBtns() {
+  for (var i = 0; i < 6; i++) {
+    (function(idx){
+      var cont = document.getElementById('b'+idx);
+      BTN_NAMES[idx].forEach(function(n,j){
+        var b = document.createElement('button');
+        b.textContent = n;
+        b.addEventListener('click',function(){
+          document.querySelectorAll('#b'+idx+' button').forEach(function(x){x.classList.remove('sel')});
+          b.classList.add('sel'); cur[idx] = j; drawTab(idx);
+        });
+        cont.appendChild(b);
+      });
+      if (BTN_NAMES[idx].length > 0) {
+        cont.firstChild && cont.firstChild.classList.add('sel');
+      }
+    })(i);
+  }
+  // Redox presets
+  var rp = document.getElementById('rp');
+  [['Na','Cl'],['H','O'],['C','O'],['H','F'],['K','Br'],['Li','F'],['N','O'],['Mg','O'],['S','O'],['Ca','F'],['Si','O'],['Al','O']].forEach(function(p){
+    var b = document.createElement('button'); b.textContent = p[0]+'-'+p[1];
+    b.addEventListener('click',function(){document.getElementById('rx1').value=p[0];document.getElementById('rx2').value=p[1];doRedox()});
+    rp.appendChild(b);
+  });
+  document.getElementById('rxb').addEventListener('click',doRedox);
+}
+initBtns();
+
+function drawAll(){for(var i=0;i<6;i++)drawTab(i)}
+
+function drawTab(idx) {
+  var cv = document.getElementById('c'+idx);
+  cv.width = Math.min(cv.parentElement.getBoundingClientRect().width - 12, 600);
+  var c = cv.getContext('2d'), w = cv.width, h = cv.height;
+  bg(c); var i = cur[idx];
+  
+  function d(x,y,e,p,s){at(c,x,y,e,p||'#6B6B6B',s||'#444')}
+  function b(x1,y1,x2,y2,t){bl(c,x1,y1,x2,y2,t)}
+  
+  if (idx === 0) drawReactions(c,w,h,i,d,b);
+  else if (idx === 1) drawIsomer(c,w,h,i,d,b);
+  else if (idx === 2) drawPolymer(c,w,h,i);
+  else if (idx === 3) drawPetrol(c,w,h,i);
+  else if (idx === 4) drawBio(c,w,h,i,d,b);
+  else if (idx === 5) drawRedox(c,w,h);
+  
+  document.getElementById('d'+idx).innerHTML = '<b>' + BTN_NAMES[idx][i] + '</b>: ' + INFOS[idx][i] || INFOS[idx][0];
+}
+
+function drawReactions(c,w,h,i,d,b) {
+  ar = Math.min(w*0.035, h*0.05, 24); sp = ar*4; cx = w/2;
+  if (i===0) {
+    var my = h*0.42;
+    tx(c,'Yer Degistirme (SN2)',cx,h*0.08,'#00F0FF',h*0.06);
+    tx(c,'Nu: + R-L -> R-Nu + L:',cx,h*0.15,'#E6EDF3',h*0.04);
+    d(cx-sp*1.2,my,'OH','#FF0000'); d(cx-sp*0.3,my-sp*0.4,'H','#FFF');
+    d(cx+sp*0.3,my,'C'); d(cx+sp*1.4,my,'Cl','#1FC01F');
+    b(cx-sp*1.2,my,cx,my); b(cx,my,cx+sp*0.3,my); b(cx+sp*0.3,my,cx+sp*1.4,my);
+    b(cx,my,cx-sp*0.3,my-sp*0.4);
+    arr(c,cx+sp*0.5,my-sp*0.8,cx-sp*0.8,my+sp*1.0,'#FF69B4');
+    tx(c,'Nu atagi (OH-)',cx+sp*0.5,my-sp*1.2,'#FF69B4',h*0.035);
+    tx(c,'Ayrilan grup (Cl-)',cx+sp*1.8,my+sp*0.6,'#FFA500',h*0.035);
+    tx(c,'Tek basamakli, eszamanli bag olusum/kopma',cx,h*0.88,'#AAA',h*0.035);
+  } else if (i===1) {
+    tx(c,'Katilma (Elektrofilik)',cx,h*0.08,'#00F0FF',h*0.06);
+    tx(c,'C=C + HX -> C-C (H ve X eklenir)',cx,h*0.15,'#E6EDF3',h*0.04);
+    var my = h*0.40;
+    d(cx-sp*0.6,my,'C'); d(cx+sp*0.6,my,'C');
+    d(cx-sp*1.3,my,'H','#FFF'); d(cx+sp*1.3,my,'Br','#A52525');
+    b(cx-sp*0.6,my,cx+sp*0.6,my,2); b(cx-sp*0.6,my,cx-sp*1.3,my); b(cx+sp*0.6,my,cx+sp*1.3,my);
+    tx(c,'C=C cift bagi',cx,my-sp*0.6,'#00F0FF',h*0.03);
+    arr(c,cx+sp*0.2,my-sp*0.4,cx-sp*0.2,my+sp*0.4,'#FF69B4');
+    tx(c,'p elektronlari H+ yi ceker',cx,my-sp*1.0,'#FF69B4',h*0.03);
+    var my2 = h*0.78;
+    d(cx-sp*0.6,my2,'C'); d(cx+sp*0.6,my2,'C'); d(cx-sp*1.3,my2,'H','#FFF'); d(cx+sp*1.3,my2,'Br','#A52525');
+    b(cx-sp*0.6,my2,cx+sp*0.6,my2); b(cx-sp*0.6,my2,cx-sp*1.3,my2); b(cx+sp*0.6,my2,cx+sp*1.3,my2);
+    tx(c,'Urun: H ve Br eklenmis alkan',cx,my2+sp*0.8,'#39FF14',h*0.035);
+    tx(c,'Markovnikov: H cok H li C ye gider',cx,h*0.93,'#AAA',h*0.03);
+  } else if (i===2) {
+    tx(c,'Ayrilma (Eliminasyon)',cx,h*0.08,'#00F0FF',h*0.06);
+    tx(c,'Alkol + H+ -> Alken + H2O',cx,h*0.15,'#E6EDF3',h*0.04);
+    var my = h*0.45;
+    d(cx-sp*0.6,my,'C'); d(cx+sp*0.6,my,'C'); d(cx+sp*1.4,my,'C');
+    d(cx+sp*1.3,my-sp*0.4,'OH','#FF0000'); d(cx-sp*1.3,my,'H','#FFF');
+    b(cx-sp*0.6,my,cx+sp*0.6,my); b(cx+sp*0.6,my,cx+sp*1.4,my);
+    b(cx+sp*1.4,my,cx+sp*1.3,my-sp*0.4); b(cx-sp*0.6,my,cx-sp*1.3,my);
+    tx(c,'+ H+ (asit katalizoru)',cx,my+sp*0.9,'#FFA500',h*0.035);
+    arr(c,cx,h*0.58,cx,h*0.65,'#39FF14');
+    var my2 = h*0.72;
+    d(cx-sp*0.6,my2,'C'); d(cx+sp*0.6,my2,'C'); d(cx-sp*1.3,my2,'H','#FFF');
+    b(cx-sp*0.6,my2,cx+sp*0.6,my2,2); b(cx-sp*0.6,my2,cx-sp*1.3,my2);
+    tx(c,'Alken + H2O',cx,my2+sp*0.7,'#39FF14',h*0.035);
+  } else if (i===3) {
+    tx(c,'Yukseltgenme (Alkol -> Keton/Asit)',cx,h*0.08,'#00F0FF',h*0.055);
+    tx(c,'R-OH + [O] -> R=O + H2O',cx,h*0.15,'#E6EDF3',h*0.04);
+    var my = h*0.40;
+    d(cx-sp*0.8,my,'C'); d(cx+sp*0.4,my,'C'); d(cx-sp*0.8,my-sp*0.5,'H','#FFF');
+    d(cx+sp*0.4,my-sp*0.5,'OH','#FF0000'); d(cx-sp*0.8,my+sp*0.5,'H','#FFF'); d(cx+sp*0.4,my+sp*0.5,'H','#FFF');
+    b(cx-sp*0.8,my,cx+sp*0.4,my); b(cx-sp*0.8,my,cx-sp*0.8,my-sp*0.5);
+    b(cx-sp*0.8,my,cx-sp*0.8,my+sp*0.5); b(cx+sp*0.4,my,cx+sp*0.4,my-sp*0.5); b(cx+sp*0.4,my,cx+sp*0.4,my+sp*0.5);
+    tx(c,'Icin Alkol (R-CH2-OH)',cx,my+sp*0.9,'#AAA',h*0.03);
+    tx(c,'+ [O] (Cr2O7/H2SO4)',cx,h*0.62,'#FFA500',h*0.03);
+    arr(c,cx,h*0.65,cx,h*0.70,'#39FF14');
+    var my2 = h*0.78;
+    d(cx-sp*0.8,my2,'C'); d(cx+sp*0.4,my2,'C');
+    d(cx-sp*0.8,my2-sp*0.5,'H','#FFF'); d(cx-sp*0.8,my2+sp*0.5,'H','#FFF');
+    d(cx+sp*0.4,my2-sp*0.5,'O','#FF0000');
+    b(cx-sp*0.8,my2,cx+sp*0.4,my2,2); b(cx-sp*0.8,my2,cx-sp*0.8,my2-sp*0.5);
+    b(cx-sp*0.8,my2,cx-sp*0.8,my2+sp*0.5);
+    tx(c,'Keton (R-CO-R)',cx,my2+sp*0.8,'#39FF14',h*0.035);
+  } else if (i===4) {
+    tx(c,'Indirgenme (Keton/Asit -> Alkol)',cx,h*0.08,'#00F0FF',h*0.055);
+    tx(c,'C=O + 2H -> CH-OH',cx,h*0.15,'#E6EDF3',h*0.04);
+    var my = h*0.40;
+    d(cx-sp*0.8,my,'C'); d(cx+sp*0.4,my,'C'); d(cx-sp*0.8,my-sp*0.5,'H','#FFF');
+    d(cx-sp*0.8,my+sp*0.5,'H','#FFF'); d(cx+sp*0.4,my-sp*0.5,'O','#FF0000');
+    b(cx-sp*0.8,my,cx+sp*0.4,my,2); b(cx-sp*0.8,my,cx-sp*0.8,my-sp*0.5); b(cx-sp*0.8,my,cx-sp*0.8,my+sp*0.5);
+    tx(c,'Keton',cx,my+sp*0.8,'#AAA',h*0.03);
+    tx(c,'+ 2H (LiAlH4/NaBH4)',cx,h*0.62,'#FFA500',h*0.03);
+    arr(c,cx,h*0.65,cx,h*0.70,'#39FF14');
+    var my2 = h*0.78;
+    d(cx-sp*0.8,my2,'C'); d(cx+sp*0.4,my2,'C'); d(cx-sp*0.8,my2-sp*0.5,'H','#FFF');
+    d(cx-sp*0.8,my2+sp*0.5,'H','#FFF'); d(cx+sp*0.4,my2+sp*0.5,'OH','#FF0000');
+    b(cx-sp*0.8,my2,cx+sp*0.4,my2); b(cx-sp*0.8,my2,cx-sp*0.8,my2-sp*0.5);
+    b(cx-sp*0.8,my2,cx-sp*0.8,my2+sp*0.5); b(cx+sp*0.4,my2,cx+sp*0.4,my2+sp*0.5);
+    tx(c,'Icin Alkol',cx,my2+sp*0.8,'#39FF14',h*0.035);
+  } else if (i===5) {
+    tx(c,'Nukleofilik Yer Degistirme (SN1)',cx,h*0.07,'#00F0FF',h*0.05);
+    tx(c,'R-L -> R+ + L- (once), Nu: -> R-Nu',cx,h*0.13,'#E6EDF3',h*0.035);
+    var my = h*0.32;
+    d(cx,my,'C'); d(cx-sp*0.7,my+sp*0.5,'R','#8B949E',null,ar*0.6);
+    d(cx+sp*0.7,my+sp*0.5,'R','#8B949E',null,ar*0.6); d(cx,my-sp*0.6,'R','#8B949E',null,ar*0.6);
+    d(cx-sp*1.2,my,'Br','#A52525');
+    b(cx,my,cx-sp*0.7,my+sp*0.5); b(cx,my,cx+sp*0.7,my+sp*0.5); b(cx,my,cx,my-sp*0.6); b(cx,my,cx-sp*1.2,my);
+    tx(c,'Basamak 1: Karbokatyon (R3C+)',cx,my+sp*1.0,'#FF69B4',h*0.03);
+    arr(c,cx,h*0.52,cx,h*0.58,'#39FF14');
+    var my2 = h*0.72;
+    d(cx,my2,'C'); d(cx-sp*0.7,my2+sp*0.5,'R','#8B949E',null,ar*0.6);
+    d(cx+sp*0.7,my2+sp*0.5,'R','#8B949E',null,ar*0.6); d(cx,my2-sp*0.6,'R','#8B949E',null,ar*0.6);
+    d(cx+sp*1.2,my2,'OH','#FF0000');
+    b(cx,my2,cx-sp*0.7,my2+sp*0.5); b(cx,my2,cx+sp*0.7,my2+sp*0.5); b(cx,my2,cx,my2-sp*0.6); b(cx,my2,cx+sp*1.2,my2);
+    tx(c,'Basamak 2: Nu atagi (alkol olusur)',cx,my2+sp*1.0,'#39FF14',h*0.03);
+  }
+}
+
+function drawIsomer(c,w,h,i,d,b) {
+  ar = Math.min(w*0.035, h*0.05, 22); sp = ar*4; cx = w/2;
+  if (i===0) {
+    tx(c,'Yapi (Yapisal) Izomeri',cx,h*0.07,'#00F0FF',h*0.055);
+    tx(c,'Ayni formulu (C4H10), farkli yapi',cx,h*0.13,'#E6EDF3',h*0.035);
+    var sy = h*0.28;
+    d(cx-sp*0.6,sy,'C'); d(cx+sp*0.6,sy,'C'); d(cx+sp*1.8,sy,'C'); d(cx+sp*3.0,sy,'C');
+    b(cx-sp*0.6,sy,cx+sp*0.6,sy); b(cx+sp*0.6,sy,cx+sp*1.8,sy); b(cx+sp*1.8,sy,cx+sp*3.0,sy);
+    tx(c,'n-Butan (duz zincir)',cx+sp*1.2,sy+sp*0.7,'#AAA',h*0.03);
+    var sy2 = h*0.58;
+    d(cx-sp*0.8,sy2,'C'); d(cx,sy2,'C'); d(cx+sp*0.8,sy2,'C'); d(cx,sy2-sp*0.9,'C');
+    b(cx-sp*0.8,sy2,cx,sy2); b(cx,sy2,cx+sp*0.8,sy2); b(cx,sy2,cx,sy2-sp*0.9);
+    tx(c,'Izobutan (dalli zincir)',cx,sy2+sp*0.7,'#AAA',h*0.03);
+    tx(c,'Fiziksel ozellikler farkli (kn, yogunluk)',cx,h*0.86,'#39FF14',h*0.035);
+  } else if (i===1) {
+    tx(c,'Geometrik (Cis-Trans) Izomeri',cx,h*0.07,'#00F0FF',h*0.055);
+    tx(c,'C=C cift baginda ayni/karsti tarafta',cx,h*0.13,'#E6EDF3',h*0.035);
+    // Cis
+    var sy = h*0.25;
+    d(cx-sp*2.5,sy,'H'); d(cx-sp*0.5,sy,'C'); d(cx+sp*0.5,sy,'C'); d(cx+sp*2.5,sy,'H');
+    d(cx-sp*0.5,sy-sp*0.6,'C'); d(cx+sp*0.5,sy-sp*0.6,'C');
+    b(cx-sp*0.5,sy,cx+sp*0.5,sy,2); b(cx-sp*2.5,sy,cx-sp*0.5,sy);
+    b(cx+sp*0.5,sy,cx+sp*2.5,sy); b(cx-sp*0.5,sy,cx-sp*0.5,sy-sp*0.6);
+    b(cx+sp*0.5,sy,cx+sp*0.5,sy-sp*0.6);
+    tx(c,'Cis (ayni tarafta)',cx,sy+sp*0.8,'#00F0FF',h*0.03);
+    // Trans
+    var sy2 = h*0.62;
+    d(cx-sp*2.5,sy2,'H'); d(cx-sp*0.5,sy2,'C'); d(cx+sp*0.5,sy2,'C'); d(cx+sp*2.5,sy2,'H');
+    d(cx-sp*0.5,sy2+sp*0.6,'C'); d(cx+sp*0.5,sy2+sp*0.6,'C');
+    b(cx-sp*0.5,sy2,cx+sp*0.5,sy2,2); b(cx-sp*2.5,sy2,cx-sp*0.5,sy2);
+    b(cx+sp*0.5,sy2,cx+sp*2.5,sy2); b(cx-sp*0.5,sy2,cx-sp*0.5,sy2+sp*0.6);
+    b(cx+sp*0.5,sy2,cx+sp*0.5,sy2+sp*0.6);
+    tx(c,'Trans (karsi tarafta)',cx,sy2+sp*0.9,'#00F0FF',h*0.03);
+    tx(c,'Fiziksel/kimyasal ozellikler farkli',cx,h*0.90,'#39FF14',h*0.03);
+  } else if (i===2) {
+    tx(c,'Optik (Enantiyomer) Izomeri',cx,h*0.07,'#00F0FF',h*0.055);
+    tx(c,'Kiral merkez, 4 farkli grup, ayna goruntusu',cx,h*0.13,'#E6EDF3',h*0.035);
+    var sy = h*0.40;
+    // Chiral center
+    d(cx,sy,'C','#FF69B4'); d(cx,sy-sp*0.9,'A'); d(cx,sy+sp*0.9,'B');
+    d(cx-sp*0.9,sy,'C'); d(cx+sp*0.9,sy,'D');
+    b(cx,sy,cx,sy-sp*0.9); b(cx,sy,cx,sy+sp*0.9); b(cx,sy,cx-sp*0.9,sy); b(cx,sy,cx+sp*0.9,sy);
+    tx(c,'Kiral merkez (C*)',cx,sy+sp*1.3,'#FF69B4',h*0.03);
+    // Mirror line
+    c.setLineDash([6,4]); ln(c,w*0.5-2,h*0.18,w*0.5-2,h*0.72,'#444',2); c.setLineDash([]);
+    tx(c,'Ayna',w*0.5-15,h*0.18,'#444',h*0.025);
+    // R/S forms
+    tx(c,'D (Sa,)',w*0.28,sy+sp*1.3,'#AAA',h*0.025);
+    tx(c,'L (Sol)',w*0.72,sy+sp*1.3,'#AAA',h*0.025);
+    tx(c,'Polarize isigi zitt yonde dondururler',cx,h*0.85,'#39FF14',h*0.03);
+  } else if (i===3) {
+    tx(c,'Tautomeri (Keto-Enol)',cx,h*0.07,'#00F0FF',h*0.055);
+    tx(c,'Proton yer degistirmesi ile izomeri',cx,h*0.13,'#E6EDF3',h*0.035);
+    var sy = h*0.30;
+    d(cx-sp*0.6,sy,'C'); d(cx+sp*0.6,sy,'C'); d(cx+sp*1.4,sy,'C');
+    d(cx+sp*1.4,sy-sp*0.5,'O','#FF0000');
+    d(cx-sp*0.6,sy-sp*0.5,'H','#FFF'); d(cx-sp*0.6,sy+sp*0.5,'H','#FFF');
+    d(cx+sp*0.6,sy-sp*0.5,'H','#FFF'); d(cx+sp*0.6,sy+sp*0.5,'H','#FFF');
+    b(cx-sp*0.6,sy,cx+sp*0.6,sy); b(cx+sp*0.6,sy,cx+sp*1.4,sy,2);
+    b(cx-sp*0.6,sy,cx-sp*0.6,sy-sp*0.5); b(cx-sp*0.6,sy,cx-sp*0.6,sy+sp*0.5);
+    b(cx+sp*0.6,sy,cx+sp*0.6,sy-sp*0.5); b(cx+sp*0.6,sy,cx+sp*0.6,sy+sp*0.5);
+    tx(c,'Keto formu (C=O)',cx,sy+sp*0.9,'#00F0FF',h*0.03);
+    // Arrow right
+    arr(c,w*0.55,sy,w*0.62,sy,'#FFA500');
+    var sy2 = h*0.72;
+    d(cx+sp*0.2,sy2,'C'); d(cx-sp*0.6,sy2,'C'); d(cx+sp*1.0,sy2,'C');
+    d(cx+sp*1.0,sy2-sp*0.5,'OH','#FF0000');
+    d(cx-sp*0.6,sy2-sp*0.5,'H','#FFF'); d(cx-sp*0.6,sy2+sp*0.5,'H','#FFF');
+    d(cx+sp*0.2,sy2+sp*0.5,'H','#FFF');
+    b(cx-sp*0.6,sy2,cx+sp*0.2,sy2,2); b(cx+sp*0.2,sy2,cx+sp*1.0,sy2);
+    b(cx+sp*1.0,sy2,cx+sp*1.0,sy2-sp*0.5); b(cx-sp*0.6,sy2,cx-sp*0.6,sy2-sp*0.5);
+    b(cx-sp*0.6,sy2,cx-sp*0.6,sy2+sp*0.5); b(cx+sp*0.2,sy2,cx+sp*0.2,sy2+sp*0.5);
+    tx(c,'Enol formu (C=C-OH)',cx,sy2+sp*0.9,'#00F0FF',h*0.03);
+    tx(c,'Dengedeler: Keto agir baskindir',cx,h*0.93,'#39FF14',h*0.03);
+  } else if (i===4) {
+    tx(c,'Konformasyon Izomeri (Etan)',cx,h*0.07,'#00F0FF',h*0.055);
+    tx(c,'Tek bag etrafinda donme, Newman projeksiyonu',cx,h*0.13,'#E6EDF3',h*0.035);
+    var cp = Math.min(w*0.3,120), cy = h*0.40;
+    // Eclipsed
+    circ(c, cx-sp*3, cy, cp, '#0D1117', '#444', 2);
+    circ(c, cx-sp*3, cy, cp*0.3, '#6B6B6B', '#444', 2);
+    // Three bonds from center
+    for (var j=0;j<3;j++){var a=j*2*PI/3-PI/2;ln(c,cx-sp*3,cy,cx-sp*3+cp*Math.cos(a),cy+cp*Math.sin(a),'#8B949E',3)}
+    // Three bonds from outer circle
+    for (var j=0;j<3;j++){var a=j*2*PI/3-PI/2+PI/6;
+      ln(c,cx-sp*3+cp*Math.cos(a+PI/6),cy+cp*Math.sin(a+PI/6),cx-sp*3+cp*1.3*Math.cos(a+PI/6),cy+cp*1.3*Math.sin(a+PI/6),'#00F0FF',3)}
+    tx(c,'Gergin (Eclipsed)',cx-sp*3,cy+cp+sp*0.6,'#AAA',h*0.03);
+    tx(c,'Yuksek enerji',cx-sp*3,cy+cp+sp*1.0,'#FF4444',h*0.025);
+    // Staggered
+    circ(c, cx+sp*3, cy, cp, '#0D1117', '#444', 2);
+    circ(c, cx+sp*3, cy, cp*0.3, '#6B6B6B', '#444', 2);
+    for (var j=0;j<3;j++){var a=j*2*PI/3-PI/2;ln(c,cx+sp*3,cy,cx+sp*3+cp*Math.cos(a),cy+cp*Math.sin(a),'#8B949E',3)}
+    for (var j=0;j<3;j++){var a=j*2*PI/3-PI/2;
+      ln(c,cx+sp*3+cp*Math.cos(a),cy+cp*Math.sin(a),cx+sp*3+cp*1.3*Math.cos(a),cy+cp*1.3*Math.sin(a),'#00F0FF',3)}
+    tx(c,'Kaymis (Staggered)',cx+sp*3,cy+cp+sp*0.6,'#AAA',h*0.03);
+    tx(c,'Dusuk enerji (tercih edilen)',cx+sp*3,cy+cp+sp*1.0,'#39FF14',h*0.025);
+    tx(c,'H atomlari arasi itme en az',cx,h*0.85,'#E6EDF3',h*0.03);
+  }
+}
+
+function drawPolymer(c,w,h,i) {
+  ar = Math.min(w*0.032, h*0.045, 20); sp = ar*4; cx = w/2;
+  
+  if (i===0) {
+    tx(c,'Katilma (Zincir) Polimerlesmesi',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'n CH2=CH2 -> -(CH2-CH2)n- (Polietilen)',cx,h*0.11,'#E6EDF3',h*0.035);
+    var my = h*0.22;
+    bl(c,cx-sp*0.7,my,cx+sp*0.7,my,2); at(c,cx-sp*0.7,my,'C'); at(c,cx+sp*0.7,my,'C');
+    tx(c,'Etilen monomeri',cx,my+sp*0.8,'#AAA',h*0.03);
+    var ay = h*0.40;
+    ln(c,cx-sp*2,ay,cx-sp*2,ay+sp*1.5,'#FFA500',3);
+    ln(c,cx+sp*2,ay,cx+sp*2,ay+sp*1.5,'#FFA500',3);
+    tx(c,'n',cx+sp*2.5,ay+sp*0.6,'#FFA500',sp*0.7);
+    for (var j=0;j<4;j++){
+      var bx=cx-sp*1.5+j*sp; at(c,bx,ay,'C'); at(c,bx,ay+sp*0.8,'C');
+      bl(c,bx,ay,bx,ay+sp*0.8); if(j<3){bl(c,bx+sp*0.5,ay,bx+sp,ay);bl(c,bx+sp*0.5,ay+sp*0.8,bx+sp,ay+sp*0.8)}
+    }
+    tx(c,'Polietilen (PE) - en yaygin plastik',cx,h*0.78,'#39FF14',h*0.04);
+    tx(c,'Monomer: Etilen (C2H4) | 1000-100000 monomer unit',cx,h*0.85,'#AAA',h*0.03);
+    tx(c,'Kullanim: Torba, sise, boru, yalitim',cx,h*0.92,'#AAA',h*0.03);
+  } else if (i===1) {
+    tx(c,'Yogunlasma (Basamak) Polimerlesmesi',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Diasit + Diamin -> Poliamid (Nylon) + n H2O',cx,h*0.11,'#E6EDF3',h*0.035);
+    var by = h*0.30, sp5 = sp*0.7;
+    at(c,cx-sp5*3,by,'C'); at(c,cx-sp5*4,by-sp5*0.6,'O','#FF0000'); at(c,cx-sp5*4,by+sp5*0.6,'O','#FF0000');
+    bl(c,cx-sp5*3,by,cx-sp5*1.2,by); at(c,cx-sp5*1.2,by,'C'); bl(c,cx-sp5*1.2,by,cx+sp5*0.6,by); at(c,cx+sp5*0.6,by,'C');
+    bl(c,cx+sp5*0.6,by,cx+sp5*2.4,by); at(c,cx+sp5*2.4,by,'C'); at(c,cx+sp5*3.4,by-sp5*0.6,'O','#FF0000'); at(c,cx+sp5*3.4,by+sp5*0.6,'O','#FF0000');
+    tx(c,'Diasit',cx+sp5*0.6,by+sp5*1.4,'#AAA',h*0.03);
+    var by2 = h*0.52;
+    at(c,cx-sp5*3,by2,'N','#3050F8'); at(c,cx-sp5*3.8,by2-sp5*0.6,'H','#FFF'); at(c,cx-sp5*3.8,by2+sp5*0.6,'H','#FFF');
+    bl(c,cx-sp5*3,by2,cx-sp5*1.2,by2); at(c,cx-sp5*1.2,by2,'C'); bl(c,cx-sp5*1.2,by2,cx+sp5*0.6,by2); at(c,cx+sp5*0.6,by2,'C');
+    bl(c,cx+sp5*0.6,by2,cx+sp5*2.4,by2); at(c,cx+sp5*2.4,by2,'C'); at(c,cx+sp5*3.5,by2-sp5*0.6,'N','#3050F8'); at(c,cx+sp5*4.3,by2-sp5*0.6,'H','#FFF');
+    tx(c,'Diamin',cx+sp5*0.6,by2+sp5*1.4,'#AAA',h*0.03);
+    tx(c,'-> -[CO-NH]-n + n H2O (Nylon 6,6)',cx,h*0.80,'#39FF14',h*0.035);
+    tx(c,'Amid bagi (-CO-NH-) ile baglanir',cx,h*0.87,'#AAA',h*0.03);
+    tx(c,'Kullanim: Tekstil, halat, yedek parca',cx,h*0.94,'#AAA',h*0.03);
+  } else if (i===2) {
+    tx(c,'Termoplastik Polimerler',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Dogrusal zincirler - Van der Waals kuvvetleri',cx,h*0.11,'#AAA',h*0.03);
+    tx(c,'Tekrar isitilip sekillendirilebilir',cx,h*0.16,'#AAA',h*0.03);
+    for (var k=0;k<5;k++){
+      var cy2 = h*0.25 + k*h*0.055;
+      c.beginPath(); c.moveTo(w*0.08, cy2);
+      for (var j=0;j<9;j++) c.lineTo(w*0.08+j*w*0.09, cy2+Math.sin(j*0.7+k*0.3)*4);
+      c.strokeStyle='#00F0FF'; c.lineWidth=6; c.lineCap='round'; c.stroke()
+    }
+    tx(c,'Polimer zincirleri birbirine paralel',cx,h*0.64,'#AAA',h*0.03);
+    tx(c,'PE, PP, PVC, PET, PS, PMMA',cx,h*0.73,'#39FF14',h*0.035);
+    tx(c,'Erime: 100-260 C | Geri donusum mumkun',cx,h*0.80,'#AAA',h*0.03);
+    tx(c,'Kullanim: Ambalaj, oyuncak, elektronik, otomotiv',cx,h*0.88,'#AAA',h*0.03);
+  } else if (i===3) {
+    tx(c,'Termoset Polimerler',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Capraz bagli 3D ag - Bir kez sertlesir erimez',cx,h*0.11,'#AAA',h*0.03);
+    var sx = w*0.16, sy2 = h*0.055, stx = w*0.10, sty = h*0.22, nod = [];
+    for (var k=0;k<5;k++) for (var j=0;j<4;j++) nod.push([stx+k*sx, sty+j*sy2]);
+    for (var a=0;a<nod.length;a++) for (var b=0;b<nod.length;b++){
+      var dx = Math.abs(nod[a][0]-nod[b][0]), dy = Math.abs(nod[a][1]-nod[b][1]);
+      if ((dx < sx*0.7 && dy < 4) || (dx < 4 && dy < sy2*0.6) || (dx < sx*0.4 && dy < sy2*0.3))
+        ln(c,nod[a][0],nod[a][1],nod[b][0],nod[b][1],'#FF0080',3);
+    }
+    for (var a=0;a<nod.length;a++) circ(c,nod[a][0],nod[a][1],5,'#FFA500');
+    tx(c,'Capraz baglar siki ag yapar',cx,h*0.67,'#AAA',h*0.03);
+    tx(c,'Epoksi, Bakalit, Melamin, Poliuretan',cx,h*0.75,'#39FF14',h*0.035);
+    tx(c,'Yuksek sicaklik dayanimi 150-300 C',cx,h*0.82,'#AAA',h*0.03);
+    tx(c,'Geri donusum zor | Elektrik yalitimi',cx,h*0.89,'#AAA',h*0.03);
+  } else if (i===4) {
+    tx(c,'Elastomerler (Kaucuk)',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Zayif capraz bagli zincirler - Yuksek elastikiyet',cx,h*0.11,'#AAA',h*0.03);
+    for (var k=0;k<4;k++){
+      var cy2 = h*0.25 + k*h*0.07;
+      c.beginPath(); c.moveTo(w*0.08, cy2);
+      for (var j=0;j<7;j++) c.lineTo(w*0.08+j*w*0.11, cy2+Math.sin(j*0.9+k*0.6)*14);
+      c.strokeStyle='#00F0FF'; c.lineWidth=5; c.lineCap='round'; c.stroke()
+    }
+    for (var k=0;k<3;k++){
+      var cy2 = h*0.25 + k*h*0.07 + h*0.032;
+      ln(c,w*0.30,cy2-6,w*0.42,cy2+6,'#FF0080',3);
+    }
+    tx(c,'Zayif capraz baglar zincirlerin uzamasina izin verir',cx,h*0.72,'#AAA',h*0.03);
+    tx(c,'Dogal Kaucuk (izopren), Silikon, Neopren',cx,h*0.80,'#39FF14',h*0.035);
+    tx(c,'Vulkanizasyon: Kukurt ile capraz bag (Goodyear 1839)',cx,h*0.88,'#AAA',h*0.03);
+    tx(c,'Kullanim: Lastik, conta, eldiven, ayakkabi',cx,h*0.95,'#AAA',h*0.03);
+  }
+}
+
+function drawPetrol(c,w,h,i) {
+  if (i===0) {
+    tx(c,'Petrolun Bilesimi',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Ham petrol: C1-C60+ hidrokarbon karisimi',cx,h*0.10,'#AAA',h*0.03);
+    tx(c,'Fraksiyonel damitma ile ayrilir',cx,h*0.14,'#AAA',h*0.03);
+    var fr = [
+      ['Gaz (C1-C4)',0.18,'#FF4444','-160 C'],['Benzin (C5-C9)',0.22,'#FF8C00','40-180 C'],['Gaz yagi',0.24,'#FFD700','180-250 C'],
+      ['Dizel (C14-C18)',0.16,'#32CD32','250-350 C'],['Yakit (C19-C25)',0.12,'#00F0FF','350-450 C'],['Asfalt (>C25)',0.08,'#8B4513','>450 C']
+    ];
+    var bw = w*0.50, bh = h*0.42, by = h*0.78, curY = by;
+    for (var j=0;j<fr.length;j++){
+      var fh = bh * fr[j][1]; curY -= fh;
+      c.fillStyle = fr[j][2]; c.fillRect(cx-bw/2, curY, bw, fh);
+      ln(c,cx-bw/2,curY,cx+bw/2,curY,'#555',2);
+      c.font = h*0.025+'px -apple-system,system-ui,sans-serif'; c.fillStyle='#FFF'; c.textAlign='center'; c.textBaseline='middle';
+      c.fillText(fr[j][0], cx-bw/2-6, curY+fh/2);
+      c.fillText(Math.round(fr[j][1]*100)+'%', cx+bw/2+6, curY+fh/2);
+    }
+    tx(c,'Karbon sayisi arttikca kaynama noktasi yukselir',cx,h*0.90,'#AAA',h*0.03);
+    tx(c,'Cok karbonlu: agir (kati), az karbonlu: hafif (gaz)',cx,h*0.95,'#AAA',h*0.03);
+  } else if (i===1) {
+    tx(c,'Alkanlar - Doymus Hidrokarbonlar',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Genel formul: CnH2n+2, C-C tek bag',cx,h*0.10,'#AAA',h*0.03);
+    var data = [['Metan',-161],['Etan',-88],['Propan',-42],['Butan',0],['Pentan',36],['Heksan',69],['Heptan',98],['Oktan',125]];
+    var maxBP = 150, bw = w*0.65/data.length, bm = h*0.42, bb = h*0.65;
+    for (var j=0;j<data.length;j++){
+      var bhh = (data[j][1]/maxBP)*bm, bx = cx - bw*data.length/2 + j*bw + bw/2;
+      var bc = data[j][1] < -50 ? '#FFA500' : data[j][1] < 0 ? '#00F0FF' : data[j][1] < 50 ? '#FF0080' : data[j][1] < 100 ? '#FF4444' : '#39FF14';
+      c.fillStyle = bc; c.fillRect(bx-bw*0.3, bb-bhh, bw*0.6, bhh);
+      c.font = h*0.025+'px -apple-system,system-ui,sans-serif'; c.fillStyle='#FFF'; c.textAlign='center'; c.textBaseline='middle';
+      c.fillText(data[j][0], bx, bb+h*0.03);
+      c.fillText(data[j][1]+' C', bx, bb-bhh-4);
+    }
+    tx(c,'Karbon sayisi arttikca kaynama noktasi yukselir',cx,h*0.82,'#AAA',h*0.03);
+    tx(c,'Metan CH4 / Etan C2H6 / Propan C3H8 / Butan C4H10',cx,h*0.90,'#AAA',h*0.03);
+  } else if (i===2) {
+    tx(c,'Kraking (Parcalama)',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Uzun zincir -> Kisa zincir (benzin) + alken',cx,h*0.10,'#AAA',h*0.03);
+    var ar2 = Math.min(w*0.03, h*0.04, 20), sp2 = ar2*4, ay = h*0.28;
+    var cols = ['#FFA500','#00F0FF','#FF0080','#FF4444','#39FF14','#FFA500','#00F0FF','#FF0080'];
+    for (var j=0;j<8;j++){var x=cx-sp2*3.5+j*sp2;circ(c,x,ay,ar2,cols[j],'#555',2);c.font=ar2*0.9+'px sans-serif';c.fillStyle='#FFF';c.textAlign='center';c.textBaseline='middle';c.fillText('C',x,ay)}
+    tx(c,'Uzun zincir (>C20)',cx,ay+sp2*0.8,'#AAA',h*0.03);
+    tx(c,'+ Isi 500 C',cx,ay+sp2*1.6,'#FFA500',h*0.03);
+    arr(c,cx-sp2*3,ay+sp2*2,cx+sp2*3,ay+sp2*2,'#39FF14');
+    for (var j=0;j<6;j++){var x=cx-sp2*2.5+j*sp2;circ(c,x,ay+sp2*3,ar2,'#39FF14','#555',2);c.font=ar2*0.9+'px sans-serif';c.fillStyle='#FFF';c.textAlign='center';c.textBaseline='middle';c.fillText('C',x,ay+sp2*3)}
+    tx(c,'Benzin (C5-C10)',cx-sp2*1.5,ay+sp2*4,'#39FF14',h*0.03);
+    circ(c,cx+sp2*2,ay+sp2*3,ar2,'#FFA500','#555',2);
+    c.fillText('C',cx+sp2*2-6,ay+sp2*3); circ(c,cx+sp2*3,ay+sp2*3,ar2,'#FFA500','#555',2); c.fillText('C',cx+sp2*3-6,ay+sp2*3);
+    tx(c,'Etilen',cx+sp2*2.5,ay+sp2*4,'#39FF14',h*0.03);
+    tx(c,'Kraking: petrokimyanin temeli',cx,h*0.84,'#AAA',h*0.03);
+    tx(c,'Katalitik kraking: zeolit ile daha verimli',cx,h*0.90,'#AAA',h*0.03);
+  } else if (i===3) {
+    tx(c,'Reforming',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Duz zincirli alkan -> Halkali/aromatik HC',cx,h*0.10,'#AAA',h*0.03);
+    var ar2 = Math.min(w*0.03, h*0.04, 20), sp2 = ar2*4, by = h*0.35;
+    for (var j=0;j<7;j++){var x=w*0.12+j*sp2;circ(c,x,by,ar2,'#FF0080','#555',2);c.font=ar2*0.9+'px sans-serif';c.fillStyle='#FFF';c.textAlign='center';c.textBaseline='middle';c.fillText('C',x,by)}
+    tx(c,'n-Heptan',w*0.35,by+sp2,'#AAA',h*0.03);
+    tx(c,'OK 0',w*0.35,by+sp2*1.6,'#AAA',h*0.03);
+    var rcx=w*0.7, rcy=h*0.42, r=sp2*1.5, ang=2*PI/6;
+    for (var j=0;j<6;j++){var ax=rcx+r*Math.cos(j*ang-PI/2), ay2=rcy+r*Math.sin(j*ang-PI/2);circ(c,ax,ay2,ar2,'#39FF14','#555',2);c.fillText('C',ax,ay2)}
+    for (var j=0;j<6;j++){var a1=rcx+r*Math.cos(j*ang-PI/2), a2=rcx+r*Math.cos((j+1)*ang-PI/2), b1=rcy+r*Math.sin(j*ang-PI/2), b2=rcy+r*Math.sin((j+1)*ang-PI/2);ln(c,a1,b1,a2,b2,j%2===0?'#8B949E':'#00F0FF',4)}
+    tx(c,'Benzen (halkali)',rcx,rcy+r+sp2,'#AAA',h*0.03);
+    tx(c,'OK 100',rcx,rcy+r+sp2*1.6,'#AAA',h*0.03);
+    arr(c,cx-sp2*2,h*0.68,cx+sp2*2,h*0.68,'#39FF14');
+    tx(c,'Pt/Re katalizor, 500 C',cx,h*0.66,'#FFA500',h*0.03);
+    tx(c,'Oktan sayisi artar -> benzin kalitesi yukselir',cx,h*0.80,'#AAA',h*0.03);
+    tx(c,'Aromatikler: benzen, toluen, ksilen',cx,h*0.86,'#AAA',h*0.03);
+    tx(c,'Reforming ile H2 de uretilir',cx,h*0.92,'#AAA',h*0.03);
+  } else if (i===4) {
+    tx(c,'Petrokimya Urunleri',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Petrolden rafinasyonla elde edilen gunluk urunler',cx,h*0.10,'#AAA',h*0.03);
+    var items = [['Benzin','Yakit tasit'],['Plastik','Ambalaj ve esya'],['Asfalt','Yol yapimi'],['Gubre','Tarim'],['Ilac','Saglik'],['Polyester','Tekstil'],['Deterjan','Temizlik'],['Kozmetik','Kisisel bakim']];
+    var cols2 = 4, rows = 2, cw = w*0.22, ch2 = h*0.10, sx2 = w*0.06, sy2 = h*0.22;
+    for (var j=0;j<items.length;j++){
+      var r2 = Math.floor(j/cols2), col = j%cols2;
+      c.fillStyle = '#1E2A3A'; c.fillRect(sx2+col*cw, sy2+r2*ch2*1.2, cw-4, ch2-4);
+      c.font = h*0.03+'px sans-serif'; c.fillStyle='#39FF14'; c.textAlign='center'; c.textBaseline='middle';
+      c.fillText(items[j][0], sx2+col*cw+cw/2, sy2+r2*ch2*1.2+ch2*0.3);
+      c.font = h*0.025+'px sans-serif'; c.fillStyle='#AAA'; c.fillText(items[j][1], sx2+col*cw+cw/2, sy2+r2*ch2*1.2+ch2*0.72);
+    }
+    tx(c,'Petrol: modern hayatin temel kaynagi',cx,h*0.82,'#AAA',h*0.03);
+    tx(c,'Her gun 100 milyon varil tuketim',cx,h*0.88,'#AAA',h*0.03);
+    tx(c,'Alternatif enerji kaynaklari giderek onem kazaniyor',cx,h*0.94,'#AAA',h*0.03);
+  }
+}
+
+function drawBio(c,w,h,i,d,b) {
+  ar = Math.min(w*0.032, h*0.045, 22); sp = ar*4; cx = w/2;
+  
+  if (i===0) {
+    tx(c,'Karbonhidratlar',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Cn(H2O)n - sekerler, nisasta, seluloz',cx,h*0.10,'#AAA',h*0.03);
+    tx(c,'Monosakkarit: 1 seker | Disakkarit: 2 | Polisakkarit: cok',cx,h*0.14,'#AAA',h*0.03);
+    var sy = h*0.28;
+    d(cx-sp*0.6,sy,'C'); d(cx,sy,'C'); d(cx+sp*0.6,sy,'C'); d(cx-sp*0.6,sy+sp*0.5,'O','#FF0000');
+    d(cx,sy+sp*0.5,'O','#FF0000');
+    d(cx-sp*0.6,sy-sp*0.5,'H','#FFF'); d(cx,sy-sp*0.5,'H','#FFF'); d(cx+sp*0.6,sy-sp*0.5,'H','#FFF');
+    d(cx-sp*0.6,sy+sp*1.0,'H','#FFF'); d(cx,sy+sp*1.0,'H','#FFF');
+    b(cx-sp*0.6,sy,cx,sy); b(cx,sy,cx+sp*0.6,sy);
+    b(cx-sp*0.6,sy,cx-sp*0.6,sy-sp*0.5); b(cx,sy,cx,sy-sp*0.5); b(cx+sp*0.6,sy,cx+sp*0.6,sy-sp*0.5);
+    b(cx-sp*0.6,sy,cx-sp*0.6,sy+sp*0.5); b(cx,sy,cx,sy+sp*0.5);
+    b(cx-sp*0.6,sy+sp*0.5,cx-sp*0.6,sy+sp*1.0); b(cx,sy+sp*0.5,cx,sy+sp*1.0);
+    tx(c,'Glikoz (C6H12O6)',cx,sy+sp*1.4,'#AAA',h*0.03);
+    var sy2 = h*0.72;
+    d(cx-sp*1.2,sy2,'C'); d(cx-sp*0.4,sy2,'C'); d(cx+sp*0.4,sy2,'C'); d(cx+sp*1.2,sy2,'C');
+    d(cx-sp*1.2,sy2+sp*0.5,'O','#FF0000'); d(cx+sp*1.2,sy2+sp*0.5,'O','#FF0000');
+    b(cx-sp*1.2,sy2,cx-sp*0.4,sy2); b(cx-sp*0.4,sy2,cx+sp*0.4,sy2,2); b(cx+sp*0.4,sy2,cx+sp*1.2,sy2);
+    b(cx-sp*1.2,sy2,cx-sp*1.2,sy2+sp*0.5); b(cx+sp*1.2,sy2,cx+sp*1.2,sy2+sp*0.5);
+    tx(c,'Sakkaroz (seker) - disakkarit',cx,sy2+sp*0.9,'#39FF14',h*0.03);
+    tx(c,'Nisasta: Glikoz polimeri (enerji depolama)',cx,h*0.93,'#AAA',h*0.03);
+  } else if (i===1) {
+    tx(c,'Proteinler',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Amino asitlerden olusur, 20 cesit',cx,h*0.10,'#AAA',h*0.03);
+    tx(c,'Peptid bagi (-CO-NH-) ile baglanir',cx,h*0.14,'#AAA',h*0.03);
+    var sy = h*0.28;
+    d(cx-sp*0.6,sy,'C'); d(cx+sp*0.6,sy,'C');
+    d(cx-sp*0.6,sy-sp*0.6,'NH2','#3050F8'); d(cx+sp*0.6,sy-sp*0.6,'COOH','#FF0000');
+    d(cx,sy+sp*0.6,'R'); b(cx,sy,cx,sy+sp*0.6);
+    b(cx-sp*0.6,sy,cx+sp*0.6,sy); b(cx-sp*0.6,sy,cx-sp*0.6,sy-sp*0.6);
+    b(cx+sp*0.6,sy,cx+sp*0.6,sy-sp*0.6);
+    tx(c,'Genel amino asit yapisi',cx,sy+sp*1.0,'#AAA',h*0.03);
+    var sy2 = h*0.62;
+    d(cx-sp*1.2,sy2,'N','#3050F8'); d(cx,sy2,'C'); d(cx+sp*1.2,sy2,'C'); d(cx+sp*2.2,sy2,'O','#FF0000');
+    d(cx-sp*0.4,sy2-sp*0.6,'H','#FFF'); d(cx+sp*1.2,sy2-sp*0.6,'R');
+    b(cx-sp*1.2,sy2,cx,sy2); bl(c,cx,sy2,cx+sp*1.2,sy2,2); b(cx+sp*1.2,sy2,cx+sp*2.2,sy2);
+    b(cx,sy2,cx-sp*0.4,sy2-sp*0.6); b(cx+sp*1.2,sy2,cx+sp*1.2,sy2-sp*0.6);
+    tx(c,'Peptid bagi (-CO-NH-)',cx,sy2+sp*0.7,'#39FF14',h*0.03);
+    tx(c,'Birincil -> Ikincil (alfa heliks) -> Ucuncul -> Dortcul yapi',cx,h*0.88,'#AAA',h*0.03);
+    tx(c,'Enzimler proteindir, biyokimyasal reaksiyonlari katalizler',cx,h*0.94,'#AAA',h*0.03);
+  } else if (i===2) {
+    tx(c,'Yaglar (Lipitler)',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Gliserol + 3 yag asidi (trigliserid)',cx,h*0.10,'#AAA',h*0.03);
+    var sy = h*0.25;
+    d(cx,sy,'C'); d(cx-sp*0.7,sy+sp*0.5,'C'); d(cx+sp*0.7,sy+sp*0.5,'C');
+    d(cx-sp*0.7,sy-sp*0.5,'H','#FFF'); d(cx+sp*0.7,sy-sp*0.5,'H','#FFF');
+    b(cx,sy,cx-sp*0.7,sy+sp*0.5); b(cx,sy,cx+sp*0.7,sy+sp*0.5);
+    b(cx,sy,cx-sp*0.7,sy-sp*0.5); b(cx,sy,cx+sp*0.7,sy-sp*0.5);
+    // fatty acid chains
+    for (var j=0;j<3;j++){
+      var fx = cx+(j-1)*sp*0.7, fy = sy+sp*0.5+(j===1?0:sp*0.7);
+      ln(c,fx,fy,fx+sp*1.5,fy,'#8B949E',3); ln(c,fx+sp*1.5,fy,fx+sp*2.5,fy-3,'#8B949E',3);
+      ln(c,fx+sp*2.5,fy-3,fx+sp*3.5,fy,'#8B949E',3);
+    }
+    tx(c,'Doymus yag (kati): hayvansal',cx-sp*2.5,sy+sp*1.8,'#AAA',h*0.025);
+    tx(c,'Doymamis yag (sivi): bitkisel',cx+sp*2.5,sy+sp*1.8,'#AAA',h*0.025);
+    var sy2 = h*0.68;
+    tx(c,'Hucre zari: Fosfolipit cift tabaka',cx,sy2,'#00F0FF',h*0.04);
+    for (var j=0;j<6;j++){
+      var py = sy2 + (j-2.5)*h*0.03;
+      circ(c,w*0.1,py,4,'#39FF14'); ln(c,w*0.1+4,py,w*0.2+Math.sin(j)*6,py,'#8B949E',2);
+      circ(c,w*0.9,py,4,'#39FF14'); ln(c,w*0.9-4,py,w*0.8+Math.sin(j)*6,py,'#8B949E',2);
+    }
+    tx(c,'Steroidler: hormon yapisinda (kolesterol, testosteron)',cx,sy2+sp*0.7,'#AAA',h*0.03);
+    tx(c,'Yagda cozunen vitaminler (A,D,E,K)',cx,h*0.92,'#AAA',h*0.03);
+  } else if (i===3) {
+    tx(c,'Vitaminler',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Organik bilesikler, metabolizmada duzenleyici',cx,h*0.10,'#AAA',h*0.03);
+    var vt = [['A','Gorme, bagisiklik','Yagda cozunen'],['D','Kalsiyum emilimi','Yagda cozunen'],['E','Antioksidan','Yagda cozunen'],['K','Kan pihtilasmasi','Yagda cozunen'],['C','Bagisiklik, kolajen','Suda cozunen'],['B1','Enerji metabolizmasi','Suda cozunen'],['B12','Sinir sistemi, kan','Suda cozunen']];
+    var cw = w*0.28, ch2 = h*0.10, sx2 = w*0.04, sy2 = h*0.20;
+    for (var j=0;j<vt.length;j++){
+      var r2 = Math.floor(j/3), col = j%3;
+      c.fillStyle = '#1E2A3A'; c.fillRect(sx2+col*cw, sy2+r2*ch2*1.3, cw-4, ch2-4);
+      c.font = h*0.035+'px sans-serif'; c.fillStyle='#39FF14'; c.textAlign='center'; c.textBaseline='middle';
+      c.fillText('Vitamin '+vt[j][0], sx2+col*cw+cw/2, sy2+r2*ch2*1.3+ch2*0.25);
+      c.font = h*0.022+'px sans-serif'; c.fillStyle='#AAA'; c.fillText(vt[j][1], sx2+col*cw+cw/2, sy2+r2*ch2*1.3+ch2*0.6);
+      c.fillText(vt[j][2], sx2+col*cw+cw/2, sy2+r2*ch2*1.3+ch2*0.9);
+    }
+    tx(c,'Vitamin eksikliginde hastalik: Skorbut (C), Beriberi (B1), Ra itizm (D)',cx,h*0.88,'#AAA',h*0.03);
+    tx(c,'Dengeli beslenme ile tum vitaminler alinabilir',cx,h*0.94,'#AAA',h*0.03);
+  } else if (i===4) {
+    tx(c,'Nukleik Asitler (DNA/RNA)',cx,h*0.05,'#00F0FF',h*0.055);
+    tx(c,'Nukleotidlerden olusur (fosfat+seker+baz)',cx,h*0.10,'#AAA',h*0.03);
+    var sy = h*0.30;
+    // Double helix representation
+    var step = w*0.7/12, sx3 = w*0.15;
+    c.beginPath(); c.moveTo(sx3, sy - 5);
+    for (var j=0;j<12;j++) c.lineTo(sx3+j*step, sy + (j%2===0?-10:10));
+    c.strokeStyle = '#00F0FF'; c.lineWidth = 4; c.stroke();
+    c.beginPath(); c.moveTo(sx3, sy + 5);
+    for (var j=0;j<12;j++) c.lineTo(sx3+j*step, sy + (j%2===0?10:-10));
+    c.strokeStyle = '#FF0080'; c.lineWidth = 4; c.stroke();
+    // base pairs
+    for (var j=0;j<12;j++){
+      var bx = sx3+j*step+step/2;
+      ln(c,bx, sy+(j%2===0?-10:10), bx, sy+(j%2===0?10:-10), '#8B949E', 2);
+    }
+    tx(c,'DNA: Cift sarmal (Watson-Crick)',cx,sy+sp*0.7,'#00F0FF',h*0.03);
+    var sy2 = h*0.70;
+    c.beginPath(); c.moveTo(sx3, sy2);
+    for (var j=0;j<12;j++) c.lineTo(sx3+j*step, sy2 + (j%2===0?-5:5));
+    c.strokeStyle = '#00F0FF'; c.lineWidth = 3; c.stroke();
+    tx(c,'RNA: Tek zincir',cx,sy2+sp*0.5,'#00F0FF',h*0.03);
+    tx(c,'Bazlar: A (Adenin), T (Timin), G (Guanin), C (Sitozin)',cx,sy2+sp*1.0,'#AAA',h*0.025);
+    tx(c,'DNA -> RNA -> Protein (Santral Dogma)',cx,h*0.92,'#39FF14',h*0.035);
+  }
+}
+
+function drawRedox(c,w,h) {
+  var cx = w/2, cy = h*0.32;
+  var e1 = document.getElementById('rx1').value.trim(), e2 = document.getElementById('rx2').value.trim();
+  if (!e1 || !e2) {
+    tx(c,'Iki element girerek Redoks analizi yapin',cx,h*0.4,'#8B949E',h*0.055);
+    return;
+  }
+  var d1 = EL[e1.charAt(0).toUpperCase()+e1.slice(1).toLowerCase()];
+  var d2 = EL[e2.charAt(0).toUpperCase()+e2.slice(1).toLowerCase()];
+  // try direct
+  if (!d1) { var k = Object.keys(EL).find(function(x){return x===e1.toUpperCase()}); if(k)d1=EL[k] }
+  if (!d2) { var k = Object.keys(EL).find(function(x){return x===e2.toUpperCase()}); if(k)d2=EL[k] }
+  if (!d1 || !d2) { tx(c,'Element bulunamadi',cx,h*0.4,'#FF4444',h*0.055); return }
+  
+  var en1 = d1.en, en2 = d2.en, fark = Math.abs(en1 - en2);
+  var bag = fark === 0 ? 'Apolar Kovalent (Ayni element)' : fark < 0.5 ? 'Apolar Kovalent' : fark < 1.7 ? 'Polar Kovalent' : 'Iyonik (elektron devri)';
+  var r = Math.min(w*0.12, 72), lx = w*0.22, rx2 = w*0.78;
+  // Glows
+  var g1 = c.createRadialGradient(lx,cy,0,lx,cy,r+24); g1.addColorStop(0,'rgba(179,136,255,0.3)'); g1.addColorStop(1,'rgba(179,136,255,0)');
+  c.fillStyle = g1; c.fillRect(lx-r-30,cy-r-30,r*2+60,r*2+60);
+  var g2 = c.createRadialGradient(rx2,cy,0,rx2,cy,r+24); g2.addColorStop(0,'rgba(255,0,128,0.3)'); g2.addColorStop(1,'rgba(255,0,128,0)');
+  c.fillStyle = g2; c.fillRect(rx2-r-30,cy-r-30,r*2+60,r*2+60);
+  // Atoms
+  circ(c,lx,cy,r,'#B388FF','#555',3); circ(c,rx2,cy,r,'#FF0080','#555',3);
+  c.font = h*0.08+'px sans-serif'; c.fillStyle='#FFF'; c.textAlign='center'; c.textBaseline='middle';
+  c.fillText(d1.n, lx, cy); c.fillText(d2.n, rx2, cy);
+  c.font = h*0.045+'px sans-serif'; c.fillStyle='#E6EDF3';
+  c.fillText(e1.toUpperCase(), lx, cy+r+h*0.045+4); c.fillText(e2.toUpperCase(), rx2, cy+r+h*0.045+4);
+  
+  if (en1 > 0 && en2 > 0) {
+    var arrowY = cy - r - 36;
+    if (en1 < en2) {
+      arr(c,lx+r+5,cy,cx,arrowY,'#00F0FF'); arr(c,cx,arrowY,rx2-r-5,cy,'#00F0FF');
+      tx(c,'e- akisi (yukseltgenme)',cx,arrowY-10,'#CCCCCC',h*0.04);
+      tx(c,'(en dusukten yuksege)',cx,arrowY+h*0.045+2,'#8B949E',h*0.035);
+    } else {
+      arr(c,rx2-r-5,cy,cx,arrowY,'#00F0FF'); arr(c,cx,arrowY,lx+r+5,cy,'#00F0FF');
+      tx(c,'e- akisi (yukseltgenme)',cx,arrowY-10,'#CCCCCC',h*0.04);
+      tx(c,'(en dusukten yuksege)',cx,arrowY+h*0.045+2,'#8B949E',h*0.035);
+    }
+    var ay2 = cy + r + h*0.045 + 16;
+    var yu = en1 < en2 ? e1.toUpperCase() : e2.toUpperCase();
+    var ind = en1 > en2 ? e1.toUpperCase() : e2.toUpperCase();
+    c.font = h*0.05+'px sans-serif'; c.fillStyle='#39FF14'; c.textAlign='center'; c.textBaseline='middle';
+    c.fillText('Yukseltgenen: '+yu+' (e- verir)', lx, ay2);
+    c.fillText('Indirgenen: '+ind+' (e- alir)', rx2, ay2);
+    
+    // EN Bar
+    var barY = h*0.72, barH = 24, barL = w*0.08, barR2 = w*0.92, barW = barR2 - barL;
+    c.fillStyle = '#1E2A3A'; roundRect(c, barL, barY, barW, barH, 12);
+    var grd = c.createLinearGradient(barL,0,barR2,0); grd.addColorStop(0,'#39FF14'); grd.addColorStop(0.33,'#00F0FF'); grd.addColorStop(0.66,'#FF0080'); grd.addColorStop(1,'#FF3333');
+    c.fillStyle = grd; roundRect(c, barL, barY, barW, barH, 12);
+    var maxEn = 4.0, p1 = en1/maxEn, p2 = en2/maxEn, m1X = barL + barW * p1, m2X = barL + barW * p2;
+    circ(c, m1X, barY+barH/2, 10, '#FFF');
+    c.font = h*0.035+'px sans-serif'; c.fillStyle='#FFA500'; c.fillText(e1.toUpperCase()+' '+rnd(en1,1), m1X, barY-8);
+    circ(c, m2X, barY+barH/2, 10, '#FFF');
+    c.fillText(e2.toUpperCase()+' '+rnd(en2,1), m2X, barY-8);
+    c.font = h*0.04+'px sans-serif'; c.fillStyle='#39FF14'; c.fillText('Dusuk EN (e- verir)', barL, barY+barH+28);
+    c.fillText('Yuksek EN (e- alir)', barR2, barY+barH+28);
+    c.font = h*0.04+'px sans-serif'; c.fillStyle='#CCCCCC';
+    c.fillText('EN Farki: '+rnd(fark,2)+' | '+bag, cx, barY+barH+52);
+    
+    var html = '<div class="l">REDOKS ANALIZI</div>';
+    html += '<div>'+d1.n+' ('+e1.toUpperCase()+', EN: '+en1+') - '+d2.n+' ('+e2.toUpperCase()+', EN: '+en2+')</div>';
+    html += '<div class="v">EN Farki: '+rnd(fark,2)+' | Bag: '+bag+'</div>';
+    html += '<div>Yukseltgenen: '+(en1<en2?d1.n:d2.n)+' (e- verir, EN dusuk)</div>';
+    html += '<div>Indirgenen: '+(en1>en2?d1.n:d2.n)+' (e- alir, EN yuksek)</div>';
+    html += '<div class="l" style="margin-top:6px">Yukseltgenme: '+(en1<en2?e1:e2).toUpperCase()+' -> '+(en1<en2?e1:e2).toUpperCase()+'+ + e-</div>';
+    html += '<div class="l">Indirgenme: '+(en1>en2?e1:e2).toUpperCase()+' + e- -> '+(en1>en2?e1:e2).toUpperCase()+"-</div>";
+    document.getElementById('rxt').innerHTML = html;
+  }
+}
+
+function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();c.fill()}
+
+function doRedox() {
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('act')});
+  document.querySelectorAll('.tab')[5].classList.add('act');
+  document.querySelectorAll('.tc').forEach(function(x){x.classList.remove('act')});
+  document.getElementById('t5').classList.add('act');
+  setTimeout(function(){var cv=document.getElementById('c5');cv.width=Math.min(cv.parentElement.getBoundingClientRect().width-12,600);drawRedox(cv.getContext('2d'),cv.width,cv.height)},50);
+}
+
+// Auto-run
+setTimeout(drawAll, 100);
+</script>
+</body>
+</html>

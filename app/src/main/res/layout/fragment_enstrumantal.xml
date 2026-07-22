@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground" android:padding="16dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Kalibrasyon Egrsi" android:textSize="26sp"
+            android:textColor="?attr/colorPrimary" android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:cardCornerRadius="12dp" app:cardElevation="2dp"
+            app:cardBackgroundColor="?attr/colorSurface">
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:padding="12dp">
+                <TextView android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Blank Olcumu" android:textSize="16sp"
+                    android:textColor="?attr/colorSecondary" android:textStyle="bold"
+                    android:layout_marginBottom="6dp"/>
+                <EditText android:id="@+id/ins_blank"
+                    android:layout_width="match_parent" android:layout_height="48dp"
+                    android:hint="Blank Degeri" android:inputType="numberDecimal"
+                    android:background="?android:attr/colorBackground" android:padding="12dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"
+                    android:layout_marginTop="4dp"/>
+                <TextView android:id="@+id/ins_blank_durum"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="?android:attr/textColorSecondary" android:textSize="13sp"
+                    android:layout_marginTop="4dp"/>
+                <Button android:id="@+id/ins_blank_btn"
+                    android:layout_width="match_parent" android:layout_height="40dp"
+                    android:text="BLANK EKLE" android:textColor="#FFF"
+                    android:backgroundTint="?attr/colorAccent" android:layout_marginTop="4dp"
+                    android:textStyle="bold"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:cardCornerRadius="12dp" app:cardElevation="2dp"
+            app:cardBackgroundColor="?attr/colorSurface">
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:padding="12dp">
+                <TextView android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Standart Cozeltiler" android:textSize="16sp"
+                    android:textColor="?attr/colorPrimary" android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
+                <LinearLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="horizontal">
+                    <EditText android:id="@+id/ins_std_kons" android:layout_width="0dp"
+                        android:layout_height="48dp" android:layout_weight="1"
+                        android:hint="Kons (ppm)" android:inputType="numberDecimal"
+                        android:background="?android:attr/colorBackground" android:padding="12dp"
+                        android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"/>
+                    <EditText android:id="@+id/ins_std_abs" android:layout_width="0dp"
+                        android:layout_height="48dp" android:layout_weight="1"
+                        android:hint="Abs" android:inputType="numberDecimal"
+                        android:background="?android:attr/colorBackground" android:padding="12dp"
+                        android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"
+                        android:layout_marginStart="8dp"/>
+                </LinearLayout>
+                <Button android:id="@+id/ins_std_btn"
+                    android:layout_width="match_parent" android:layout_height="40dp"
+                    android:text="STANDART EKLE" android:textColor="#FFF"
+                    android:backgroundTint="?attr/colorPrimary" android:layout_marginTop="6dp"
+                    android:textStyle="bold"/>
+
+                <TextView android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hizli Ekle:" android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="12sp" android:layout_marginTop="8dp"/>
+                <LinearLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="horizontal"
+                    android:weightSum="2">
+                    <Button android:id="@+id/ins_preset_1"
+                        android:layout_width="0dp" android:layout_height="36dp"
+                        android:layout_weight="1" android:text="Std 1 (1, 0.1)"
+                        android:textColor="#FFF" android:textSize="10sp"
+                        android:backgroundTint="#00CC88" android:layout_marginEnd="3dp"/>
+                    <Button android:id="@+id/ins_preset_2"
+                        android:layout_width="0dp" android:layout_height="36dp"
+                        android:layout_weight="1" android:text="Std 2 (2, 0.2)"
+                        android:textColor="#FFF" android:textSize="10sp"
+                        android:backgroundTint="#00CCAA" android:layout_marginStart="3dp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="horizontal"
+                    android:weightSum="2" android:layout_marginTop="6dp">
+                    <Button android:id="@+id/ins_preset_5"
+                        android:layout_width="0dp" android:layout_height="36dp"
+                        android:layout_weight="1" android:text="Std 3 (5, 0.5)"
+                        android:textColor="#FFF" android:textSize="10sp"
+                        android:backgroundTint="#00CCCC" android:layout_marginEnd="3dp"/>
+                    <Button android:id="@+id/ins_preset_all"
+                        android:layout_width="0dp" android:layout_height="36dp"
+                        android:layout_weight="1" android:text="Hepsini Ekle (1-5)"
+                        android:textColor="#FFF" android:textSize="10sp"
+                        android:backgroundTint="#00CCEE" android:layout_marginStart="3dp"/>
+                </LinearLayout>
+
+                <TextView android:id="@+id/ins_std_list"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="?attr/colorOnSurface" android:textSize="12sp"
+                    android:layout_marginTop="8dp" android:lineSpacingExtra="3dp"
+                    android:background="?android:attr/colorBackground" android:padding="8dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:cardCornerRadius="12dp" app:cardElevation="2dp"
+            app:cardBackgroundColor="?attr/colorSurface">
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:padding="12dp">
+                <TextView android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kalibrasyon Grafigi" android:textSize="16sp"
+                    android:textColor="?attr/colorPrimary" android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
+                <FrameLayout android:id="@+id/chart_container"
+                    android:layout_width="match_parent" android:layout_height="240dp"
+                    android:background="?android:attr/colorBackground"/>
+                <TextView android:id="@+id/ins_coord"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textColor="?android:attr/textColorSecondary" android:textSize="12sp"
+                    android:layout_marginTop="6dp" android:gravity="center"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:cardCornerRadius="12dp" app:cardElevation="2dp"
+            app:cardBackgroundColor="?attr/colorSurface">
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:padding="12dp">
+                <TextView android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hesaplamalar" android:textSize="16sp"
+                    android:textColor="?attr/colorSecondary" android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
+                <EditText android:id="@+id/ins_abs"
+                    android:layout_width="match_parent" android:layout_height="48dp"
+                    android:hint="Absorbans Degeri" android:inputType="numberDecimal"
+                    android:background="?android:attr/colorBackground" android:padding="12dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"/>
+                <Button android:id="@+id/ins_abs_btn"
+                    android:layout_width="match_parent" android:layout_height="40dp"
+                    android:text="KONSANTRASYON HESAPLA (Abs -> Kons)"
+                    android:textColor="#FFF"
+                    android:backgroundTint="?attr/colorPrimary" android:layout_marginTop="6dp"
+                    android:textStyle="bold" android:textSize="11sp"/>
+                <EditText android:id="@+id/ins_kons"
+                    android:layout_width="match_parent" android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:hint="Konsantrasyon (ppm)" android:inputType="numberDecimal"
+                    android:background="?android:attr/colorBackground" android:padding="12dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"/>
+                <Button android:id="@+id/ins_kons_btn"
+                    android:layout_width="match_parent" android:layout_height="40dp"
+                    android:text="ABSORBANS HESAPLA (Kons -> Abs)"
+                    android:textColor="#FFF"
+                    android:backgroundTint="?attr/colorSecondary" android:layout_marginTop="6dp"
+                    android:textStyle="bold" android:textSize="11sp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView android:id="@+id/ins_sonuc"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="?attr/colorPrimary" android:textSize="15sp" android:textStyle="bold"
+            android:layout_marginTop="8dp" android:gravity="center"/>
+
+        <Button android:id="@+id/ins_temizle"
+            android:layout_width="match_parent" android:layout_height="48dp"
+            android:text="TEMIZLE" android:textColor="#FFF"
+            android:backgroundTint="@color/neon_red" android:layout_marginTop="8dp"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+</ScrollView>

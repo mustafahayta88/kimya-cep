@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground" android:padding="16dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="Lewis Yapısı Çizici" android:textSize="26sp"
+                android:textColor="?attr/colorPrimary" android:textStyle="bold"/>
+            <Button android:id="@+id/btn_help" android:layout_width="40dp" android:layout_height="40dp"
+                android:text="?" android:textSize="20sp" android:textColor="#FFF"
+                android:backgroundTint="?attr/colorAccent" android:textStyle="bold"/>
+        </LinearLayout>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Molekülün elektron noktalı yapısı" android:textSize="16sp"
+            android:textColor="?attr/colorSecondary" android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp" app:cardElevation="2dp"
+            app:cardBackgroundColor="?attr/colorSurface" android:layout_marginBottom="8dp">
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:padding="14dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Molekül Seç" android:textSize="16sp"
+                    android:textColor="?attr/colorAccent" android:textStyle="bold"
+                    android:layout_marginBottom="8dp"/>
+                <LinearLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="horizontal">
+                    <Button android:id="@+id/btn_lewis_prev" android:layout_width="48dp"
+                        android:layout_height="40dp" android:text="◀"
+                        android:textColor="#FFF" android:backgroundTint="?attr/colorPrimary"/>
+                    <TextView android:id="@+id/tv_lewis_name" android:layout_width="0dp"
+                        android:layout_height="40dp" android:layout_weight="1"
+                        android:text="H₂O" android:textColor="?attr/colorOnSurface"
+                        android:textSize="18sp" android:textStyle="bold"
+                        android:gravity="center" android:layout_marginHorizontal="8dp"/>
+                    <Button android:id="@+id/btn_lewis_next" android:layout_width="48dp"
+                        android:layout_height="40dp" android:text="▶"
+                        android:textColor="#FFF" android:backgroundTint="?attr/colorPrimary"/>
+                </LinearLayout>
+                <TextView android:id="@+id/tv_lewis_counter" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:text="1 / 26"
+                    android:textColor="?android:attr/textColorSecondary" android:textSize="12sp" android:gravity="center"
+                    android:layout_marginTop="4dp"/>
+                <TextView android:id="@+id/tv_lewis_formula" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:textColor="?attr/colorSecondary"
+                    android:textSize="14sp" android:gravity="center"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp" app:cardElevation="2dp"
+            app:cardBackgroundColor="?attr/colorSurface" android:layout_marginBottom="8dp">
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:padding="14dp">
+                <View android:id="@+id/lewis_canvas_placeholder"
+                    android:layout_width="match_parent" android:layout_height="260dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp" app:cardElevation="2dp"
+            app:cardBackgroundColor="?attr/colorSurface" android:layout_marginBottom="8dp">
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:padding="14dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Bilgi" android:textSize="16sp"
+                    android:textColor="?attr/colorPrimary" android:textStyle="bold"
+                    android:layout_marginBottom="6dp"/>
+                <TextView android:id="@+id/tv_lewis_info" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" android:lineSpacingExtra="4dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>

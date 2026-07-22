@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kimya Araci</string>
+    <string name="nav_kesfet">Kesfet</string>
+    <string name="nav_hesapla">Hesapla</string>
+    <string name="nav_tepkime">Tepkime</string>
+    <string name="nav_endustriyel">Endustriyel</string>
+    <string name="nav_araclar">Araclar</string>
+    <string name="app_subtitle">MUSTAFA HAYTA</string>
+</resources>

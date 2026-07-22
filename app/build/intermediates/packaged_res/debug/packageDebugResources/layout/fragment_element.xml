@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground" android:fillViewport="true">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="16dp">
+
+        <!-- Header -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="PERIYODIK TABLO"
+                android:textSize="20sp" android:textColor="?attr/colorPrimary"
+                android:textStyle="bold" android:letterSpacing="0.12"/>
+            <Button android:id="@+id/btn_help" android:layout_width="36dp" android:layout_height="36dp"
+                android:text="?" android:textSize="18sp" android:textColor="#FFF"
+                android:backgroundTint="?attr/colorSecondary" android:textStyle="bold"/>
+        </LinearLayout>
+
+        <!-- Search bar -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp" app:cardBackgroundColor="?attr/colorSurface"
+            android:layout_marginTop="10dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="48dp"
+                android:orientation="horizontal" android:padding="3dp"
+                android:gravity="center_vertical">
+                <EditText android:id="@+id/el_arama"
+                    android:layout_width="0dp" android:layout_height="match_parent"
+                    android:layout_weight="1" android:hint="Sembol, ad veya atom no..."
+                    android:inputType="text" android:background="@null"
+                    android:paddingStart="12dp" android:paddingEnd="8dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"
+                    android:textSize="14sp" android:singleLine="true"/>
+                <Button android:id="@+id/el_ara_itn"
+                    android:layout_width="wrap_content" android:layout_height="match_parent"
+                    android:text="Ara" android:textSize="13sp" android:textColor="#FFF"
+                    android:backgroundTint="?attr/colorPrimary"
+                    android:minWidth="64dp" android:minHeight="0dp"
+                    android:paddingStart="12dp" android:paddingEnd="12dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- EMPTY STATE -->
+        <LinearLayout android:id="@+id/el_empty"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:gravity="center_horizontal"
+            android:layout_marginTop="8dp">
+
+            <com.kimya.uygulama.fragments.AtomPlaceholderView
+                android:id="@+id/el_placeholder_atom"
+                android:layout_width="match_parent" android:layout_height="260dp"
+                android:layout_marginTop="8dp"/>
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Bir element arayin"
+                android:textColor="?android:attr/textColorSecondary" android:textSize="15sp"
+                android:layout_marginTop="4dp"/>
+
+            <LinearLayout android:id="@+id/el_legend"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center"
+                android:layout_marginTop="16dp" android:paddingStart="4dp" android:paddingEnd="4dp"/>
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Populer Elementler" android:textSize="13sp"
+                android:textColor="?attr/colorPrimary" android:textStyle="bold"
+                android:layout_marginTop="16dp" android:letterSpacing="0.08"/>
+
+            <GridLayout android:id="@+id/el_quick_grid"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:columnCount="6" android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
+        <!-- ELEMENT DETAIL -->
+        <LinearLayout android:id="@+id/el_detail"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:visibility="gone">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp" app:cardBackgroundColor="?attr/colorSurface"
+                app:cardElevation="4dp" android:layout_marginTop="4dp">
+                <FrameLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <com.kimya.uygulama.fragments.AtomModelView
+                        android:id="@+id/el_atom_canvas"
+                        android:layout_width="match_parent" android:layout_height="320dp"/>
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="14dp" app:cardBackgroundColor="?attr/colorSurface"
+                app:cardElevation="2dp" android:layout_marginTop="10dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical">
+                        <TextView android:id="@+id/el_sym_badge"
+                            android:layout_width="72dp" android:layout_height="72dp"
+                            android:gravity="center" android:textSize="28sp"
+                            android:textColor="#FFF" android:textStyle="bold"
+                            android:fontFamily="monospace"/>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical"
+                            android:layout_marginStart="14dp">
+                            <TextView android:id="@+id/el_name"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:textSize="20sp" android:textColor="?attr/colorOnSurface"
+                                android:textStyle="bold"/>
+                            <TextView android:id="@+id/el_type_badge"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:textSize="11sp" android:textColor="#FFF"
+                                android:paddingStart="8dp" android:paddingEnd="8dp"
+                                android:paddingTop="2dp" android:paddingBottom="2dp"
+                                android:layout_marginTop="4dp"/>
+                            <TextView android:id="@+id/el_subtitle"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:textSize="12sp" android:textColor="?android:attr/textColorSecondary"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginTop="12dp"
+                        android:gravity="center">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/el_stat_z"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:textSize="18sp" android:textColor="?attr/colorPrimary"
+                                android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Atom No" android:textSize="10sp"
+                                android:textColor="?android:attr/textColorSecondary"/>
+                        </LinearLayout>
+                        <View android:layout_width="1dp" android:layout_height="28dp"
+                            android:background="@color/line"/>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/el_stat_mass"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:textSize="18sp" android:textColor="?attr/colorAccent"
+                                android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Kutle" android:textSize="10sp"
+                                android:textColor="?android:attr/textColorSecondary"/>
+                        </LinearLayout>
+                        <View android:layout_width="1dp" android:layout_height="28dp"
+                            android:background="@color/line"/>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/el_stat_group"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:textSize="18sp" android:textColor="@color/neon_pink"
+                                android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Grup" android:textSize="10sp"
+                                android:textColor="?android:attr/textColorSecondary"/>
+                        </LinearLayout>
+                        <View android:layout_width="1dp" android:layout_height="28dp"
+                            android:background="@color/line"/>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+                            <TextView android:id="@+id/el_stat_period"
+                                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:textSize="18sp" android:textColor="?attr/colorSecondary"
+                                android:textStyle="bold"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Periyot" android:textSize="10sp"
+                                android:textColor="?android:attr/textColorSecondary"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="14dp" app:cardBackgroundColor="?attr/colorSurface"
+                app:cardElevation="2dp" android:layout_marginTop="10dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="FIZIKSEL OZELLIKLER" android:textSize="13sp"
+                        android:textColor="?attr/colorPrimary" android:textStyle="bold"
+                        android:letterSpacing="0.08"/>
+                    <LinearLayout android:id="@+id/el_prop_bars"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="vertical" android:layout_marginTop="10dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="14dp" app:cardBackgroundColor="?attr/colorSurface"
+                app:cardElevation="2dp" android:layout_marginTop="10dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="ELEKTRON YAPISI" android:textSize="13sp"
+                        android:textColor="?attr/colorAccent" android:textStyle="bold"
+                        android:letterSpacing="0.08"/>
+                    <TextView android:id="@+id/el_electron_config"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:textColor="?attr/colorOnSurface" android:textSize="15sp"
+                        android:fontFamily="monospace" android:layout_marginTop="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="DEGERLIKLER" android:textSize="13sp"
+                        android:textColor="@color/neon_pink" android:textStyle="bold"
+                        android:letterSpacing="0.08" android:layout_marginTop="14dp"/>
+                    <LinearLayout android:id="@+id/el_valence_row"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginTop="8dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="14dp" app:cardBackgroundColor="?attr/colorSurface"
+                app:cardElevation="2dp" android:layout_marginTop="10dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="ACIKLAMA" android:textSize="13sp"
+                        android:textColor="?attr/colorSecondary" android:textStyle="bold"
+                        android:letterSpacing="0.08"/>
+                    <TextView android:id="@+id/el_desc_text"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:textColor="?attr/colorOnSurface" android:textSize="13sp"
+                        android:lineSpacingExtra="3dp" android:layout_marginTop="8dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:cardCornerRadius="14dp" app:cardBackgroundColor="?attr/colorSurface"
+                app:cardElevation="2dp" android:layout_marginTop="10dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="KULLANIM ALANLARI" android:textSize="13sp"
+                        android:textColor="@color/neon_red" android:textStyle="bold"
+                        android:letterSpacing="0.08"/>
+                    <TextView android:id="@+id/el_usage_text"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:textColor="?attr/colorOnSurface" android:textSize="13sp"
+                        android:lineSpacingExtra="3dp" android:layout_marginTop="8dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <Button android:id="@+id/el_back_btn"
+                android:layout_width="match_parent" android:layout_height="44dp"
+                android:text="Geri Don" android:textColor="#FFF"
+                android:backgroundTint="?android:attr/textColorSecondary" android:layout_marginTop="12dp"/>
+        </LinearLayout>
+
+        <Button android:id="@+id/el_listele_itn"
+            android:layout_width="match_parent" android:layout_height="46dp"
+            android:text="118 Elementi Listele" android:textColor="#FFF"
+            android:backgroundTint="?attr/colorPrimary" android:layout_marginTop="12dp"/>
+
+    </LinearLayout>
+</ScrollView>

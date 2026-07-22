@@ -1,0 +1,5 @@
+-keep class com.kimya.uygulama.** { *; }
+-keepclassmembers class com.kimya.uygulama.db.** { *; }
+-keepattributes *Annotation*
+-keep class kotlinx.serialization.** { *; }
+-dontwarn com.itextpdf.**

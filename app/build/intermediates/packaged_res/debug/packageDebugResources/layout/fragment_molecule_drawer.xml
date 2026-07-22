@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground" android:padding="16dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="Molekul Ciz" android:textSize="24sp"
+                android:textColor="?attr/colorPrimary" android:textStyle="bold"/>
+            <Button android:id="@+id/btn_help" android:layout_width="40dp" android:layout_height="40dp"
+                android:text="?" android:textSize="20sp" android:textColor="#FFF"
+                android:backgroundTint="?attr/colorAccent" android:textStyle="bold"/>
+        </LinearLayout>
+        <View android:id="@+id/mol_canvas_placeholder"
+            android:layout_width="match_parent" android:layout_height="400dp"
+            android:background="?attr/colorSurface" android:layout_marginTop="8dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="8dp">
+            <Button android:id="@+id/mol_clear"
+                
+                android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+                android:text="Temizle" android:textColor="#FFF"
+                android:backgroundTint="#FF4444" android:layout_marginRight="4dp"/>
+            <Button android:id="@+id/mol_red"
+                
+                android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+                android:text="" android:backgroundTint="#FF4444" android:layout_marginLeft="2dp" android:layout_marginRight="2dp"/>
+            <Button android:id="@+id/mol_green"
+                
+                android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+                android:text="" android:backgroundTint="#44FF44" android:layout_marginLeft="2dp" android:layout_marginRight="2dp"/>
+            <Button android:id="@+id/mol_blue"
+                
+                android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+                android:text="" android:backgroundTint="#4488FF" android:layout_marginLeft="2dp" android:layout_marginRight="2dp"/>
+            <Button android:id="@+id/mol_white"
+                
+                android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+                android:text="" android:backgroundTint="#FFFFFF" android:layout_marginLeft="4dp"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground" android:padding="16dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Molarite Hesaplama" android:textSize="24sp"
+            android:textColor="?attr/colorPrimary" android:textStyle="bold"/>
+        <View android:id="@+id/mol_canvas_placeholder"
+            android:layout_width="match_parent" android:layout_height="48dp"
+            android:layout_marginTop="8dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:background="?attr/colorSurface"
+            android:padding="12dp" android:layout_marginTop="12dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="ON TANIMLI COZELTILER" android:textSize="13sp"
+                android:textColor="?attr/colorSecondary" android:textStyle="bold"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginTop="8dp">
+                <Button android:id="@+id/mol_preset_1m"
+                    android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+                    android:text="1M Cozelti" android:textColor="#FFF" android:textSize="11sp"
+                    android:backgroundTint="?attr/colorPrimary" android:layout_marginEnd="4dp"/>
+                <Button android:id="@+id/mol_preset_01m"
+                    android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+                    android:text="0.1M Cozelti" android:textColor="#FFF" android:textSize="11sp"
+                    android:backgroundTint="?attr/colorPrimary" android:layout_marginStart="4dp"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginTop="4dp">
+                <Button android:id="@+id/mol_preset_2m_nacl"
+                    android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+                    android:text="2M NaCl" android:textColor="#FFF" android:textSize="11sp"
+                    android:backgroundTint="?attr/colorAccent" android:layout_marginEnd="4dp"/>
+                <Button android:id="@+id/mol_preset_05m_hcl"
+                    android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+                    android:text="0.5M HCl" android:textColor="#FFF" android:textSize="11sp"
+                    android:backgroundTint="?attr/colorAccent" android:layout_marginStart="4dp"/>
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:background="?attr/colorSurface"
+            android:padding="12dp" android:layout_marginTop="12dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="DEGERLER" android:textSize="13sp"
+                android:textColor="?attr/colorPrimary" android:textStyle="bold"/>
+            <EditText android:id="@+id/mol_M"
+                android:layout_width="match_parent" android:layout_height="48dp"
+                android:hint="M (Molarite)" android:inputType="numberDecimal"
+                android:background="?android:attr/colorBackground" android:padding="12dp"
+                android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"
+                android:layout_marginTop="8dp"/>
+            <EditText android:id="@+id/mol_n"
+                android:layout_width="match_parent" android:layout_height="48dp"
+                android:hint="n (mol)" android:inputType="numberDecimal"
+                android:background="?android:attr/colorBackground" android:padding="12dp"
+                android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"
+                android:layout_marginTop="8dp"/>
+            <EditText android:id="@+id/mol_V"
+                android:layout_width="match_parent" android:layout_height="48dp"
+                android:hint="V (L)" android:inputType="numberDecimal"
+                android:background="?android:attr/colorBackground" android:padding="12dp"
+                android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+        <Button android:id="@+id/mol_itn_hesapla"
+            android:layout_width="match_parent" android:layout_height="48dp"
+            android:text="Hesapla" android:textColor="#FFF"
+            android:backgroundTint="?attr/colorPrimary" android:layout_marginTop="12dp"/>
+        <TextView android:id="@+id/mol_sonuc"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="?attr/colorSecondary" android:textSize="14sp"
+            android:background="?attr/colorSurface" android:padding="12dp"
+            android:layout_marginTop="12dp"/>
+    </LinearLayout>
+</ScrollView>

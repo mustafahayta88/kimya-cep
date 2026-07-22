@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="maddeler">
+        <item>NaOH</item><item>HCl</item><item>H2SO4</item><item>NaCl</item>
+        <item>KOH</item><item>HNO3</item><item>CH3COOH</item><item>NaHCO3</item>
+        <item>CaCO3</item><item>H3PO4</item><item>KMnO4</item><item>CuSO4</item><item>FeCl3</item><item>AgNO3</item>
+    </string-array>
+    <string-array name="birimler">
+        <item>gram</item><item>mol</item>
+    </string-array>
+    <string-array name="hacim_birim">
+        <item>mL</item><item>L</item>
+    </string-array>
+    <string-array name="sto_birim">
+        <item>gram</item><item>mol</item>
+    </string-array>
+</resources>

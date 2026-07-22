@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="@string/nav_kesfet">
+        <menu>
+            <item android:id="@+id/nav_giris" android:title="Ana Sayfa" android:icon="@android:drawable/ic_menu_info_details"/>
+            <item android:id="@+id/nav_element" android:title="Element Ara" android:icon="@android:drawable/ic_menu_search"/>
+            <item android:id="@+id/nav_bilesik" android:title="Bileşik" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_periyodik" android:title="Periyodik Tablo" android:icon="@android:drawable/ic_menu_gallery"/>
+            <item android:id="@+id/nav_trend" android:title="Trend Analizi" android:icon="@android:drawable/ic_menu_sort_by_size"/>
+            <item android:id="@+id/nav_organik" android:title="Organik Kimya" android:icon="@android:drawable/ic_menu_gallery"/>
+            <item android:id="@+id/nav_lewis" android:title="Lewis Yapısı" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_vsepr" android:title="Molekül Geometrisi" android:icon="@android:drawable/ic_menu_gallery"/>
+        </menu>
+    </item>
+    <item android:title="@string/nav_hesapla">
+        <menu>
+            <item android:id="@+id/nav_molkutlesi" android:title="Atom Kutlesi" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_molarite" android:title="Molarite" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_donusum" android:title="Mol Hesap" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_seyreltme" android:title="Seyreltme" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_gaz" android:title="Gaz Yasaları" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_cozelti" android:title="Çözelti" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_asitbaz" android:title="Asit/Baz" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_birim" android:title="Birim Dönüşüm" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_stoykiyometri" android:title="Stokiyometri" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_enstrumantal" android:title="Enstrümantal" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_termodinamik" android:title="Termodinamik" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_kinematik" android:title="Kinematik" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_denge" android:title="Kimyasal Denge" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_elektrokimya" android:title="Elektrokimya" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_cozelti_raoult" android:title="Çözeltiler (Raoult)" android:icon="@android:drawable/ic_menu_edit"/>
+        </menu>
+    </item>
+    <item android:title="@string/nav_tepkime">
+        <menu>
+            <item android:id="@+id/nav_reaksiyon" android:title="Reaksiyon Dengeleme" android:icon="@android:drawable/ic_menu_gallery"/>
+            <item android:id="@+id/nav_reaction_types" android:title="Organik Reaksiyonlar" android:icon="@android:drawable/ic_menu_gallery"/>
+            <item android:id="@+id/nav_redox" android:title="Redox" android:icon="@android:drawable/ic_menu_gallery"/>
+            <item android:id="@+id/nav_organik" android:title="Organik Kimya" android:icon="@android:drawable/ic_menu_gallery"/>
+            <item android:id="@+id/nav_isomerism" android:title="Izomerlik" android:icon="@android:drawable/ic_menu_gallery"/>
+            <item android:id="@+id/nav_polymers" android:title="Polimerler" android:icon="@android:drawable/ic_menu_gallery"/>
+            <item android:id="@+id/nav_petroleum" android:title="Petrol ve Hidrokarbonlar" android:icon="@android:drawable/ic_menu_gallery"/>
+            <item android:id="@+id/nav_biomolecules" android:title="Biyomolekuller" android:icon="@android:drawable/ic_menu_gallery"/>
+        </menu>
+    </item>
+    <item android:title="@string/nav_araclar">
+        <menu>
+            <item android:id="@+id/nav_flame_test" android:title="Alev Testi" android:icon="@android:drawable/ic_menu_gallery"/>
+            <item android:id="@+id/nav_drawer" android:title="Molekül Çiz" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_timer" android:title="Kronometre" android:icon="@android:drawable/ic_menu_manage"/>
+            <item android:id="@+id/nav_not" android:title="Not Defteri" android:icon="@android:drawable/ic_menu_edit"/>
+            <item android:id="@+id/nav_quiz" android:title="Quiz" android:icon="@android:drawable/ic_menu_help"/>
+            <item android:id="@+id/nav_search" android:title="Ara" android:icon="@android:drawable/ic_menu_search"/>
+            <item android:id="@+id/nav_history" android:title="Geçmiş" android:icon="@android:drawable/ic_menu_recent_history"/>
+        </menu>
+    </item>
+</menu>

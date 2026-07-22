@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#0D1117</color>
+    <color name="surface">#161B22</color>
+    <color name="line">#30363D</color>
+    <color name="text">#E6EDF3</color>
+    <color name="muted">#8B949E</color>
+    <color name="neon_cyan">#00F0FF</color>
+    <color name="neon_lime">#39FF14</color>
+    <color name="neon_pink">#FF0080</color>
+    <color name="neon_purp">#B388FF</color>
+    <color name="neon_red">#FF3333</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="on_primary">#000000</color>
+    <color name="cat_kesfet">@color/neon_cyan</color>
+    <color name="cat_hesapla">@color/neon_lime</color>
+    <color name="cat_tepkime">@color/neon_pink</color>
+    <color name="cat_araclar">@color/neon_purp</color>
+
+    <!-- Ocean -->
+    <color name="ocean_bg">#0A1628</color>
+    <color name="ocean_surface">#0F2035</color>
+    <color name="ocean_text">#E0F0FF</color>
+    <color name="ocean_muted">#7EB8D8</color>
+    <color name="ocean_line">#1A3A5C</color>
+    <color name="ocean_primary">#00B4D8</color>
+    <color name="ocean_secondary">#0077B6</color>
+    <color name="ocean_accent">#48CAE4</color>
+
+    <!-- Forest -->
+    <color name="forest_bg">#0A1A0A</color>
+    <color name="forest_surface">#122512</color>
+    <color name="forest_text">#E8F5E9</color>
+    <color name="forest_muted">#81C784</color>
+    <color name="forest_line">#1B5E20</color>
+    <color name="forest_primary">#00E676</color>
+    <color name="forest_secondary">#76FF03</color>
+    <color name="forest_accent">#69F0AE</color>
+
+    <!-- Sunset -->
+    <color name="sunset_bg">#1A0A00</color>
+    <color name="sunset_surface">#251200</color>
+    <color name="sunset_text">#FFF3E0</color>
+    <color name="sunset_muted">#FFAB91</color>
+    <color name="sunset_line">#4E2600</color>
+    <color name="sunset_primary">#FF6D00</color>
+    <color name="sunset_secondary">#FF3D00</color>
+    <color name="sunset_accent">#FFD740</color>
+
+    <!-- Lavender -->
+    <color name="lavender_bg">#120A1E</color>
+    <color name="lavender_surface">#1A1028</color>
+    <color name="lavender_text">#EDE7F6</color>
+    <color name="lavender_muted">#B39DDB</color>
+    <color name="lavender_line">#2D1B4E</color>
+    <color name="lavender_primary">#B388FF</color>
+    <color name="lavender_secondary">#7C4DFF</color>
+    <color name="lavender_accent">#EA80FC</color>
+
+    <!-- Crimson -->
+    <color name="crimson_bg">#1A0508</color>
+    <color name="crimson_surface">#250A10</color>
+    <color name="crimson_text">#FFEBEE</color>
+    <color name="crimson_muted">#EF9A9A</color>
+    <color name="crimson_line">#4E1018</color>
+    <color name="crimson_primary">#FF1744</color>
+    <color name="crimson_secondary">#D50000</color>
+    <color name="crimson_accent">#FF8A80</color>
+
+    <!-- Arctic -->
+    <color name="arctic_bg">#0A1520</color>
+    <color name="arctic_surface">#101E2A</color>
+    <color name="arctic_text">#E0F7FA</color>
+    <color name="arctic_muted">#80DEEA</color>
+    <color name="arctic_line">#1A3040</color>
+    <color name="arctic_primary">#E0F7FA</color>
+    <color name="arctic_secondary">#84FFFF</color>
+    <color name="arctic_accent">#A7FFEB</color>
+
+    <!-- Mint -->
+    <color name="mint_bg">#081A12</color>
+    <color name="mint_surface">#0E2518</color>
+    <color name="mint_text">#E8F8F0</color>
+    <color name="mint_muted">#80CBC4</color>
+    <color name="mint_line">#1A4030</color>
+    <color name="mint_primary">#69F0AE</color>
+    <color name="mint_secondary">#1DE9B6</color>
+    <color name="mint_accent">#A7FFEB</color>
+
+    <!-- Navigation tint ColorStateLists -->
+    <color name="nav_icon_tint_default">@color/neon_cyan</color>
+</resources>

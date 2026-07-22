@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground" android:padding="16dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="Elektrokimya" android:textSize="26sp"
+                android:textColor="?attr/colorPrimary" android:textStyle="bold"/>
+            <Button android:id="@+id/btn_help" android:layout_width="40dp" android:layout_height="40dp"
+                android:text="?" android:textSize="20sp" android:textColor="#FFF"
+                android:backgroundTint="?attr/colorAccent" android:textStyle="bold"/>
+        </LinearLayout>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Pil, Elektroliz ve Nernst" android:textSize="16sp"
+            android:textColor="?attr/colorSecondary" android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp" app:cardElevation="2dp"
+            app:cardBackgroundColor="?attr/colorSurface" android:layout_marginBottom="8dp">
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:padding="14dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Hücre Potansiyeli (E°cell)" android:textSize="16sp"
+                    android:textColor="?attr/colorPrimary" android:textStyle="bold"
+                    android:layout_marginBottom="4dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="E°cell = E°indirgenme (+) − E°indirgenme (−)"
+                    android:textSize="13sp" android:textColor="?attr/colorSecondary"
+                    android:fontFamily="monospace" android:layout_marginBottom="8dp"/>
+                <EditText android:id="@+id/et_e_cathode" android:layout_width="match_parent"
+                    android:layout_height="44dp" android:hint="Katot E° (V) (indirgenme)"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:background="?android:attr/colorBackground" android:padding="10dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"/>
+                <EditText android:id="@+id/et_e_anode" android:layout_width="match_parent"
+                    android:layout_height="44dp" android:hint="Anot E° (V) (indirgenme)"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:background="?android:attr/colorBackground" android:padding="10dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"
+                    android:layout_marginTop="4dp"/>
+                <Button android:id="@+id/btn_cell_calc" android:layout_width="match_parent"
+                    android:layout_height="44dp" android:text="E°cell Hesapla"
+                    android:textColor="#FFF" android:backgroundTint="?attr/colorPrimary"
+                    android:layout_marginTop="8dp"/>
+                <TextView android:id="@+id/tv_cell_result" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:textColor="?attr/colorSecondary"
+                    android:textSize="15sp" android:layout_marginTop="8dp"
+                    android:lineSpacingExtra="3dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp" app:cardElevation="2dp"
+            app:cardBackgroundColor="?attr/colorSurface" android:layout_marginBottom="8dp">
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:padding="14dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Nernst Denklemi" android:textSize="16sp"
+                    android:textColor="?attr/colorSecondary" android:textStyle="bold"
+                    android:layout_marginBottom="4dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="E = E° − (0.0592/n) × log(Q)"
+                    android:textSize="13sp" android:textColor="?android:attr/textColorSecondary"
+                    android:fontFamily="monospace" android:layout_marginBottom="8dp"/>
+                <EditText android:id="@+id/et_nernst_e0" android:layout_width="match_parent"
+                    android:layout_height="44dp" android:hint="E° (V)"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:background="?android:attr/colorBackground" android:padding="10dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"/>
+                <EditText android:id="@+id/et_nernst_n" android:layout_width="match_parent"
+                    android:layout_height="44dp" android:hint="Elektron sayısı n"
+                    android:inputType="number"
+                    android:background="?android:attr/colorBackground" android:padding="10dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"
+                    android:layout_marginTop="4dp"/>
+                <EditText android:id="@+id/et_nernst_q" android:layout_width="match_parent"
+                    android:layout_height="44dp" android:hint="Reaksiyon kotası Q"
+                    android:inputType="numberDecimal"
+                    android:background="?android:attr/colorBackground" android:padding="10dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"
+                    android:layout_marginTop="4dp"/>
+                <Button android:id="@+id/btn_nernst" android:layout_width="match_parent"
+                    android:layout_height="44dp" android:text="Nernst Hesapla"
+                    android:textColor="#FFF" android:backgroundTint="?attr/colorSecondary"
+                    android:layout_marginTop="8dp"/>
+                <TextView android:id="@+id/tv_nernst_result" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:textColor="?attr/colorPrimary"
+                    android:textSize="15sp" android:layout_marginTop="8dp"
+                    android:lineSpacingExtra="3dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp" app:cardElevation="2dp"
+            app:cardBackgroundColor="?attr/colorSurface" android:layout_marginBottom="8dp">
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:padding="14dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Faraday Yasası (Elektroliz)" android:textSize="16sp"
+                    android:textColor="@color/neon_pink" android:textStyle="bold"
+                    android:layout_marginBottom="4dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="m = (M × I × t) / (n × F)  |  F = 96485 C/mol"
+                    android:textSize="13sp" android:textColor="?android:attr/textColorSecondary"
+                    android:fontFamily="monospace" android:layout_marginBottom="8dp"/>
+                <EditText android:id="@+id/et_faraday_m" android:layout_width="match_parent"
+                    android:layout_height="44dp" android:hint="Mol kütle M (g/mol)"
+                    android:inputType="numberDecimal"
+                    android:background="?android:attr/colorBackground" android:padding="10dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"/>
+                <EditText android:id="@+id/et_faraday_i" android:layout_width="match_parent"
+                    android:layout_height="44dp" android:hint="Akım I (A)"
+                    android:inputType="numberDecimal"
+                    android:background="?android:attr/colorBackground" android:padding="10dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"
+                    android:layout_marginTop="4dp"/>
+                <EditText android:id="@+id/et_faraday_t" android:layout_width="match_parent"
+                    android:layout_height="44dp" android:hint="Süre t (saniye)"
+                    android:inputType="numberDecimal"
+                    android:background="?android:attr/colorBackground" android:padding="10dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"
+                    android:layout_marginTop="4dp"/>
+                <EditText android:id="@+id/et_faraday_n" android:layout_width="match_parent"
+                    android:layout_height="44dp" android:hint="Elektron sayısı n"
+                    android:inputType="number"
+                    android:background="?android:attr/colorBackground" android:padding="10dp"
+                    android:textColor="?attr/colorOnSurface" android:textColorHint="?android:attr/textColorSecondary"
+                    android:layout_marginTop="4dp"/>
+                <Button android:id="@+id/btn_faraday" android:layout_width="match_parent"
+                    android:layout_height="44dp" android:text="Hesapla (Cu elektrolizi: M=63.55, n=2)"
+                    android:textColor="#FFF" android:backgroundTint="@color/neon_pink"
+                    android:layout_marginTop="8dp" android:textSize="11sp"/>
+                <TextView android:id="@+id/tv_faraday_result" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:textColor="?attr/colorOnSurface"
+                    android:textSize="15sp" android:layout_marginTop="8dp"
+                    android:lineSpacingExtra="3dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp" app:cardElevation="2dp"
+            app:cardBackgroundColor="?attr/colorSurface">
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical"
+                android:padding="14dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Standart İndirgenme Potansiyelleri" android:textSize="14sp"
+                    android:textColor="?attr/colorAccent" android:textStyle="bold"
+                    android:layout_marginBottom="6dp"/>
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="F₂/F⁻ = +2.87 V | Cl₂/Cl⁻ = +1.36 V | Au³⁺/Au = +1.50 V\nAg⁺/Ag = +0.80 V | Fe³⁺/Fe²⁺ = +0.77 V | Cu²⁺/Cu = +0.34 V\n2H⁺/H₂ = 0.00 V | Pb²⁺/Pb = −0.13 V | Sn²⁺/Sn = −0.14 V\nNi²⁺/Ni = −0.26 V | Co²⁺/Co = −0.28 V | Zn²⁺/Zn = −0.76 V\nCr³⁺/Cr = −0.74 V | Fe²⁺/Fe = −0.44 V | Al³⁺/Al = −1.66 V\nMg²⁺/Mg = −2.37 V | Na⁺/Na = −2.71 V | Li⁺/Li = −3.04 V"
+                    android:textColor="?android:attr/textColorSecondary" android:textSize="11sp"
+                    android:lineSpacingExtra="3dp" android:fontFamily="monospace"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>

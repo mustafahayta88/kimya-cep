@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/colorBackground"
+    android:padding="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Result Banner Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="?attr/colorSurface"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+            <TextView
+                android:id="@+id/birim_banner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Birim Donustur"
+                android:textSize="22sp"
+                android:textColor="?attr/colorPrimary"
+                android:textStyle="bold"
+                android:gravity="center" />
+            <TextView
+                android:id="@+id/birim_sonuc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorSecondary"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
+
+        <!-- Input Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="?attr/colorSurface"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp">
+            <Spinner
+                android:id="@+id/birim_kategori"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="?android:attr/colorBackground"
+                android:layout_marginBottom="8dp" />
+            <EditText
+                android:id="@+id/birim_deger"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Deger"
+                android:inputType="numberDecimal"
+                android:background="?android:attr/colorBackground"
+                android:padding="12dp"
+                android:textColor="?attr/colorOnSurface"
+                android:textColorHint="?android:attr/textColorSecondary"
+                android:layout_marginBottom="8dp" />
+            <Spinner
+                android:id="@+id/birim_kaynak"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="?android:attr/colorBackground"
+                android:layout_marginBottom="8dp" />
+            <Spinner
+                android:id="@+id/birim_hedef"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="?android:attr/colorBackground"
+                android:layout_marginBottom="8dp" />
+            <Button
+                android:id="@+id/birim_donustur"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Donustur"
+                android:textColor="#FFF"
+                android:backgroundTint="?attr/colorPrimary" />
+        </LinearLayout>
+
+        <!-- Conversion View Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="?attr/colorSurface"
+            android:padding="8dp"
+            android:layout_marginBottom="12dp">
+            <com.kimya.uygulama.fragments.ConversionView
+                android:id="@+id/birim_conv_view"
+                android:layout_width="match_parent"
+                android:layout_height="120dp" />
+            <TextView
+                android:id="@+id/birim_formul"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorSecondary"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:layout_marginTop="4dp" />
+            <TextView
+                android:id="@+id/birim_carpan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="12sp"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <!-- Presets Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="?attr/colorSurface"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hizli Donusum"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button
+                    android:id="@+id/birim_preset1"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:text="25 C -> K"
+                    android:textColor="#FFF"
+                    android:backgroundTint="?android:attr/colorBackground"
+                    android:textSize="11sp"
+                    android:layout_marginEnd="4dp" />
+                <Button
+                    android:id="@+id/birim_preset2"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:text="1 atm -> kPa"
+                    android:textColor="#FFF"
+                    android:backgroundTint="?android:attr/colorBackground"
+                    android:textSize="11sp"
+                    android:layout_marginHorizontal="2dp" />
+                <Button
+                    android:id="@+id/birim_preset3"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:text="1 kJ -> J"
+                    android:textColor="#FFF"
+                    android:backgroundTint="?android:attr/colorBackground"
+                    android:textSize="11sp"
+                    android:layout_marginStart="4dp" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="6dp">
+                <Button
+                    android:id="@+id/birim_preset4"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:text="1 M -> mM"
+                    android:textColor="#FFF"
+                    android:backgroundTint="?android:attr/colorBackground"
+                    android:textSize="11sp"
+                    android:layout_marginEnd="4dp" />
+                <Button
+                    android:id="@+id/birim_preset5"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:text="1 g -> mg"
+                    android:textColor="#FFF"
+                    android:backgroundTint="?android:attr/colorBackground"
+                    android:textSize="11sp"
+                    android:layout_marginHorizontal="2dp" />
+                <Button
+                    android:id="@+id/birim_preset6"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:text="1 L -> mL"
+                    android:textColor="#FFF"
+                    android:backgroundTint="?android:attr/colorBackground"
+                    android:textSize="11sp"
+                    android:layout_marginStart="4dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

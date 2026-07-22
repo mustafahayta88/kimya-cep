@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Neon Cyber (Default) -->
+    <style name="Theme.KimyaUygulamasi" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/neon_cyan</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorSecondary">@color/neon_purp</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorAccent">@color/neon_lime</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text</item>
+        <item name="android:textColorSecondary">@color/muted</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+    </style>
+
+    <!-- Ocean Deep -->
+    <style name="Theme.KimyaUygulamasi.Ocean" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/ocean_primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorSecondary">@color/ocean_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorAccent">@color/ocean_accent</item>
+        <item name="android:colorBackground">@color/ocean_bg</item>
+        <item name="colorSurface">@color/ocean_surface</item>
+        <item name="colorOnSurface">@color/ocean_text</item>
+        <item name="android:textColorSecondary">@color/ocean_muted</item>
+        <item name="android:statusBarColor">@color/ocean_bg</item>
+        <item name="android:navigationBarColor">@color/ocean_bg</item>
+    </style>
+
+    <!-- Forest Night -->
+    <style name="Theme.KimyaUygulamasi.Forest" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/forest_primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorSecondary">@color/forest_secondary</item>
+        <item name="colorOnSecondary">@color/on_primary</item>
+        <item name="colorAccent">@color/forest_accent</item>
+        <item name="android:colorBackground">@color/forest_bg</item>
+        <item name="colorSurface">@color/forest_surface</item>
+        <item name="colorOnSurface">@color/forest_text</item>
+        <item name="android:textColorSecondary">@color/forest_muted</item>
+        <item name="android:statusBarColor">@color/forest_bg</item>
+        <item name="android:navigationBarColor">@color/forest_bg</item>
+    </style>
+
+    <!-- Sunset Blaze -->
+    <style name="Theme.KimyaUygulamasi.Sunset" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/sunset_primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorSecondary">@color/sunset_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorAccent">@color/sunset_accent</item>
+        <item name="android:colorBackground">@color/sunset_bg</item>
+        <item name="colorSurface">@color/sunset_surface</item>
+        <item name="colorOnSurface">@color/sunset_text</item>
+        <item name="android:textColorSecondary">@color/sunset_muted</item>
+        <item name="android:statusBarColor">@color/sunset_bg</item>
+        <item name="android:navigationBarColor">@color/sunset_bg</item>
+    </style>
+
+    <!-- Lavender Dream -->
+    <style name="Theme.KimyaUygulamasi.Lavender" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/lavender_primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorSecondary">@color/lavender_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorAccent">@color/lavender_accent</item>
+        <item name="android:colorBackground">@color/lavender_bg</item>
+        <item name="colorSurface">@color/lavender_surface</item>
+        <item name="colorOnSurface">@color/lavender_text</item>
+        <item name="android:textColorSecondary">@color/lavender_muted</item>
+        <item name="android:statusBarColor">@color/lavender_bg</item>
+        <item name="android:navigationBarColor">@color/lavender_bg</item>
+    </style>
+
+    <!-- Crimson Fire -->
+    <style name="Theme.KimyaUygulamasi.Crimson" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/crimson_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/crimson_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorAccent">@color/crimson_accent</item>
+        <item name="android:colorBackground">@color/crimson_bg</item>
+        <item name="colorSurface">@color/crimson_surface</item>
+        <item name="colorOnSurface">@color/crimson_text</item>
+        <item name="android:textColorSecondary">@color/crimson_muted</item>
+        <item name="android:statusBarColor">@color/crimson_bg</item>
+        <item name="android:navigationBarColor">@color/crimson_bg</item>
+    </style>
+
+    <!-- Arctic Frost -->
+    <style name="Theme.KimyaUygulamasi.Arctic" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/arctic_primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorSecondary">@color/arctic_secondary</item>
+        <item name="colorOnSecondary">@color/on_primary</item>
+        <item name="colorAccent">@color/arctic_accent</item>
+        <item name="android:colorBackground">@color/arctic_bg</item>
+        <item name="colorSurface">@color/arctic_surface</item>
+        <item name="colorOnSurface">@color/arctic_text</item>
+        <item name="android:textColorSecondary">@color/arctic_muted</item>
+        <item name="android:statusBarColor">@color/arctic_bg</item>
+        <item name="android:navigationBarColor">@color/arctic_bg</item>
+    </style>
+
+    <!-- Mint Fresh -->
+    <style name="Theme.KimyaUygulamasi.Mint" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/mint_primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorSecondary">@color/mint_secondary</item>
+        <item name="colorOnSecondary">@color/on_primary</item>
+        <item name="colorAccent">@color/mint_accent</item>
+        <item name="android:colorBackground">@color/mint_bg</item>
+        <item name="colorSurface">@color/mint_surface</item>
+        <item name="colorOnSurface">@color/mint_text</item>
+        <item name="android:textColorSecondary">@color/mint_muted</item>
+        <item name="android:statusBarColor">@color/mint_bg</item>
+        <item name="android:navigationBarColor">@color/mint_bg</item>
+    </style>
+</resources>

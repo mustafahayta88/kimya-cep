@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="#0D1117" android:padding="12dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:text="Reaksiyon Hizi" android:textSize="22sp"
+                android:textColor="?attr/colorPrimary" android:textStyle="bold"/>
+            <Button android:id="@+id/btn_help" android:layout_width="40dp" android:layout_height="40dp"
+                android:text="?" android:textSize="20sp" android:textColor="#FFF"
+                android:backgroundTint="?attr/colorAccent" android:textStyle="bold"/>
+        </LinearLayout>
+        <com.kimya.uygulama.features.ReactionRateView
+            android:id="@+id/rate_canvas"
+            android:layout_width="match_parent" android:layout_height="380dp"
+            android:layout_marginTop="4dp"/>
+        <TextView android:id="@+id/temp_label" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="Sicaklik: 25°C"
+            android:textColor="#FFAAAAAA" android:textSize="14sp" android:layout_marginTop="8dp"/>
+        <SeekBar android:id="@+id/temp_seek" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:max="100" android:progress="25"/>
+        <TextView android:id="@+id/concA_label" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="[A]: 1.0 M"
+            android:textColor="#FFAAAAAA" android:textSize="14sp" android:layout_marginTop="4dp"/>
+        <SeekBar android:id="@+id/concA_seek" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:max="200" android:progress="100"/>
+        <TextView android:id="@+id/concB_label" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="[B]: 1.0 M"
+            android:textColor="#FFAAAAAA" android:textSize="14sp" android:layout_marginTop="4dp"/>
+        <SeekBar android:id="@+id/concB_seek" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:max="200" android:progress="100"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginTop="8dp">
+            <Button android:id="@+id/btn_start" android:layout_width="0dp"
+                android:layout_height="match_parent" android:layout_weight="1"
+                android:text="Baslat" android:textColor="#FFFFFF"
+                 android:layout_marginRight="4dp"/>
+            <Button android:id="@+id/btn_stop" android:layout_width="0dp"
+                android:layout_height="match_parent" android:layout_weight="1"
+                android:text="Durdur" android:textColor="#FFFFFF"
+                android:layout_marginLeft="4dp" android:layout_marginRight="4dp"/>
+            <Button android:id="@+id/btn_reset" android:layout_width="0dp"
+                android:layout_height="match_parent" android:layout_weight="1"
+                android:text="Sifirla" android:textColor="#FFFFFF"
+                android:layout_marginLeft="4dp"/>
+        </LinearLayout>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="A + B -> C | r = k[A][B] | k sicakliga bagli (Arrhenius)"
+            android:textColor="#FF666666" android:textSize="12sp" android:gravity="center"
+            android:padding="8dp"/>
+    </LinearLayout>
+</ScrollView>
