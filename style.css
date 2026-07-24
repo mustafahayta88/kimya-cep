@@ -148,7 +148,7 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif
 
 /* CONTACT */
 .contact{padding:100px 0}
-.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:700px;margin:0 auto}
+.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .contact-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:32px 24px;text-align:center;text-decoration:none;color:var(--text);transition:all .2s}
 .contact-card:hover{border-color:var(--border2);transform:translateY(-2px)}
 .contact-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
