@@ -148,7 +148,7 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif
 
 /* CONTACT */
 .contact{padding:100px 0}
-.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.contact-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:12px!important}
 .contact-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:32px 24px;text-align:center;text-decoration:none;color:var(--text);transition:all .2s}
 .contact-card:hover{border-color:var(--border2);transform:translateY(-2px)}
 .contact-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
@@ -183,7 +183,7 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif
 /* RESPONSIVE */
 @media(max-width:900px){
     .features-grid{grid-template-columns:repeat(2,1fr)}
-    .contact-grid{grid-template-columns:repeat(3,1fr);gap:12px}
+    .contact-grid{grid-template-columns:repeat(3,1fr)!important;gap:10px!important}
     .download-box{flex-direction:column;text-align:center;padding:40px 32px}
     .download-meta{justify-content:center}
     .step-connector{display:none}
@@ -202,6 +202,8 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif
 }
 @media(max-width:480px){
     .features-grid{grid-template-columns:1fr}
+    .contact-grid{grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
+    .contact-card{padding:20px 8px!important}
     .hero-buttons{flex-direction:column;align-items:center}
     .download-logo{width:140px;height:140px;border-radius:28px}
 }
