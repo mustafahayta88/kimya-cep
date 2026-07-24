@@ -183,7 +183,7 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif
 /* RESPONSIVE */
 @media(max-width:900px){
     .features-grid{grid-template-columns:repeat(2,1fr)}
-    .contact-grid{grid-template-columns:1fr}
+    .contact-grid{grid-template-columns:repeat(3,1fr);gap:12px}
     .download-box{flex-direction:column;text-align:center;padding:40px 32px}
     .download-meta{justify-content:center}
     .step-connector{display:none}
