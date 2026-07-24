@@ -166,6 +166,20 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif
 .footer-right a{color:var(--muted);text-decoration:none;font-size:13px;transition:color .2s}
 .footer-right a:hover{color:var(--text)}
 
+.badge-warning{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.2);color:#FBBF24}
+.badge-warning svg{color:#FBBF24}
+.hero-platform{display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;color:var(--muted);margin-top:-24px;margin-bottom:36px}
+.hero-platform svg{color:var(--orange)}
+.section-note{display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;color:var(--muted);margin-top:8px}
+.section-note svg{color:var(--yellow)}
+
+/* DISCLAIMER */
+.disclaimer{padding:0 0 80px}
+.disclaimer-box{display:flex;gap:20px;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.15);border-radius:var(--r);padding:24px;max-width:700px;margin:0 auto}
+.disclaimer-icon{flex-shrink:0;color:#FBBF24;margin-top:2px}
+.disclaimer-text h3{font-size:16px;font-weight:700;color:#FBBF24;margin-bottom:8px}
+.disclaimer-text p{font-size:13px;color:var(--dim);line-height:1.7}
+
 /* RESPONSIVE */
 @media(max-width:900px){
     .features-grid{grid-template-columns:repeat(2,1fr)}
