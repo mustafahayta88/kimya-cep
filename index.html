@@ -2,392 +2,405 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0e1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Kimya Cep - Kimya Artık Cebinde</title>
     <meta name="description" content="Kimya derslerini eğlenceli ve interaktif hale getiren Android uygulaması.">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="container nav-container">
-            <a href="#" class="logo">
-                <img src="assets/logo.png" alt="Kimya Cep" class="nav-logo">
-                <span class="logo-text">Kimya<span class="logo-accent">Cep</span></span>
-            </a>
-            <div class="nav-links">
-                <a href="#ozellikler">Özellikler</a>
-                <a href="#nasil-calisir">Nasıl Çalışır</a>
-                <a href="#guncelleme">Güncellemeler</a>
-                <a href="#sss">SSS</a>
-                <a href="#iletisim">İletişim</a>
+    <!-- MOBILE APP SHELL -->
+    <div class="app-shell">
+
+        <!-- STATUS BAR -->
+        <div class="status-bar">
+            <span class="status-time">9:41</span>
+            <div class="status-icons">
+                <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="0.5"/><rect x="4.5" y="5" width="3" height="7" rx="0.5"/><rect x="9" y="2" width="3" height="10" rx="0.5"/><rect x="13.5" y="0" width="2.5" height="12" rx="0.5"/></svg>
+                <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2C5.8 2 3.8 2.8 2.3 4.2L0 1.9C2.1 0 4.9-0.9 8-0.9s5.9 0.9 8 2.8l-2.3 2.3C12.2 2.8 10.2 2 8 2zm4.5 4.5L8 11 3.5 6.5C4.7 5.3 6.3 4.6 8 4.6s3.3 0.7 4.5 1.9z"/></svg>
+                <div class="battery"><div class="battery-level"></div></div>
             </div>
-            <a href="#indir" class="nav-cta">Ücretsiz İndir</a>
-            <button class="mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('show')">
-                <span></span><span></span><span></span>
+        </div>
+
+        <!-- TAB: ANA SAYFA -->
+        <div class="tab-page active" id="tab-home">
+            <!-- HEADER -->
+            <div class="app-header">
+                <div class="header-top">
+                    <button class="icon-btn">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    </button>
+                    <button class="icon-btn">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    </button>
+                </div>
+                <h1 class="app-title">KİMYA <span class="accent">CEP</span></h1>
+                <p class="app-subtitle">Kimya artık cebinde.</p>
+                <div class="search-bar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" placeholder="Ne aramıştın?" id="search-input">
+                    <button class="filter-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- HIZLI ERISIM -->
+            <section class="section">
+                <div class="section-row">
+                    <span class="section-label">HIZLI ERİŞİM</span>
+                    <a href="#" class="section-link">Düzenle</a>
+                </div>
+                <div class="quick-grid">
+                    <div class="quick-card" onclick="switchTab('tab-tools')">
+                        <div class="quick-icon qi-blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                        </div>
+                        <span>Hesaplamalar</span>
+                    </div>
+                    <div class="quick-card" onclick="showFeature('enstrumantal')">
+                        <div class="quick-icon qi-teal">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        </div>
+                        <span>Enstrümantal Analiz</span>
+                    </div>
+                    <div class="quick-card" onclick="switchTab('tab-tools')">
+                        <div class="quick-icon qi-purple">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3v12l-3 3h12l-3-3V3"/><path d="M8 3h8"/></svg>
+                        </div>
+                        <span>Simülasyonlar</span>
+                    </div>
+                    <div class="quick-card" onclick="showFeature('periyodik')">
+                        <div class="quick-icon qi-green">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                        </div>
+                        <span>Kimya Konuları</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- KATEGORILER -->
+            <section class="section">
+                <span class="section-label">KATEGORİLER</span>
+                <div class="category-grid">
+                    <div class="category-card" onclick="showFeature('periyodik')">
+                        <div class="cat-icon">
+                            <span class="cat-element">Au</span>
+                        </div>
+                        <div class="cat-info">
+                            <h3>Periyodik Tablo</h3>
+                            <p>Elementleri keşfet</p>
+                        </div>
+                    </div>
+                    <div class="category-card" onclick="showFeature('organic')">
+                        <div class="cat-icon cat-orange">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        </div>
+                        <div class="cat-info">
+                            <h3>Organik Kimya</h3>
+                            <p>Tepkimeler, mekanizmalar</p>
+                        </div>
+                    </div>
+                    <div class="category-card" onclick="showFeature('element')">
+                        <div class="cat-icon cat-cyan">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+                        </div>
+                        <div class="cat-info">
+                            <h3>İnorganik Kimya</h3>
+                            <p>Bileşikler ve türleri</p>
+                        </div>
+                    </div>
+                    <div class="category-card" onclick="showFeature('termodinamik')">
+                        <div class="cat-icon cat-red">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+                        </div>
+                        <div class="cat-info">
+                            <h3>Fizikokimya</h3>
+                            <p>Termodinamik, elektrokimya</p>
+                        </div>
+                    </div>
+                    <div class="category-card" onclick="showFeature('lewis')">
+                        <div class="cat-icon cat-yellow">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M12 22V12"/></svg>
+                        </div>
+                        <div class="cat-info">
+                            <h3>Kimya Sözlüğü</h3>
+                            <p>Terimler ve tanımlar</p>
+                        </div>
+                    </div>
+                    <div class="category-card" onclick="showFeature('not')">
+                        <div class="cat-icon cat-pink">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        </div>
+                        <div class="cat-info">
+                            <h3>Ders Notları</h3>
+                            <p>Özetler ve formüller</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- GUNUN KIMYASALI -->
+            <section class="section">
+                <div class="daily-card">
+                    <div class="daily-info">
+                        <span class="daily-label">Günün Kimyasalı</span>
+                        <div class="formula">H<sub>2</sub>O</div>
+                        <p>Dihidrojen monoksit</p>
+                    </div>
+                    <div class="daily-visual">
+                        <div class="molecule-3d">
+                            <div class="atom atom-o"></div>
+                            <div class="atom atom-h atom-h1"></div>
+                            <div class="atom atom-h atom-h2"></div>
+                            <div class="bond bond1"></div>
+                            <div class="bond bond2"></div>
+                        </div>
+                    </div>
+                    <svg class="daily-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </section>
+        </div>
+
+        <!-- TAB: FAVORILER -->
+        <div class="tab-page" id="tab-favorites">
+            <div class="app-header compact">
+                <h2 class="page-title">Favoriler</h2>
+            </div>
+            <div class="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <p>Henüz favori eklenmemiş</p>
+                <span>Araçları kullanarak favorilerinizi ekleyin</span>
+            </div>
+        </div>
+
+        <!-- TAB: ARAÇLAR -->
+        <div class="tab-page" id="tab-tools">
+            <div class="app-header compact">
+                <h2 class="page-title">Araçlar</h2>
+                <div class="search-bar compact">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" placeholder="Araç ara...">
+                </div>
+            </div>
+            <div class="tools-list">
+                <div class="tool-item" onclick="showFeature('molkutlesi')">
+                    <div class="tool-icon ti-blue"><span>M</span></div>
+                    <div class="tool-info">
+                        <h3>Molarite Hesaplama</h3>
+                        <p>M, m, n hesaplamaları</p>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+                <div class="tool-item" onclick="showFeature('ph')">
+                    <div class="tool-icon ti-green"><span>PH</span></div>
+                    <div class="tool-info">
+                        <h3>pH Hesaplama</h3>
+                        <p>Asit, baz ve tampon çözeltiler</p>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+                <div class="tool-item" onclick="showFeature('seyreltme')">
+                    <div class="tool-icon ti-purple"><span>C₁V₁</span></div>
+                    <div class="tool-info">
+                        <h3>Seyreltme Hesaplama</h3>
+                        <p>C₁V₁ = C₂V₂</p>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+                <div class="tool-item" onclick="showFeature('gaz')">
+                    <div class="tool-icon ti-cyan"><span>PV</span></div>
+                    <div class="tool-info">
+                        <h3>Gaz Yasaları</h3>
+                        <p>PV = nRT ve türevleri</p>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+                <div class="tool-item" onclick="showFeature('titrasyon')">
+                    <div class="tool-icon ti-pink"><span>T</span></div>
+                    <div class="tool-info">
+                        <h3>Titrasyon Hesaplama</h3>
+                        <p>Asit-baz titrasyonları</p>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+                <div class="tool-item" onclick="showFeature('redox')">
+                    <div class="tool-icon ti-red"><span>R</span></div>
+                    <div class="tool-info">
+                        <h3>Redoks Hesaplama</h3>
+                        <p>Denge ve elektron aktarımı</p>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+                <div class="tool-item" onclick="showFeature('ppm')">
+                    <div class="tool-icon ti-yellow"><span>ppm</span></div>
+                    <div class="tool-info">
+                        <h3>ppm / ppb Hesaplama</h3>
+                        <p>Derişim birimleri dönüşümleri</p>
+                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: PROFIL -->
+        <div class="tab-page" id="tab-profile">
+            <div class="app-header compact">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div class="profile-greeting">
+                        <h2>Merhaba, Mustafa</h2>
+                        <p>Bugün ne öğrenmek istersin?</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ISTATISTIKLER -->
+            <section class="section">
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <span class="stat-number">24</span>
+                        <span class="stat-label">Hesaplama</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">8</span>
+                        <span class="stat-label">Simülasyon</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">12</span>
+                        <span class="stat-label">Konu Çalıştı</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number accent">5</span>
+                        <span class="stat-label">Favori</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DEVAM ETTIKLERIN -->
+            <section class="section">
+                <div class="section-row">
+                    <span class="section-label">Devam Ettiklerin</span>
+                    <a href="#" class="section-link">Tümünü Gör</a>
+                </div>
+                <div class="continue-list">
+                    <div class="continue-item" onclick="showFeature('ftir')">
+                        <div class="continue-icon ci-teal">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        </div>
+                        <div class="continue-info">
+                            <h4>FT-IR Simülasyonu</h4>
+                            <p>Son düzenleme: Bugün</p>
+                        </div>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                    <div class="continue-item" onclick="showFeature('organic')">
+                        <div class="continue-icon ci-orange">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
+                        </div>
+                        <div class="continue-info">
+                            <h4>Organik Kimya - Alkanlar</h4>
+                            <p>İlerleme: %64</p>
+                        </div>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                    <div class="continue-item" onclick="showFeature('elektrokimya')">
+                        <div class="continue-icon ci-purple">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        </div>
+                        <div class="continue-info">
+                            <h4>Elektrokimya</h4>
+                            <p>İlerleme: %28</p>
+                        </div>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAVORI ARACLAR -->
+            <section class="section">
+                <div class="section-row">
+                    <span class="section-label">Favori Araçların</span>
+                    <a href="#" class="section-link">Düzenle</a>
+                </div>
+                <div class="fav-tools-grid">
+                    <div class="fav-tool" onclick="showFeature('ph')">
+                        <div class="fav-icon fi-green">
+                            <span>pH</span>
+                            <small>01m</small>
+                        </div>
+                        <span>Ayrı Hesaplama</span>
+                    </div>
+                    <div class="fav-tool" onclick="showFeature('molarite')">
+                        <div class="fav-icon fi-blue">
+                            <span>M</span>
+                        </div>
+                        <span>Molarite Hesaplama</span>
+                    </div>
+                    <div class="fav-tool" onclick="showFeature('kalibrasyon')">
+                        <div class="fav-icon fi-teal">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        </div>
+                        <span>Kalibrasyon Eğrisi</span>
+                    </div>
+                    <div class="fav-tool" onclick="showFeature('periyodik')">
+                        <div class="fav-icon fi-purple">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        </div>
+                        <span>Periyodik Tablo</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- FEATURE OVERLAY -->
+        <div class="feature-overlay" id="feature-overlay">
+            <div class="feature-header">
+                <button class="back-btn" onclick="closeFeature()">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <h2 class="feature-title" id="feature-title">Özellik</h2>
+                <button class="icon-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                </button>
+            </div>
+            <div class="feature-content" id="feature-content">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+
+        <!-- BOTTOM NAV -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="switchTab('tab-home')" data-tab="tab-home">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Ana Sayfa</span>
             </button>
-        </div>
-    </nav>
-
-    <section class="hero">
-        <div class="hero-glow"></div>
-        <div class="container hero-content">
-            <div class="hero-badge">
-                <span class="badge-dot"></span>
-                v2.0 Yayınlandı — AAS Simülatörü Eklendi
-            </div>
-            <h1>Kimya öğrenmek<br>artık <span class="gradient-text">çok daha kolay.</span></h1>
-            <p class="hero-desc">AAS simülasyonundan FTIR'a, alev testlerinden titrasyona kadar tüm laboratuvar araçlarını cebinde taşı.</p>
-            <div class="hero-buttons">
-                <a href="#indir" class="btn btn-primary">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    APK İndir — Ücretsiz
-                </a>
-                <a href="#nasil-calisir" class="btn btn-ghost">Nasıl Çalışır?</a>
-            </div>
-            <div class="hero-visual">
-                <div class="phone-frame">
-                    <img src="assets/logo.png" alt="Kimya Cep Uygulaması">
+            <button class="nav-item" onclick="switchTab('tab-favorites')" data-tab="tab-favorites">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <span>Favoriler</span>
+            </button>
+            <button class="nav-item nav-center" onclick="switchTab('tab-tools')" data-tab="tab-tools">
+                <div class="nav-center-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3v12l-3 3h12l-3-3V3"/><path d="M8 3h8"/></svg>
                 </div>
-                <div class="floating-card card-1">
-                    <span class="fc-icon">🔬</span>
-                    <span class="fc-text">AAS Simülasyonu</span>
-                </div>
-                <div class="floating-card card-2">
-                    <span class="fc-icon">📊</span>
-                    <span class="fc-text">FTIR Analizi</span>
-                </div>
-                <div class="floating-card card-3">
-                    <span class="fc-icon">🔥</span>
-                    <span class="fc-text">Alev Testi</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="trust-bar">
-        <div class="container">
-            <div class="trust-items">
-                <div class="trust-item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    <span>Reklamsız</span>
-                </div>
-                <div class="trust-item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="16 12 12 8 8 12"/><line x1="12" y1="16" x2="12" y2="8"/></svg>
-                    <span>Ücretsiz</span>
-                </div>
-                <div class="trust-item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    <span>Açık Kaynak</span>
-                </div>
-                <div class="trust-item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    <span>Güvenli</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="ozellikler" class="features">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-badge">Özellikler</span>
-                <h2>Her şey elinizin altında</h2>
-                <p>Kimya derslerinizde ihtiyaç duyacağınız tüm araçlar tek bir uygulamada.</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card card-highlight">
-                    <div class="feature-icon-wrap icon-green">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v12l-3 3h12l-3-3V3"/><path d="M8 3h8"/></svg>
-                    </div>
-                    <h3>AAS Simülasyonu</h3>
-                    <p>Atomik Absorbsiyon Spektroskopisi ile wavelength ayarı, absorbans ölçümü ve kalibrasyon eğrisi oluşturun.</p>
-                    <span class="feature-tag tag-new">En Popüler</span>
-                </div>
-                <div class="feature-card card-highlight">
-                    <div class="feature-icon-wrap icon-cyan">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                    </div>
-                    <h3>FTIR Simülatörü</h3>
-                    <p>Fourier Transform Infrared spektrum analizi yaparak bilinmeyen bileşikleri tanımlayın.</p>
-                    <span class="feature-tag tag-new">Yeni</span>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon-wrap icon-orange">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c0 4-4 6-4 10a4 4 0 0 0 8 0c0-4-4-6-4-10z"/></svg>
-                    </div>
-                    <h3>Alev Testi</h3>
-                    <p>Elementlerin alev testi renklerini interaktif olarak keşfedin.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon-wrap icon-purple">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
-                    </div>
-                    <h3>Titürasyon Hesaplama</h3>
-                    <p>Kolayca titürasyon hesaplamaları yapın ve sonuçları anında görün.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon-wrap icon-pink">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/></svg>
-                    </div>
-                    <h3>Molekül Geometri</h3>
-                    <p>VSEPR teorisi ile 3D molekül geometrileri görüntüleyin.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon-wrap icon-blue">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                    </div>
-                    <h3>Kimyasal Denge</h3>
-                    <p>Le Chatelier ilkesi ve denge sabitleri hesaplamaları.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon-wrap icon-yellow">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    </div>
-                    <h3>Elektrokimya</h3>
-                    <p>GALVANİK ve elektroliz hücreleri hesaplamaları.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon-wrap icon-teal">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                    </div>
-                    <h3>Faz Diyagramları</h3>
-                    <p>Basınç-sıcaklık faz diyagramlarını analiz edin.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon-wrap icon-green">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m-7.07-3.93l4.24-4.24m5.66-5.66l4.24-4.24M1 12h6m6 0h6m-3.93 7.07l-4.24-4.24m-5.66-5.66L5.93 4.93"/></svg>
-                    </div>
-                    <h3>Lewis Yapıları</h3>
-                    <p>Dot (nokta) yapısı ile Lewis diyagramları çizin.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="nasil-calisir" class="how-it-works">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-badge">Nasıl Çalışır</span>
-                <h2>3 adımda başlayın</h2>
-                <p>Hiçbir kayıt gerekmez, hemen kullanmaya başlayın.</p>
-            </div>
-            <div class="steps-grid">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <h3>İndirin</h3>
-                    <p>APK dosyasını telefonunuza indirin ve bilinmeyen kaynaklardan yükleme iznini açın.</p>
-                </div>
-                <div class="step-connector">
-                    <svg width="40" height="20" viewBox="0 0 40 20"><path d="M0 10h32M28 4l8 6-8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <h3>Açın</h3>
-                    <p>Uygulamayı açın ve ana menüden istediğiniz aracı seçin.</p>
-                </div>
-                <div class="step-connector">
-                    <svg width="40" height="20" viewBox="0 0 40 20"><path d="M0 10h32M28 4l8 6-8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <h3>Keşfedin</h3>
-                    <p>Simülasyonları çalıştırın, hesaplamalar yapın ve kimyayı eğlenerek öğrenin.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="app-preview">
-        <div class="container">
-            <div class="preview-box">
-                <img src="assets/logo.png" alt="Kimya Cep" class="preview-img">
-                <div class="preview-overlay">
-                    <h3>Kimya Cep</h3>
-                    <p>8 güçlü araç, tek uygulama</p>
-                    <a href="#indir" class="btn btn-primary">Hemen İndir</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="guncelleme" class="updates">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-badge">Güncellemeler</span>
-                <h2>Son yenilikler</h2>
-                <p>Uygulamamız sürekli geliştiriliyor.</p>
-            </div>
-            <div class="timeline">
-                <div class="timeline-item">
-                    <div class="timeline-dot dot-green"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-header">
-                            <span class="timeline-version">v2.0</span>
-                            <span class="timeline-date">24 Temmuz 2026</span>
-                        </div>
-                        <h3>AAS Simülatörü Eklendi</h3>
-                        <p>Atomik Absorbsiyon Spektroskopisi tam simülasyonu uygulamaya eklendi. Wavelength ayarı, absorbans ölçümü ve kalibrasyon eğrisi artık cebinizde.</p>
-                        <div class="update-changes">
-                            <span class="change-tag tag-add">+ AAS Simülasyonu</span>
-                            <span class="change-tag tag-add">+ Kalibrasyon eğrisi</span>
-                            <span class="change-tag tag-fix">⚡ Performans iyileştirmeleri</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-dot dot-cyan"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-header">
-                            <span class="timeline-version">v1.5</span>
-                            <span class="timeline-date">20 Temmuz 2026</span>
-                        </div>
-                        <h3>FTIR & Alev Testi</h3>
-                        <p>FTIR spektrum simülatörü ve interaktif alev testi özellikleri eklendi. Element tanımlama artık çok daha kolay.</p>
-                        <div class="update-changes">
-                            <span class="change-tag tag-add">+ FTIR Simülatörü</span>
-                            <span class="change-tag tag-add">+ Alev Testi</span>
-                            <span class="change-tag tag-fix">⚡ Hata düzeltmeleri</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-dot dot-purple"></div>
-                    <div class="timeline-content">
-                        <div class="timeline-header">
-                            <span class="timeline-version">v1.0</span>
-                            <span class="timeline-date">15 Temmuz 2026</span>
-                        </div>
-                        <h3>İlk Yayın</h3>
-                        <p>Kimya Cep uygulaması ilk kez yayınlandı. Temel hesaplama araçları, Lewis yapıları ve molekül geometri özellikleri mevcut.</p>
-                        <div class="update-changes">
-                            <span class="change-tag tag-add">+ Titürasyon hesaplama</span>
-                            <span class="change-tag tag-add">+ Lewis Yapıları</span>
-                            <span class="change-tag tag-add">+ Molekül Geometri</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="sss" class="faq">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-badge">SSS</span>
-                <h2>Sıkça Sorulan Sorular</h2>
-            </div>
-            <div class="faq-list">
-                <details class="faq-item">
-                    <summary>Kimya Cep ücretsiz mi?</summary>
-                    <p>Evet, Kimya Cep tamamen ücretsizdir. Reklam içermez ve hiçbir özellik kilitli değildir.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>APK nasıl yüklenir?</summary>
-                    <p>Telefonunuzun Ayarlar > Güvenlik menüsünden "Bilinmeyen kaynaklardan uygulama yükleme" seçeneğini aktif edin. Ardından indirdiğiniz APK dosyasına tıklayarak kurulumu başlatın.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Hangi Android sürümleri destekleniyor?</summary>
-                    <p>Android 7.0 (Nougat) ve üzeri tüm sürümler desteklenmektedir.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>İnternet bağlantısı gerekiyor mu?</summary>
-                    <p>Hayır, Kimya Cep tamamen çevrimdışı çalışır. İnternet bağlantısı gerekmez.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Yeni özellikler eklenecek mi?</summary>
-                    <p>Evet, uygulamamız sürekli geliştirilmektedir. Önerileriniz için uygulama içindeki Geri Bildirim bölümünü kullanın.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Hata bulursam ne yapmalıyım?</summary>
-                    <p>Uygulama içindeki Geri Bildirim bölümünden hata detaylarını paylaşın, en kısa sürede düzeltelim.</p>
-                </details>
-            </div>
-        </div>
-    </section>
-
-    <section id="indir" class="download">
-        <div class="container">
-            <div class="download-box">
-                <div class="download-content">
-                    <h2>Kimya Cep'i<br><span class="gradient-text">hemen indirin.</span></h2>
-                    <p>Ücretsiz, reklamsız ve tamamen kimya öğrencileri için tasarlandı.</p>
-                    <div class="download-meta">
-                        <div class="meta-item">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            v2.0 — ~15 MB
-                        </div>
-                        <div class="meta-item">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            Güvenli APK
-                        </div>
-                        <div class="meta-item">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                            Android 7.0+
-                        </div>
-                    </div>
-                    <a href="app/kimya-cep.apk" class="btn btn-primary btn-large" download>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        APK İndir
-                    </a>
-                    <p class="download-hint">APK yükleme: Ayarlar > Güvenlik > Bilinmeyen kaynaklara izin ver</p>
-                </div>
-                <div class="download-visual">
-                    <img src="assets/logo.png" alt="Kimya Cep" class="download-logo">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="iletisim" class="contact">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-badge">İletişim</span>
-                <h2>Bize ulaşın</h2>
-                <p>Sorularınız, önerileriniz veya geri bildirimleriniz için yazın.</p>
-            </div>
-            <div class="contact-grid">
-                <div class="contact-card">
-                    <div class="contact-icon icon-green">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                    </div>
-                    <h3>E-posta</h3>
-                    <p><a href="mailto:Mustafahayta88@gmail.com">Mustafahayta88@gmail.com</a></p>
-                </div>
-                <div class="contact-card">
-                    <div class="contact-icon icon-cyan">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    </div>
-                    <h3>Geliştirici</h3>
-                    <p>Mustafa Hayta</p>
-                </div>
-                <div class="contact-card">
-                    <div class="contact-icon icon-purple">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                    </div>
-                    <h3>Geri Bildirim</h3>
-                    <p>Uygulama içinden bildirin</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer class="footer">
-        <div class="container footer-content">
-            <div class="footer-left">
-                <img src="assets/logo.png" alt="Kimya Cep" class="footer-logo-img">
-                <span class="footer-brand">Kimya<span class="logo-accent">Cep</span></span>
-            </div>
-            <p class="footer-copy">&copy; 2026 Kimya Cep. Tüm hakları saklıdır.</p>
-            <div class="footer-right">
-                <a href="#ozellikler">Özellikler</a>
-                <a href="#indir">İndir</a>
-                <a href="#iletisim">İletişim</a>
-            </div>
-        </div>
-    </footer>
+            </button>
+            <button class="nav-item" onclick="switchTab('tab-tools')" data-tab="tab-tools-grid">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                <span>Araçlar</span>
+            </button>
+            <button class="nav-item" onclick="switchTab('tab-profile')" data-tab="tab-profile">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Profil</span>
+            </button>
+        </nav>
+    </div>
 
     <script src="script.js"></script>
 </body>
