@@ -537,8 +537,8 @@ class FTIRSimulatorView @JvmOverloads constructor(
         if (showInterferogram) {
             drawInterferogram(canvas, w, h)
         } else {
-            drawSchematic(canvas, w, h * 0.08f)
-            drawSpectrum(canvas, 0f, h * 0.09f, w, h * 0.91f)
+            drawSchematic(canvas, w, h * 0.06f)
+            drawSpectrum(canvas, 0f, h * 0.07f, w, h * 0.93f)
         }
 
         canvas.restore()

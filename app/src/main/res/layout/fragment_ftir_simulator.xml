@@ -4,15 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@android:color/black"
-    android:padding="16dp">
+    android:background="@android:color/black">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="12dp">
+        android:padding="12dp"
+        android:paddingBottom="4dp">
 
         <TextView
             android:layout_width="0dp"
@@ -37,57 +37,63 @@
             android:minHeight="0dp" />
     </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Numune Türü"
-        android:textColor="#8B949E"
-        android:textSize="12sp"
-        android:layout_marginBottom="4dp" />
-
-    <Spinner
-        android:id="@+id/spinner_sample_type"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="#161B22"
-        android:layout_marginBottom="8dp" />
-
     <com.kimya.uygulama.views.FTIRSimulatorView
         android:id="@+id/ftir_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:layout_marginHorizontal="8dp" />
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/readings_card"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:cardCornerRadius="12dp"
-        app:cardBackgroundColor="#161B22"
-        app:cardElevation="0dp"
-        app:strokeColor="#30363D"
-        app:strokeWidth="1dp">
+        android:maxHeight="280dp"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:paddingHorizontal="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:layout_marginBottom="4dp">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Seçili Gruplar:"
+                    android:text="Numune Türü"
+                    android:textColor="#8B949E"
+                    android:textSize="11sp" />
+
+                <Spinner
+                    android:id="@+id/spinner_sample_type"
+                    android:layout_width="0dp"
+                    android:layout_height="34dp"
+                    android:layout_weight="2"
+                    android:background="#161B22" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="2dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Grup:"
                     android:textColor="#E6EDF3"
-                    android:textSize="12sp" />
+                    android:textSize="11sp" />
 
                 <TextView
                     android:id="@+id/tv_selected_groups"
@@ -96,22 +102,22 @@
                     android:layout_weight="2"
                     android:text="Yok"
                     android:textColor="#00F0FF"
-                    android:textSize="12sp" />
+                    android:textSize="11sp" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="4dp">
+                android:layout_marginBottom="2dp">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Çözünürlük:"
+                    android:text="Çöz:"
                     android:textColor="#E6EDF3"
-                    android:textSize="12sp" />
+                    android:textSize="11sp" />
 
                 <TextView
                     android:id="@+id/tv_resolution"
@@ -120,14 +126,7 @@
                     android:layout_weight="2"
                     android:text="4 cm⁻¹"
                     android:textColor="#39FF14"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="4dp">
+                    android:textSize="11sp" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -135,16 +134,17 @@
                     android:layout_weight="1"
                     android:text="Tarama:"
                     android:textColor="#E6EDF3"
-                    android:textSize="12sp" />
+                    android:textSize="11sp"
+                    android:layout_marginStart="8dp" />
 
                 <TextView
                     android:id="@+id/tv_scan_count"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="2"
+                    android:layout_weight="1"
                     android:text="16"
                     android:textColor="#39FF14"
-                    android:textSize="12sp" />
+                    android:textSize="11sp" />
             </LinearLayout>
 
             <TextView
@@ -152,150 +152,115 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#FFA500"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:visibility="gone"
-                android:layout_marginBottom="4dp" />
+                android:layout_marginBottom="2dp" />
 
             <TextView
                 android:id="@+id/tv_group_desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#8B949E"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:visibility="gone"
-                android:layout_marginBottom="8dp" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/controls_card"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:cardCornerRadius="12dp"
-        app:cardBackgroundColor="#161B22"
-        app:cardElevation="0dp"
-        app:strokeColor="#30363D"
-        app:strokeWidth="1dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Çözünürlük (cm⁻¹)"
-                android:textColor="#8B949E"
-                android:textSize="11sp"
-                android:layout_marginBottom="6dp" />
+                android:layout_marginBottom="4dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="10dp">
+                android:layout_marginBottom="4dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_res_1"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="30dp"
                     android:layout_weight="1"
                     android:text="1"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="#00F0FF"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginEnd="3dp"
                     style="@style/Widget.Material3.Button.OutlinedButton" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_res_2"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="30dp"
                     android:layout_weight="1"
                     android:text="2"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="#00F0FF"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginEnd="3dp"
                     style="@style/Widget.Material3.Button.OutlinedButton" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_res_4"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="30dp"
                     android:layout_weight="1"
                     android:text="4"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="#00F0FF"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginEnd="3dp"
                     style="@style/Widget.Material3.Button.OutlinedButton" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_res_8"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="30dp"
                     android:layout_weight="1"
                     android:text="8"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="#00F0FF"
                     style="@style/Widget.Material3.Button.OutlinedButton" />
             </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tarama Sayısı"
-                android:textColor="#8B949E"
-                android:textSize="11sp"
-                android:layout_marginBottom="6dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="10dp">
+                android:layout_marginBottom="6dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_scan_1"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="30dp"
                     android:layout_weight="1"
                     android:text="1"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="#00F0FF"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginEnd="3dp"
                     style="@style/Widget.Material3.Button.OutlinedButton" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_scan_4"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="30dp"
                     android:layout_weight="1"
                     android:text="4"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="#00F0FF"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginEnd="3dp"
                     style="@style/Widget.Material3.Button.OutlinedButton" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_scan_16"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="30dp"
                     android:layout_weight="1"
                     android:text="16"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="#00F0FF"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginEnd="3dp"
                     style="@style/Widget.Material3.Button.OutlinedButton" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_scan_64"
                     android:layout_width="0dp"
-                    android:layout_height="36dp"
+                    android:layout_height="30dp"
                     android:layout_weight="1"
                     android:text="64"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="#00F0FF"
                     style="@style/Widget.Material3.Button.OutlinedButton" />
             </LinearLayout>
@@ -308,55 +273,60 @@
                 <Button
                     android:id="@+id/btn_scan"
                     android:layout_width="0dp"
-                    android:layout_height="40dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:text="Tarama Başlat"
                     android:textColor="#000000"
                     android:backgroundTint="#00F0FF"
-                    android:layout_marginEnd="6dp" />
+                    android:textSize="12sp"
+                    android:layout_marginEnd="4dp" />
 
                 <Button
                     android:id="@+id/btn_cookbook"
                     android:layout_width="0dp"
-                    android:layout_height="40dp"
+                    android:layout_height="36dp"
                     android:layout_weight="1"
                     android:text="Kitap"
                     android:textColor="#000000"
-                    android:backgroundTint="#39FF14" />
+                    android:backgroundTint="#39FF14"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/btn_toggle_interferogram"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:text="İnterferogram"
+                    android:textColor="#000000"
+                    android:backgroundTint="#FF6B6B"
+                    android:textSize="12sp"
+                    android:layout_marginStart="4dp" />
             </LinearLayout>
 
-            <Button
-                android:id="@+id/btn_toggle_interferogram"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fonksiyonel Gruplar"
+                android:textColor="#00F0FF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="4dp" />
+
+            <HorizontalScrollView
                 android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:text="İnterferogram Göster"
-                android:textColor="#000000"
-                android:backgroundTint="#FF6B6B"
-                android:layout_marginTop="6dp" />
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginBottom="4dp">
+
+                <LinearLayout
+                    android:id="@+id/group_chips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Fonksiyonel Gruplar"
-        android:textColor="#00F0FF"
-        android:textSize="13sp"
-        android:textStyle="bold"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="6dp" />
-
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:layout_marginBottom="4dp">
-
-        <LinearLayout
-            android:id="@+id/group_chips"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" />
-    </HorizontalScrollView>
+    </ScrollView>
 
 </LinearLayout>

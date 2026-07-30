@@ -373,12 +373,6 @@ class FTIRSimulatorFragment : Fragment() {
     }
 
     private fun applyThemeToViews(v: View) {
-        listOf(R.id.readings_card, R.id.controls_card).forEach { id ->
-            v.findViewById<MaterialCardView>(id)?.let {
-                it.setCardBackgroundColor(themeSurface)
-                it.setStrokeColor(themeLine)
-            }
-        }
         v.findViewById<Button>(R.id.btn_ftir_help)?.backgroundTintList =
             android.content.res.ColorStateList.valueOf(themePrimary)
         btnScan.backgroundTintList = android.content.res.ColorStateList.valueOf(themePrimary)
