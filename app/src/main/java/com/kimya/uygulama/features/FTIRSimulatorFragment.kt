@@ -179,15 +179,16 @@ class FTIRSimulatorFragment : Fragment() {
         groupChipsContainer.removeAllViews()
         val dp4 = (4 * resources.displayMetrics.density).toInt()
         val dp8 = (8 * resources.displayMetrics.density).toInt()
-        val dp14 = (14 * resources.displayMetrics.density).toInt()
+        val dp12 = (12 * resources.displayMetrics.density).toInt()
+        val dp16 = (16 * resources.displayMetrics.density).toInt()
 
         for (group in FTIRSimulatorView.FUNCTIONAL_GROUPS) {
             val chip = MaterialCardView(requireContext()).apply {
-                radius = 22f * resources.displayMetrics.density
+                radius = 26f * resources.displayMetrics.density
                 cardElevation = 3f * resources.displayMetrics.density
                 val bg = GradientDrawable().apply {
                     setColor(themeSurface)
-                    cornerRadius = 22f * resources.displayMetrics.density
+                    cornerRadius = 26f * resources.displayMetrics.density
                     setStroke(dp4, group.color)
                 }
                 background = bg
@@ -199,11 +200,11 @@ class FTIRSimulatorFragment : Fragment() {
             val inner = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(dp14, dp8, dp14, dp8)
+                setPadding(dp16, dp12, dp16, dp12)
             }
 
             val dot = View(requireContext()).apply {
-                val size = (12 * resources.displayMetrics.density).toInt()
+                val size = (16 * resources.displayMetrics.density).toInt()
                 layoutParams = LinearLayout.LayoutParams(size, size).apply { marginEnd = dp8 }
                 background = GradientDrawable().apply {
                     shape = GradientDrawable.OVAL
@@ -218,14 +219,14 @@ class FTIRSimulatorFragment : Fragment() {
             val name = TextView(requireContext()).apply {
                 text = group.nameTr
                 setTextColor(Color.WHITE)
-                textSize = 12f
+                textSize = 13f
                 setSingleLine(true)
             }
 
             val wn = TextView(requireContext()).apply {
                 text = "${group.peakCenter.toInt()} cm⁻¹"
                 setTextColor(group.color)
-                textSize = 10f
+                textSize = 11f
                 paint.isFakeBoldText = true
                 setSingleLine(true)
             }
