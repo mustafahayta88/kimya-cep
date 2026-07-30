@@ -361,6 +361,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
 
     // Cursor
     private var cursorX = 0f; private var cursorY = 0f; private var showCursor = false
+    private var tapTime = 0L; private var lastTapTime = 0L
 
     private val handler = Handler(Looper.getMainLooper())
     private val ticker = object : Runnable {
@@ -374,14 +375,38 @@ class FTIRSimulatorView @JvmOverloads constructor(
 
     init {
         sDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(d: ScaleGestureDetector): Boolean { zoomScale *= d.scaleFactor; zoomScale = zoomScale.coerceIn(0.5f, 4f); return true }
+            override fun onScaleBegin(d: ScaleGestureDetector): Boolean { return true }
+            override fun onScale(d: ScaleGestureDetector): Boolean {
+                val factor = d.scaleFactor
+                val pivotX = d.focusX; val pivotY = d.focusY
+                // Zoom around the pinch point
+                val newScale = (zoomScale * factor).coerceIn(0.5f, 4f)
+                val scaleChange = newScale / zoomScale
+                // Adjust pan so the pivot point stays fixed
+                panX = pivotX - (pivotX - panX) * scaleChange
+                panY = pivotY - (pivotY - panY) * scaleChange
+                zoomScale = newScale
+                invalidate()
+                return true
+            }
         })
         setOnTouchListener { _, e ->
             sDetector.onTouchEvent(e)
             if (e.pointerCount == 1) when (e.action) {
-                0 -> { lastTx = e.x; lastTy = e.y; touchMode = 0 }
+                0 -> { lastTx = e.x; lastTy = e.y; touchMode = 0; tapTime = System.currentTimeMillis() }
                 2 -> { val dx = e.x - lastTx; val dy = e.y - lastTy; if (abs(dx) > 5 || abs(dy) > 5) touchMode = 1; if (touchMode == 1) { panX += dx; panY += dy; lastTx = e.x; lastTy = e.y } }
-                1, 3 -> { touchMode = 0; showCursor = false }
+                1, 3 -> {
+                    if (touchMode == 0 && System.currentTimeMillis() - tapTime < 300) {
+                        // Double tap detection
+                        val now = System.currentTimeMillis()
+                        if (now - lastTapTime < 300) {
+                            // Double tap: reset zoom and pan
+                            zoomScale = 1f; panX = 0f; panY = 0f; invalidate()
+                        }
+                        lastTapTime = now
+                    }
+                    touchMode = 0; showCursor = false
+                }
             }
             if (e.action == MotionEvent.ACTION_MOVE && touchMode == 0) {
                 cursorX = e.x; cursorY = e.y; showCursor = true
