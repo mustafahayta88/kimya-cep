@@ -24,5 +24,10 @@
             android:windowSoftInputMode="adjustResize"
             android:windowLayoutInDisplayCutoutMode="never"
             android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize" />
+        <activity
+            android:name=".features.AASSimulatorActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.KimyaUygulamasi" />
     </application>
 </manifest>

@@ -5,10 +5,7 @@ import android.graphics.*
 import android.os.Bundle
 import android.view.*
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.kimya.uygulama.R
 import kotlin.math.*
 
 data class Atom3D(val symbol: String, var x: Float, var y: Float, var z: Float, val color: Int, val radius: Float)
@@ -20,14 +17,28 @@ class Molecule3DView(context: Context) : View(context) {
     private var autoRotate = true
     private var zoomScale = 1f; private var panX = 0f; private var panY = 0f
     private var lastTx = 0f; private var lastTy = 0f; private var tMode = 0
+    private var showInfo = false
     private val sDetector: ScaleGestureDetector
-    private val bgP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF0D1117.toInt(); style = Paint.Style.FILL }
-    private val bondP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF8B949E.toInt(); strokeWidth = 3f; style = Paint.Style.STROKE; isAntiAlias = true }
-    private val bond2P = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF00F0FF.toInt(); strokeWidth = 3f; style = Paint.Style.STROKE; isAntiAlias = true }
-    private val bond3P = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFF0080.toInt(); strokeWidth = 3f; style = Paint.Style.STROKE; isAntiAlias = true }
-    private val elP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt(); textSize = 0f; textAlign = Paint.Align.CENTER; isFakeBoldText = true }
-    private val labelP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFAAAAAA.toInt(); textSize = 0f; textAlign = Paint.Align.CENTER }
-    private val glowP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x33FFFFFF.toInt(); style = Paint.Style.FILL }
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+
+    data class MolInfo(val name: String, val formula: String, val geometry: String, val angle: String, val polar: String, val desc: String)
+
+    val molInfos = listOf(
+        MolInfo("Su", "H₂O", "Bükülü", "104.5°", "Polar", "Yağları çözer, tüm canlılar için temel molekül"),
+        MolInfo("Karbondioksit", "CO₂", "Doğrusal", "180°", "Apolar", "Sera gazı, fotosentezinham maddesi"),
+        MolInfo("Metan", "CH₄", "Dört yüzlü", "109.5°", "Apolar", "Doğal gazın ana bileşeni"),
+        MolInfo("Amonyak", "NH₃", "Üçgen piramit", "107.3°", "Polar", "Gübre üretiminde kullanılır"),
+        MolInfo("Etan", "C₂H₆", "Dört yüzlü (C)", "109.5°", "Apolar", "En basit iki karbonlu alkan"),
+        MolInfo("Eten", "C₂H₄", "Düzensel", "120°", "Apolar", "Polietilen üretimi için kullanılır"),
+        MolInfo("Benzen", "C₆H₆", "Halkalı düzlemsel", "120°", "Apolar", "Aromatik bileşiklerin temel yapıtaşı"),
+        MolInfo("Oktan", "C₈H₁₈", "Uzun zincir", "109.5°", "Apolar", "Benzin ana bileşeni, oktan sayısı"),
+        MolInfo("Etanol", "C₂H₅OH", "Karışık", "—", "Polar", "İçki ve dezenfektan yapımında kullanılır"),
+        MolInfo("Aseton", "CₙH₆O", "Düzensel", "120°", "Polar", "Oje çözücü, endüstriyel çözücü"),
+        MolInfo("Asetik Asit", "CH₃COOH", "Karışık", "—", "Polar", "Sirkanın ana bileşeni, %5 asetik asit"),
+        MolInfo("Metanol", "CH₃OH", "Dört yüzlü (C)", "109.5°", "Polar", "Endüstriyel çözücü, toksik"),
+        MolInfo("Asetilen", "C₂H₂", "Doğrusal", "180°", "Apolar", "Kaynak ve kesme gazı"),
+        MolInfo("Toluen", "C₇H₈", "Halkalı", "120°", "Apolar", "Boya ve yapıştırıcı çözücü")
+    )
 
     var onMoleculeChange: ((Int) -> Unit)? = null
 
@@ -129,41 +140,43 @@ class Molecule3DView(context: Context) : View(context) {
             Bond3D(0, 6), Bond3D(1, 7), Bond3D(2, 8), Bond3D(3, 9), Bond3D(4, 10), Bond3D(5, 11),
             Bond3D(6, 12), Bond3D(6, 13), Bond3D(6, 14))
     )
-    private val molNames = listOf(
-        "Su (H2O)", "Karbondioksit (CO2)", "Metan (CH4)", "Amonyak (NH3)",
-        "Etan (C2H6)", "Eten (C2H4)", "Benzen (C6H6)", "Oktan (C8H18)",
-        "Etanol (C2H5OH)", "Aseton (C3H6O)", "Asetik Asit (CH3COOH)",
-        "Metanol (CH3OH)", "Asetilen (C2H2)", "Toluen (C7H8)"
-    )
 
-    init { isClickable = true; isFocusable = true
+    init {
+        isClickable = true; isFocusable = true
         sDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(d: ScaleGestureDetector): Boolean { zoomScale *= d.scaleFactor; zoomScale = zoomScale.coerceIn(0.3f, 4f); invalidate(); return true }
         })
+        setOnTouchListener { _, e ->
+            sDetector.onTouchEvent(e)
+            if (e.pointerCount == 1) when (e.action) {
+                0 -> { lastTx = e.x; lastTy = e.y; tMode = 1 }
+                2 -> { val dx = e.x - lastTx; val dy = e.y - lastTy; if (abs(dx) > 5 || abs(dy) > 5) tMode = 2; if (tMode == 2) { panX += dx; panY += dy; lastTx = e.x; lastTy = e.y; invalidate() } }
+                1, 3 -> { tMode = 0 }
+            }
+            if (e.action == MotionEvent.ACTION_MOVE && tMode == 1 && e.pointerCount == 1) {
+                rotY += (e.x - lastTx) * 0.008f; rotX += (e.y - lastTy) * 0.008f; autoRotate = false; invalidate()
+            }
+            if (e.action == 1) { tMode = 0; handler.postDelayed({ autoRotate = true; invalidate() }, 3000) }
+            true
+        }
     }
 
     fun setMolecule(i: Int) { molIndex = i.coerceIn(0, molecules.size - 1); rotX = 0f; rotY = 0f; invalidate(); onMoleculeChange?.invoke(molIndex) }
-
-    override fun onTouchEvent(e: MotionEvent): Boolean {
-        sDetector.onTouchEvent(e)
-        when (e.action and MotionEvent.ACTION_MASK) {
-            MotionEvent.ACTION_DOWN -> { lastTx = e.x; lastTy = e.y; tMode = 1 }
-            MotionEvent.ACTION_MOVE -> { if (tMode == 1 && e.pointerCount == 1) { rotY += (e.x - lastTx) * 0.01f; rotX += (e.y - lastTy) * 0.01f; autoRotate = false; invalidate() }; lastTx = e.x; lastTy = e.y }
-            MotionEvent.ACTION_POINTER_DOWN -> { tMode = 2 }
-            MotionEvent.ACTION_UP -> { if (tMode == 1 && abs(e.x - lastTx) < 10f && abs(e.y - lastTy) < 10f) { autoRotate = !autoRotate }; tMode = 0 }
-        }
-        return true
-    }
+    fun toggleInfo() { showInfo = !showInfo; invalidate() }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val w = width.toFloat(); val h = height.toFloat()
-        canvas.drawRect(0f, 0f, w, h, bgP)
+        canvas.drawColor(Color.rgb(10, 14, 23))
+
+        // Header
+        val hp = Paint(Paint.ANTI_ALIAS_FLAG); hp.textSize = 20f; hp.textAlign = Paint.Align.CENTER; hp.color = Color.rgb(0, 240, 255); hp.isFakeBoldText = true; hp.isAntiAlias = true
+        canvas.drawText("3D Molekül Görüntüleyici", w / 2f, 28f, hp)
+
         canvas.save()
         canvas.scale(zoomScale, zoomScale, w / 2f, h / 2f)
         canvas.translate(panX / zoomScale, panY / zoomScale)
-        val cx = w / 2f; val cy = h * 0.45f
-        labelP.textSize = h * 0.035f
+        val cx = w / 2f; val cy = h * 0.44f
 
         if (autoRotate) { rotY += 0.02f; postInvalidateOnAnimation() }
 
@@ -178,120 +191,160 @@ class Molecule3DView(context: Context) : View(context) {
             Triple(x * sc + cx, y * sc + cy, z)
         }
 
+        // Draw bonds
         for (b in bonds) {
             val p1 = proj[b.from]; val p2 = proj[b.to]
             val sx = p1.first.toFloat(); val sy = p1.second.toFloat()
             val ox = p2.first.toFloat(); val oy = p2.second.toFloat()
-            val bp = when (b.order) { 2 -> bond2P; 3 -> bond3P; else -> bondP }
-            canvas.drawLine(sx, sy, ox, oy, bp)
+            val bondColor = when (b.order) { 2 -> Color.rgb(0, 200, 255); 3 -> Color.rgb(255, 0, 128); else -> Color.rgb(140, 150, 160) }
+            val bondW = when (b.order) { 3 -> 4f; else -> 3f }
+            val bp = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = bondColor; strokeWidth = bondW; style = Paint.Style.STROKE; isAntiAlias = true }
+            if (b.order == 2) {
+                val dx = ox - sx; val dy = oy - sy; val len = sqrt(dx * dx + dy * dy); if (len < 1f) continue
+                val nx = -dy / len * 3f; val ny = dx / len * 3f
+                canvas.drawLine(sx + nx, sy + ny, ox + nx, oy + ny, bp)
+                canvas.drawLine(sx - nx, sy - ny, ox - nx, oy - ny, bp)
+            } else if (b.order == 3) {
+                val dx = ox - sx; val dy = oy - sy; val len = sqrt(dx * dx + dy * dy); if (len < 1f) continue
+                val nx = -dy / len * 4f; val ny = dx / len * 4f
+                canvas.drawLine(sx, sy, ox, oy, bp)
+                canvas.drawLine(sx + nx, sy + ny, ox + nx, oy + ny, bp)
+                canvas.drawLine(sx - nx, sy - ny, ox - nx, oy - ny, bp)
+            } else {
+                canvas.drawLine(sx, sy, ox, oy, bp)
+            }
         }
 
+        // Draw atoms (sorted by depth)
         val sorted = proj.withIndex().sortedBy { -it.value.third }
         for ((idx, p) in sorted) {
             val sx = p.first.toFloat(); val sy = p.second.toFloat(); val sz = p.third
             val r = atoms[idx].radius * sc / 18f * (1f + sz * 0.001f).coerceIn(0.6f, 1.4f)
 
-            val a = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = atoms[idx].color; style = Paint.Style.FILL }
-            canvas.drawCircle(sx, sy, r, a)
-            canvas.drawCircle(sx, sy, r, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF333333.toInt(); style = Paint.Style.STROKE; strokeWidth = 2f })
-            elP.textSize = r * 1.2f
-            canvas.drawText(atoms[idx].symbol, sx, sy + elP.textSize / 3f, elP)
+            // Glow
+            val glowP = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; isAntiAlias = true }
+            glowP.color = Color.argb(((1f + sz * 0.005f).coerceIn(0.3f, 1f) * 35).toInt().coerceIn(10, 50), Color.red(atoms[idx].color), Color.green(atoms[idx].color), Color.blue(atoms[idx].color))
+            canvas.drawCircle(sx, sy, r * 2.2f, glowP)
 
-            glowP.alpha = ((1f + sz * 0.005f).coerceIn(0.3f, 1f) * 40).toInt().coerceIn(10, 60)
-            canvas.drawCircle(sx, sy, r * 2f, glowP)
+            // Atom sphere (gradient)
+            val sphereP = Paint(Paint.ANTI_ALIAS_FLAG)
+            sphereP.shader = RadialGradient(sx - r * 0.3f, sy - r * 0.3f, r * 1.5f,
+                intArrayOf(Color.argb(255, minOf(255, Color.red(atoms[idx].color) + 80), minOf(255, Color.green(atoms[idx].color) + 80), minOf(255, Color.blue(atoms[idx].color) + 80)),
+                    atoms[idx].color, Color.argb(255, maxOf(0, Color.red(atoms[idx].color) - 60), maxOf(0, Color.green(atoms[idx].color) - 60), maxOf(0, Color.blue(atoms[idx].color) - 60))),
+                floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP)
+            sphereP.isAntiAlias = true
+            canvas.drawCircle(sx, sy, r, sphereP)
+
+            // Outline
+            canvas.drawCircle(sx, sy, r, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(30, 30, 30); style = Paint.Style.STROKE; strokeWidth = 1.5f; isAntiAlias = true })
+
+            // Highlight
+            val hlP = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; isAntiAlias = true }
+            hlP.color = Color.argb(120, 255, 255, 255)
+            canvas.drawCircle(sx - r * 0.25f, sy - r * 0.25f, r * 0.3f, hlP)
+
+            // Symbol
+            val elP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; textSize = r * 1.1f; textAlign = Paint.Align.CENTER; isFakeBoldText = true; isAntiAlias = true }
+            canvas.drawText(atoms[idx].symbol, sx, sy + elP.textSize * 0.35f, elP)
         }
 
-        labelP.textSize = h * 0.04f
-        canvas.drawText(molNames[molIndex], cx, h * 0.89f, labelP)
+        // Molecule name
+        val np = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = h * 0.04f; textAlign = Paint.Align.CENTER; color = Color.rgb(0, 240, 255); isFakeBoldText = true; isAntiAlias = true }
+        canvas.drawText("${molInfos[molIndex].name} (${molInfos[molIndex].formula})", cx, h * 0.88f, np)
+
+        // Info
+        val ip = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = h * 0.025f; textAlign = Paint.Align.CENTER; isAntiAlias = true }
+        ip.color = Color.rgb(200, 200, 200)
+        canvas.drawText("Geometri: ${molInfos[molIndex].geometry} | Açı: ${molInfos[molIndex].angle} | ${molInfos[molIndex].polar}", cx, h * 0.92f, ip)
+
         canvas.restore()
+
+        // Info panel overlay
+        if (showInfo) drawInfo(canvas, w, h)
+    }
+
+    private fun drawInfo(c: Canvas, w: Float, h: Float) {
+        val px = w * 0.03f; val py = 8f; val pw = w * 0.94f; val ph = h - 16f
+        c.drawRoundRect(px, py, px + pw, py + ph, 20f, 20f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(17, 24, 39); isAntiAlias = true })
+        c.drawRoundRect(px, py, px + pw, py + ph, 20f, 20f, Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2f; color = Color.rgb(0, 200, 255); isAntiAlias = true })
+        var ty = py + 40f
+        val hp = Paint(Paint.ANTI_ALIAS_FLAG); hp.textSize = 22f; hp.textAlign = Paint.Align.CENTER; hp.color = Color.rgb(0, 240, 255); hp.isFakeBoldText = true; hp.isAntiAlias = true
+        c.drawText("3D Molekül Görüntüleyici", w / 2f, ty, hp); ty += 38f
+        val lp = Paint(Paint.ANTI_ALIAS_FLAG); lp.textSize = 16f; lp.textAlign = Paint.Align.LEFT; lp.isAntiAlias = true
+        val lines = listOf(
+            Pair("═══ NEDİR? ═══", Color.rgb(0, 240, 255)),
+            Pair("Molekulleri 3 boyutta görüntüleyin,", Color.rgb(220, 220, 220)),
+            Pair("bağ türlerini ve geometriyi öğrenin.", Color.rgb(220, 220, 220)),
+            Pair("", Color.TRANSPARENT),
+            Pair("═══ GEOMETRİLER ═══", Color.rgb(0, 240, 255)),
+            Pair("Doğrusal: 180° (CO₂, C₂H₂)", Color.rgb(170, 204, 255)),
+            Pair("Düzlemsel üçgen: 120° (C₂H₄, C₆H₆)", Color.rgb(170, 204, 255)),
+            Pair("Dört yüzlü: 109.5° (CH₄, C₂H₆)", Color.rgb(170, 204, 255)),
+            Pair("Bükülü: 104.5° (H₂O)", Color.rgb(170, 204, 255)),
+            Pair("Üçgen piramit: 107.3° (NH₃)", Color.rgb(170, 204, 255)),
+            Pair("", Color.TRANSPARENT),
+            Pair("═══ BAĞ TÜRLERİ ═══", Color.rgb(0, 240, 255)),
+            Pair("— Tek bağ: 1 sigma bağı", Color.rgb(140, 150, 160)),
+            Pair("═ Çift bağ: 1 sigma + 1 pi bağı", Color.rgb(0, 200, 255)),
+            Pair("≡ Üçlü bağ: 1 sigma + 2 pi bağı", Color.rgb(255, 0, 128)),
+            Pair("", Color.TRANSPARENT),
+            Pair("═══ KULLANIM ═══", Color.rgb(0, 240, 255)),
+            Pair("1. Alt düğümlerden molekül seçin", Color.rgb(200, 230, 255)),
+            Pair("2. Kaydırarak döndürün (otomatik döner)", Color.rgb(200, 230, 255)),
+            Pair("3. Çimdikleme ile yakınlaştırın", Color.rgb(200, 230, 255))
+        )
+        for ((line, color) in lines) { if (line.isEmpty()) { ty += 6f; continue }; lp.color = color; c.drawText(line, px + 18f, ty, lp); ty += 22f }
     }
 }
 
 class Molecule3DFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val ll = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.VERTICAL; setBackgroundColor(0xFF0D1117.toInt())
-        }
-        val headerRow = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.HORIZONTAL; setPadding(8, 8, 8, 4)
-        }
-        headerRow.addView(TextView(requireContext()).apply {
-            text = "3B Molekul Goruntuleyici"; setTextColor(0xFF00F0FF.toInt())
-            textSize = 22f; setTypeface(null, android.graphics.Typeface.BOLD)
-            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-        })
-        val helpBtn3d = android.widget.Button(requireContext()).apply {
-            text = "?"; textSize = 20f; setTextColor(-0x1)
-            backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.neon_purp)
-            layoutParams = LinearLayout.LayoutParams((40 * resources.displayMetrics.density).toInt(), (40 * resources.displayMetrics.density).toInt())
-        }
-        headerRow.addView(helpBtn3d)
-        ll.addView(headerRow)
-        val view = Molecule3DView(requireContext()).apply {
-            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (550 * resources.displayMetrics.density).toInt())
-        }
-        ll.addView(view)
+        val ctx = requireContext()
+        val root = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(Color.rgb(10, 14, 23)); setPadding(12, 12, 12, 12) }
+        val view = Molecule3DView(ctx)
 
-        val btnNames = listOf("H2O", "CO2", "CH4", "NH3", "C2H6", "C2H4", "C6H6", "C8H18", "EtOH", "Aseton", "AcOH", "MeOH", "C2H2", "Toluen")
-        val hScroll = HorizontalScrollView(requireContext()).apply {
-            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        }
-        val btnRow = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.HORIZONTAL; setPadding(4, 4, 4, 4)
-        }
-        val btnIds = mutableListOf<Button>()
+        // Top bar
+        val top = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(0, 0, 0, 4) }
+        top.addView(TextView(ctx).apply { text = "3D Molekül"; textSize = 22f; setTextColor(Color.rgb(0, 240, 255)); setTypeface(null, android.graphics.Typeface.BOLD) }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        val helpBtn = TextView(ctx).apply { text = "?"; textSize = 26f; setTextColor(Color.rgb(0, 240, 255)); setPadding(20, 8, 20, 8); setBackgroundColor(Color.rgb(20, 30, 50)) }
+        helpBtn.setOnClickListener { view.toggleInfo() }
+        top.addView(helpBtn)
+        root.addView(top)
+
+        root.addView(view, LinearLayout.LayoutParams.MATCH_PARENT, (resources.displayMetrics.heightPixels * 0.58f).toInt())
+
+        // Molecule buttons
+        val hScroll = HorizontalScrollView(ctx).apply { layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT) }
+        val btnRow = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; setPadding(4, 4, 4, 4) }
+        val btnNames = listOf("H₂O", "CO₂", "CH₄", "NH₃", "C₂H₆", "C₂H₄", "C₆H₆", "C₈H₁₈", "EtOH", "Aseton", "AcOH", "MeOH", "C₂H₂", "Toluen")
+        val btnIds = mutableListOf<TextView>()
         btnNames.forEachIndexed { i, name ->
-            Button(requireContext()).apply {
-                text = name; textSize = 11f; setTextColor(-0x1); setPadding(10, 4, 10, 4)
-                backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.neon_purp)
-                layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT).apply { setMargins(3, 0, 3, 0) }
-                setOnClickListener { btnIds.forEach { it.alpha = 0.5f }; alpha = 1f; view.setMolecule(i) }
-                btnIds.add(this); btnRow.addView(this)
+            val btn = TextView(ctx).apply {
+                text = name; textSize = 11f; setTextColor(Color.WHITE); setPadding(14, 8, 14, 8)
+                setBackgroundColor(Color.rgb(40, 50, 70))
+                setOnClickListener { btnIds.forEach { it.setBackgroundColor(Color.rgb(40, 50, 70)) }; setBackgroundColor(Color.rgb(0, 100, 180)); view.setMolecule(i) }
             }
+            btnIds.add(btn); btnRow.addView(btn)
         }
-        hScroll.addView(btnRow); ll.addView(hScroll)
+        hScroll.addView(btnRow); root.addView(hScroll)
 
-        val info = arrayOf(
-            "Su: V-sekli, 104.5°, polar, evrensel cozucu",
-            "CO2: Dogrusal, 180°, apolar, sera gazi",
-            "Metan: Dortyuzlu, 109.5°, apolar, dogal gaz",
-            "Amonyak: Ucgen piramit, 107.3°, polar, gubre",
-            "Etan: C-C tek bag, alkan, dogal gaz bileseni",
-            "Eten: C=C cift bag, duzlemsel, alken",
-            "Benzen: Halkali, 120°, aromatik, reaktif",
-            "Oktan: 8 C'li alkan, benzin bileseni",
-            "Etanol: Alkol, hidroksil (-OH) grubu icerir",
-            "Aseton: Keton, C=O, polarl cozucu",
-            "Asetik Asit: Karboksilik asit, sirke asidi",
-            "Metanol: En basit alkol, toksik, endustriyel cozucu",
-            "Asetilen: C=C uc bag, dogrusal, kaynak gazı",
-            "Toluen: Metil benzen, aromatik, boya cozucusu"
-        )
-        val infoDetail = TextView(requireContext()).apply {
-            setTextColor(0xFF00F0FF.toInt()); textSize = 14f; gravity = android.view.Gravity.CENTER
-            setPadding(8, 4, 8, 8)
+        // Info label
+        val infoLabel = TextView(ctx).apply { textSize = 12f; setTextColor(Color.rgb(150, 170, 200)); gravity = Gravity.CENTER; setPadding(0, 6, 0, 0) }
+        root.addView(infoLabel)
+
+        // Atom legend
+        val legend = TextView(ctx).apply {
+            text = "C = Karbon | H = Hidrojen | O = Oksijen | N = Azot"; textSize = 10f; setTextColor(Color.rgb(100, 100, 100)); gravity = Gravity.CENTER; setPadding(0, 4, 0, 0)
         }
-        ll.addView(TextView(requireContext()).apply {
-            text = "Surukleyin: dondur | Dokunun: otomatik donus | Cift parmak: yaklastir"
-            setTextColor(0xFFAAAAAA.toInt()); textSize = 12f; gravity = android.view.Gravity.CENTER; setPadding(8, 8, 8, 4)
-        })
-        ll.addView(infoDetail)
+        root.addView(legend)
 
-        btnIds[0].alpha = 1f
-        view.onMoleculeChange = { infoDetail.text = info[it] }
+        btnIds[0].setBackgroundColor(Color.rgb(0, 100, 180))
+        view.onMoleculeChange = { idx ->
+            val info = view.molInfos[idx]
+            infoLabel.text = "${info.name} — Geometri: ${info.geometry}, Açı: ${info.angle}, ${info.polar}\n${info.desc}"
+        }
         view.setMolecule(0)
-        helpBtn3d.setOnClickListener {
-            AlertDialog.Builder(requireContext())
-                .setTitle("3B Molekul Goruntuleyici")
-                .setMessage("Molekulleri 3 boyutlu olarak inceleyebilirsiniz.\n\n" +
-                    "- Molekul secmek icin alttaki dugmelere dokunun\n" +
-                    "- Parmağinizi surukleyerek molekulu dondurebilirsiniz\n" +
-                    "- Dokundugunuzda otomatik donus baslar\n" +
-                    "- Cift parmakla yakinsastirip uzaklastirabilirsiniz\n\n" +
-                    "Her molekulin aciklamasi ekranda gosterilir.")
-                .setPositiveButton("Anladim") { d, _ -> d.dismiss() }
-                .show()
-        }
-        return ll
+
+        return root
     }
 }

@@ -1,10 +1,8 @@
 package com.kimya.uygulama.features
 
 import android.content.pm.ActivityInfo
+import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.SeekBar
@@ -12,44 +10,31 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import com.kimya.uygulama.R
 import com.kimya.uygulama.views.AASSimulatorView
 
-class AASSimulatorFragment : Fragment() {
+class AASSimulatorActivity : AppCompatActivity() {
 
     private lateinit var aasView: AASSimulatorView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val v = inflater.inflate(R.layout.fragment_aas_simulator, container, false)
-        aasView = v.findViewById(R.id.aas_view)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_aas_simulator)
 
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+
+        aasView = findViewById(R.id.aas_view)
         aasView.onSelectSampleRequested = { showSelectSampleDialog() }
-
-        return v
-    }
-
-    override fun onResume() {
-        super.onResume()
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        (activity as? AppCompatActivity)?.supportActionBar?.hide()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        (activity as? AppCompatActivity)?.supportActionBar?.show()
     }
 
     private fun showSelectSampleDialog() {
-        val ctx = requireContext()
         val elements = AASSimulatorView.ELEMENTS
         val names = elements.map { "${it.symbol} - ${it.name} (${it.wavelength})" }.toTypedArray()
         var selectedIdx = elements.indexOfFirst { it.symbol == aasView.currentElement.symbol }.coerceAtLeast(0)
 
-        AlertDialog.Builder(ctx)
+        AlertDialog.Builder(this)
             .setTitle("Eleman Sec")
-            .setSingleChoiceItems(names, selectedIdx) { _, which ->
+            .setSingleChoiceItems(names, selectedIdx) { dialog, which ->
                 selectedIdx = which
             }
             .setPositiveButton("Devam") { _, _ ->
@@ -60,20 +45,19 @@ class AASSimulatorFragment : Fragment() {
     }
 
     private fun showConcDialog(elements: List<AASSimulatorView.ElementInfo>, elemIdx: Int) {
-        val ctx = requireContext()
         val elem = elements[elemIdx]
 
-        val layout = LinearLayout(ctx).apply {
+        val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(40, 20, 40, 20)
         }
 
-        val tvConcLabel = TextView(ctx).apply {
+        val tvConcLabel = TextView(this).apply {
             text = "Konsantrasyon: ${String.format("%.2f", aasView.sampleConcentration)} ppm"
             textSize = 14f
         }
 
-        val seekBar = SeekBar(ctx).apply {
+        val seekBar = SeekBar(this).apply {
             max = 2000
             progress = (aasView.sampleConcentration * 100).toInt()
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -85,7 +69,7 @@ class AASSimulatorFragment : Fragment() {
             })
         }
 
-        val etSampleId = EditText(ctx).apply {
+        val etSampleId = EditText(this).apply {
             hint = "Numune ID"
             setText(aasView.sampleId)
         }
@@ -94,14 +78,14 @@ class AASSimulatorFragment : Fragment() {
         layout.addView(tvConcLabel)
         layout.addView(seekBar)
 
-        AlertDialog.Builder(ctx)
+        AlertDialog.Builder(this)
             .setTitle("${elem.symbol} - Konsantrasyon")
             .setView(layout)
             .setPositiveButton("Uygula") { _, _ ->
                 val conc = seekBar.progress / 100.0f
                 val id = etSampleId.text.toString().ifBlank { "Sample_01" }
                 aasView.setElement(elem, conc, id)
-                Toast.makeText(ctx, "${elem.symbol} secildi (${elem.wavelength})", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "${elem.symbol} secildi (${elem.wavelength})", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Iptal", null)
             .show()

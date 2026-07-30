@@ -57,7 +57,6 @@ class DashboardFragment : Fragment() {
             ToolItem("Biyomolekül", "Karbonhidrat, protein", BiomoleculesFragment(), R.color.cat_tepkime),
         )
         val araclar = listOf(
-            ToolItem("Enstrümantal", "Spektroskopi analizi", EnstrumantalFragment(), R.color.cat_araclar),
             ToolItem("Notlar", "Hızlı not alma", NotFragment(), R.color.cat_araclar),
             ToolItem("Kronometre", "Reaksiyon süreölçer", TimerFragment(), R.color.cat_araclar),
             ToolItem("Quiz", "Kendini test et", QuizFragment(), R.color.cat_araclar),
@@ -72,6 +71,10 @@ class DashboardFragment : Fragment() {
             ToolItem("Lab. Güvenlik", "Guvenlik sembolleri", LabSafetyFragment(), R.color.cat_araclar),
             ToolItem("Alev Testi", "Flame test simulasyonu", FlameTestFragment(), R.color.cat_tepkime),
             ToolItem("AAS Simülatörü", "Atomik absorpsiyon spektroskopisi", AASSimulatorFragment(), R.color.cat_tepkime),
+            ToolItem("Pil Simülatörü", "Galvanik hücre, elektron akışı", ElectrochemistryFragment(), R.color.cat_hesapla),
+            ToolItem("pH Metre", "Asit-baz karıştırma, renkli gösterge", PhMeterFragment(), R.color.cat_tepkime),
+            ToolItem("Kalibrasyon Eğrisi", "Spektroskopi analizi", EnstrumantalFragment(), R.color.cat_araclar),
+            ToolItem("Çözünürlük", "Çözünürlük ve doygunluk", SolubilityFragment(), R.color.cat_hesapla),
         )
         addCards(v, R.id.kesfet_grid, kesfet)
         addCards(v, R.id.hesapla_grid, hesapla)

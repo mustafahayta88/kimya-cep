@@ -5,9 +5,7 @@ import android.graphics.*
 import android.os.Bundle
 import android.view.*
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import com.kimya.uygulama.R
 import kotlin.math.*
 
 class PhaseDiagramView(context: Context) : View(context) {
@@ -16,246 +14,242 @@ class PhaseDiagramView(context: Context) : View(context) {
     private var showCursor = false
     private var zoomScale = 1f; private var panX = 0f; private var panY = 0f
     private var lastTx = 0f; private var lastTy = 0f; private var tMode = 0
+    private var animTime = 0f
+    private var showInfo = false
     private val sDetector: ScaleGestureDetector
-    private val bgP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF0D1117.toInt(); style = Paint.Style.FILL }
-    private val regionP = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; isAntiAlias = true }
-    private val lineP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt(); strokeWidth = 2.5f; style = Paint.Style.STROKE; isAntiAlias = true }
-    private val textP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFAAAAAA.toInt(); textAlign = Paint.Align.CENTER }
-    private val phaseP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt(); textAlign = Paint.Align.CENTER; isFakeBoldText = true }
-    private val labelP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFA500.toInt(); textAlign = Paint.Align.CENTER; isFakeBoldText = true }
-    private val cursorP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x33FFFFFF.toInt(); style = Paint.Style.STROKE; strokeWidth = 2f; pathEffect = DashPathEffect(floatArrayOf(6f, 4f), 0f) }
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
 
-    // Substance data: name, tripleT, tripleP, critT, critP, solid_name, liquid_name, gas_name
-    private val subData = arrayOf(
-        arrayOf("Su", 0.01, 0.006, 374.0, 218.0, "Buz (Kati)", "Su (Sivi)", "Buhar (Gaz)"),
-        arrayOf("CO2", -56.6, 5.11, 31.0, 73.0, "Kuru Buz (Kati)", "Sivi CO2", "CO2 (Gaz)")
+    private data class SubData(val name: String, val tripleT: Double, val tripleP: Double, val critT: Double, val critP: Double, val solid: String, val liquid: String, val gas: String, val formula: String)
+
+    private val substances = listOf(
+        SubData("Su (H2O)", 0.01, 0.006, 374.0, 218.0, "Buz", "Su", "Buhar", "H2O"),
+        SubData("Karbondioksit (CO₂)", -56.6, 5.11, 31.0, 73.0, "Kuru Buz", "Sivi CO₂", "CO₂ Gazı", "CO₂")
     )
-    private val subNames = listOf("Su (H2O)", "Karbondioksit (CO2)")
 
-    init { isClickable = true; isFocusable = true
+    init {
+        isClickable = true; isFocusable = true
         sDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(d: ScaleGestureDetector): Boolean { zoomScale *= d.scaleFactor; zoomScale = zoomScale.coerceIn(0.3f, 4f); invalidate(); return true }
         })
-    }
-
-    fun setSubstance(i: Int) { substance = i.coerceIn(0, 1); invalidate() }
-
-    override fun onTouchEvent(e: MotionEvent): Boolean {
-        sDetector.onTouchEvent(e)
-        when (e.action and MotionEvent.ACTION_MASK) {
-            MotionEvent.ACTION_DOWN -> { lastTx = e.x; lastTy = e.y; tMode = 1; return true }
-            MotionEvent.ACTION_POINTER_DOWN -> { tMode = 2 }
-            MotionEvent.ACTION_MOVE -> { if (tMode == 1 && zoomScale <= 1.05f) { cursorX = e.x; cursorY = e.y; showCursor = true; invalidate() }; if (tMode == 1 && zoomScale > 1f) { panX += e.x - lastTx; panY += e.y - lastTy }; lastTx = e.x; lastTy = e.y; invalidate() }
-            MotionEvent.ACTION_UP -> { tMode = 0; return true }
+        setOnTouchListener { _, e ->
+            sDetector.onTouchEvent(e)
+            if (e.pointerCount == 1) when (e.action) {
+                0 -> { lastTx = e.x; lastTy = e.y; tMode = 1 }
+                2 -> { val dx = e.x - lastTx; val dy = e.y - lastTy; if (abs(dx) > 5 || abs(dy) > 5) tMode = 2; if (tMode == 2) { panX += dx; panY += dy; lastTx = e.x; lastTy = e.y; invalidate() } }
+                1, 3 -> { tMode = 0; if (cursorX > 0 && cursorY > 0) { showCursor = true } }
+            }
+            if (e.action == MotionEvent.ACTION_MOVE && tMode == 1 && zoomScale <= 1.05f) {
+                cursorX = e.x; cursorY = e.y; showCursor = true; invalidate()
+            }
+            true
         }
-        return true
     }
+
+    fun setSubstance(i: Int) { substance = i.coerceIn(0, substances.size - 1); cursorX = 0f; cursorY = 0f; showCursor = false; invalidate() }
+    fun toggleInfo() { showInfo = !showInfo; invalidate() }
+
+    private fun tToX(t: Double, dLeft: Float, dw: Float, tMin: Double, tMax: Double) = dLeft + dw * ((t - tMin) / (tMax - tMin)).toFloat()
+    private fun pToY(p: Double, dTop: Float, dh: Float, pMin: Double, pMax: Double) = (dTop + dh - dh * ((p - pMin) / (pMax - pMin))).toFloat()
+    private fun curveSG(t: Double, d: SubData) = d.critP * 0.12 * exp((t - d.tripleT) * 0.02)
+    private fun curveLG(t: Double, d: SubData) = d.critP * 0.25 * exp((t - d.tripleT) * 0.05)
+    private fun curveSL(t: Double, d: SubData) = d.critP * (0.002 + max(0.0, (t - d.tripleT) * 0.008))
 
     override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas); val w = width.toFloat(); val h = height.toFloat()
-        canvas.drawRect(0f, 0f, w, h, bgP)
-        canvas.save(); canvas.scale(zoomScale, zoomScale, w / 2f, h / 2f); canvas.translate(panX / zoomScale, panY / zoomScale)
+        super.onDraw(canvas)
+        val w = width.toFloat(); val h = height.toFloat()
+        canvas.drawColor(Color.rgb(10, 14, 23))
 
-        val data = subData[substance]
-        val tMin = -80.0; val tMax = (data[3] as Double) + 20.0
-        val pMin = 0.0; val pMax = maxOf((data[4] as Double) * 1.2, 10.0)
+        // Header
+        val hp = Paint(Paint.ANTI_ALIAS_FLAG); hp.textSize = 20f; hp.textAlign = Paint.Align.CENTER; hp.color = Color.rgb(0, 240, 255); hp.isFakeBoldText = true; hp.isAntiAlias = true
+        canvas.drawText("Faz Diyagramı Simülatörü", w / 2f, 28f, hp)
 
-        val dLeft = w * 0.12f; val dRight = w * 0.88f; val dTop = h * 0.03f; val dBot = h * 0.70f
+        // Main diagram area
+        val dLeft = w * 0.1f; val dRight = w * 0.92f; val dTop = 45f; val dBot = h * 0.68f
         val dw = dRight - dLeft; val dh = dBot - dTop
 
-        // Helper: coordinate mapping functions
-        fun tToX(t: Double) = dLeft + dw * ((t - tMin) / (tMax - tMin)).toFloat()
-        fun pToY(p: Double) = dBot - dh * ((p - pMin) / (pMax - pMin)).toFloat()
+        val d = substances[substance]
+        val tMin = if (substance == 0) -80.0 else -100.0; val tMax = d.critT + 30.0
+        val pMin = 0.0; val pMax = d.critP * 1.3
 
-        // Draw phase regions (semi-transparent)
-        val n = 200
-        val pathSolid = Path(); val pathLiquid = Path(); val pathGas = Path()
-        var prevTS = tMin; var prevTG = tMin; var prevTL = tMin
-        var firstS = true; var firstL = true; var firstG = true
+        // Background card
+        val cardP = Paint(Paint.ANTI_ALIAS_FLAG); cardP.color = Color.rgb(22, 27, 34); cardP.isAntiAlias = true
+        val csP = Paint(Paint.ANTI_ALIAS_FLAG); csP.style = Paint.Style.STROKE; csP.strokeWidth = 2f; csP.color = Color.rgb(48, 54, 61); csP.isAntiAlias = true
+        canvas.drawRoundRect(dLeft, dTop, dRight, dBot, 12f, 12f, cardP)
+        canvas.drawRoundRect(dLeft, dTop, dRight, dBot, 12f, 12f, csP)
 
-        for (i in 0..n) {
-            val frac = i / n.toDouble()
-            val t = tMin + (tMax - tMin) * frac
-            // Sublimation curve (S-G)
-            val pSG = pMin + (data[4] as Double) * 0.12 * exp((t - (data[1] as Double)) * 0.02)
-            // Vaporization curve (L-G)
-            val pLG = pMin + (data[4] as Double) * 0.25 * exp((t - (data[1] as Double)) * 0.05)
-            // Melting curve (S-L) - nearly vertical
-            val pSL = pMin + (data[4] as Double) * (0.002 + max(0.0, (t - (data[1] as Double)) * 0.008))
+        // Grid lines
+        val gridP = Paint(Paint.ANTI_ALIAS_FLAG); gridP.style = Paint.Style.STROKE; gridP.strokeWidth = 1f; gridP.color = Color.argb(20, 255, 255, 255)
+        for (i in 1..5) { val gx = dLeft + dw * i / 5f; canvas.drawLine(gx, dTop + 1, gx, dBot - 1, gridP) }
+        for (i in 1..4) { val gy = dTop + dh * i / 5f; canvas.drawLine(dLeft + 1, gy, dRight - 1, gy, gridP) }
 
-            val x = tToX(t)
-            val ySG = pToY(pSG); val yLG = pToY(pLG); val ySL = pToY(pSL)
+        // Fill phase regions
+        fun tToX(t: Double) = tToX(t, dLeft, dw, tMin, tMax)
+        fun pToY(p: Double) = pToY(p, dTop, dh, pMin, pMax)
+        fun fSG(t: Double) = curveSG(t, d)
+        fun fLG(t: Double) = curveLG(t, d)
+        fun fSL(t: Double) = curveSL(t, d)
 
-            // Solid region: top-left, bounded by SG and SL
-            // Liquid region: middle, bounded by SL and LG
-            // Gas region: bottom, bounded by SG and LG
-        }
+        // Solid region fill
+        val solidFill = Paint(Paint.ANTI_ALIAS_FLAG); solidFill.style = Paint.Style.FILL; solidFill.isAntiAlias = true
+        solidFill.color = Color.argb(25, 100, 100, 255)
+        val solidPath = Path()
+        solidPath.moveTo(tToX(tMin), pToY(pMax))
+        for (i in 0..200) { val t = tMin + (tMax - tMin) * i / 200.0; solidPath.lineTo(tToX(t), pToY(fSG(t))) }
+        solidPath.lineTo(tToX(tMin), pToY(pMin)); solidPath.close()
+        canvas.drawPath(solidPath, solidFill)
+
+        // Liquid region fill
+        solidFill.color = Color.argb(25, 100, 255, 100)
+        val liquidPath = Path()
+        liquidPath.moveTo(tToX(d.tripleT), pToY(fSL(d.tripleT)))
+        for (i in 0..200) { val t = tMin + (tMax - tMin) * i / 200.0; liquidPath.lineTo(tToX(t), pToY(fLG(t))) }
+        for (i in 200 downTo 0) { val t = tMin + (tMax - tMin) * i / 200.0; liquidPath.lineTo(tToX(t), pToY(fSL(t))) }
+        liquidPath.close()
+        canvas.drawPath(liquidPath, solidFill)
+
+        // Gas region fill
+        solidFill.color = Color.argb(25, 255, 255, 100)
+        val gasPath = Path()
+        gasPath.moveTo(tToX(tMin), pToY(0.0))
+        for (i in 0..200) { val t = tMin + (tMax - tMin) * i / 200.0; gasPath.lineTo(tToX(t), pToY(fSG(t))) }
+        for (i in 200 downTo 0) { val t = tMin + (tMax - tMin) * i / 200.0; gasPath.lineTo(tToX(t), pToY(fLG(t))) }
+        gasPath.close()
+        canvas.drawPath(gasPath, solidFill)
 
         // Draw boundary curves
+        val lineP = Paint(Paint.ANTI_ALIAS_FLAG); lineP.style = Paint.Style.STROKE; lineP.strokeWidth = 3f; lineP.isAntiAlias = true; lineP.pathEffect = CornerPathEffect(3f)
         val pathSG = Path(); val pathLG = Path(); val pathSL = Path()
+        val n = 200
         for (i in 0..n) {
-            val frac = i / n.toDouble()
-            val t = tMin + (tMax - tMin) * frac
-            val pSG = pMin + (data[4] as Double) * 0.12 * exp((t - (data[1] as Double)) * 0.02)
-            val pLG = pMin + (data[4] as Double) * 0.25 * exp((t - (data[1] as Double)) * 0.05)
-            val pSL = pMin + (data[4] as Double) * (0.002 + max(0.0, (t - (data[1] as Double)) * 0.008))
-
-            val x = tToX(t); val ySG = pToY(pSG); val yLG = pToY(pLG); val ySL = pToY(pSL)
+            val t = tMin + (tMax - tMin) * i / n.toDouble()
+            val x = tToX(t)
+            val ySG = pToY(fSG(t)); val yLG = pToY(fLG(t)); val ySL = pToY(fSL(t))
             if (i == 0) { pathSG.moveTo(x, ySG); pathLG.moveTo(x, yLG); pathSL.moveTo(x, ySL) }
             else { pathSG.lineTo(x, ySG); pathLG.lineTo(x, yLG); pathSL.lineTo(x, ySL) }
         }
-        canvas.drawPath(pathSG, lineP)
-        canvas.drawPath(pathLG, lineP)
-        canvas.drawPath(pathSL, lineP)
+        lineP.color = Color.rgb(100, 150, 255); canvas.drawPath(pathSG, lineP)
+        lineP.color = Color.rgb(100, 255, 150); canvas.drawPath(pathLG, lineP)
+        lineP.color = Color.rgb(255, 150, 100); canvas.drawPath(pathSL, lineP)
 
-        // Fill phase regions
-        // Solid: above SG and left/down of SL
-        regionP.color = 0x226666FF.toInt()
-        val solidPath = Path()
-        solidPath.addPath(pathSG); solidPath.addPath(pathSL)
-        // Actually, easier: just draw labeled regions without filling
-
-        // Phase labels with region backgrounds
-        phaseP.textSize = h * 0.045f
-
-        // Solid label top-left
-        val solidX = dLeft + dw * 0.15f; val solidY = dTop + dh * 0.15f
-        regionP.color = 0x22FF4444.toInt()
-        canvas.drawRoundRect(solidX - w * 0.06f, solidY - h * 0.03f, solidX + w * 0.06f, solidY + h * 0.03f, 8f, 8f, regionP)
-        canvas.drawText(data[5] as String, solidX, solidY + h * 0.01f, phaseP)
-
-        // Liquid label middle
-        val liqX = dLeft + dw * 0.45f; val liqY = dTop + dh * 0.55f
-        regionP.color = 0x2244FF44.toInt()
-        canvas.drawRoundRect(liqX - w * 0.06f, liqY - h * 0.03f, liqX + w * 0.06f, liqY + h * 0.03f, 8f, 8f, regionP)
-        canvas.drawText(data[6] as String, liqX, liqY + h * 0.01f, phaseP)
-
-        // Gas label bottom-right
-        val gasX = dLeft + dw * 0.75f; val gasY = dTop + dh * 0.25f
-        regionP.color = 0x22FFFF44.toInt()
-        canvas.drawRoundRect(gasX - w * 0.06f, gasY - h * 0.03f, gasX + w * 0.06f, gasY + h * 0.03f, 8f, 8f, regionP)
-        canvas.drawText(data[7] as String, gasX, gasY + h * 0.01f, phaseP)
+        // Phase labels
+        val tp = Paint(Paint.ANTI_ALIAS_FLAG); tp.textSize = 18f; tp.textAlign = Paint.Align.CENTER; tp.isFakeBoldText = true; tp.isAntiAlias = true
+        tp.color = Color.rgb(130, 160, 255); canvas.drawText(d.solid, dLeft + dw * 0.12f, dTop + dh * 0.25f, tp)
+        tp.color = Color.rgb(100, 255, 160); canvas.drawText(d.liquid, dLeft + dw * 0.4f, dTop + dh * 0.55f, tp)
+        tp.color = Color.rgb(255, 240, 100); canvas.drawText(d.gas, dLeft + dw * 0.72f, dTop + dh * 0.22f, tp)
 
         // Triple point
-        val tpX = tToX(data[1] as Double); val tpY = pToY(data[2] as Double)
-        canvas.drawCircle(tpX, tpY, 6f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFF0080.toInt(); style = Paint.Style.FILL })
-        textP.textSize = h * 0.02f
-        canvas.drawText("Uclu Nokta (${"%.1f".format(data[1] as Double)}°C, ${"%.3f".format(data[2] as Double)} atm)", tpX, tpY - 14f, textP)
+        val tpX = tToX(d.tripleT); val tpY = pToY(d.tripleP)
+        val dotP = Paint(Paint.ANTI_ALIAS_FLAG); dotP.style = Paint.Style.FILL; dotP.isAntiAlias = true
+        dotP.color = Color.rgb(255, 0, 128); canvas.drawCircle(tpX, tpY, 8f, dotP)
+        dotP.color = Color.argb(80, 255, 0, 128); canvas.drawCircle(tpX, tpY, 14f, dotP)
+        val dp = Paint(Paint.ANTI_ALIAS_FLAG); dp.textSize = 12f; dp.textAlign = Paint.Align.CENTER; dp.color = Color.rgb(255, 100, 180); dp.isAntiAlias = true
+        canvas.drawText("Üçlü Nokta", tpX, tpY - 18f, dp)
+        canvas.drawText("${"%.1f".format(d.tripleT)}°C, ${"%.3f".format(d.tripleP)} atm", tpX, tpY - 6f, dp)
 
         // Critical point
-        val crX = tToX(data[3] as Double); val crY = pToY(data[4] as Double)
-        canvas.drawCircle(crX, crY, 5f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFF0000.toInt(); style = Paint.Style.FILL })
-        textP.textSize = h * 0.02f; textP.color = 0xFFFF0000.toInt()
-        canvas.drawText("Kritik Nokta (${"%.0f".format(data[3] as Double)}°C)", crX, crY + 14f, textP)
-        textP.color = 0xFFAAAAAA.toInt()
+        val crX = tToX(d.critT); val crY = pToY(d.critP)
+        dotP.color = Color.rgb(255, 50, 50); canvas.drawCircle(crX, crY, 8f, dotP)
+        dotP.color = Color.argb(80, 255, 50, 50); canvas.drawCircle(crX, crY, 14f, dotP)
+        dp.color = Color.rgb(255, 80, 80)
+        canvas.drawText("Kritik Nokta", crX, crY - 18f, dp)
+        canvas.drawText("${"%.0f".format(d.critT)}°C, ${"%.0f".format(d.critP)} atm", crX, crY - 6f, dp)
 
         // Axis labels
-        textP.textSize = h * 0.022f
-        for (i in 0..5) {
-            val frac = i / 5.0
-            val t = tMin + (tMax - tMin) * frac; val x = tToX(t)
-            canvas.drawText("${"%.0f".format(t)}", x, dBot + 14f, textP)
-            val p = pMin + (pMax - pMin) * frac; val y = pToY(p)
-            canvas.drawText("${"%.1f".format(p)}", dLeft - 24f, y + 4f, textP)
-        }
-        canvas.drawText("Sicaklik (°C)", dLeft + dw / 2f, dBot + 32f, textP)
-        canvas.save(); canvas.rotate(-90f, dLeft - 30f, dTop + dh / 2f); canvas.drawText("Basinc (atm)", dLeft - 30f, dTop + dh / 2f, textP); canvas.restore()
+        val ap = Paint(Paint.ANTI_ALIAS_FLAG); ap.textSize = 11f; ap.textAlign = Paint.Align.CENTER; ap.color = Color.rgb(140, 140, 140); ap.isAntiAlias = true
+        for (i in 0..5) { val t = tMin + (tMax - tMin) * i / 5.0; canvas.drawText("${"%.0f".format(t)}", tToX(t), dBot + 14f, ap) }
+        for (i in 0..4) { val p = pMin + (pMax - pMin) * i / 4.0; canvas.drawText("${"%.1f".format(p)}", dLeft - 28f, pToY(p) + 4f, ap) }
+        canvas.drawText("Sıcaklık (°C)", dLeft + dw / 2, dBot + 28f, ap)
+        canvas.save(); canvas.rotate(-90f, dLeft - 32f, dTop + dh / 2); canvas.drawText("Basınç (atm)", dLeft - 32f, dTop + dh / 2, ap); canvas.restore()
 
-        // Cursor crosshair and readout
+        // Cursor crosshair
         if (showCursor && cursorX >= dLeft && cursorX <= dRight && cursorY >= dTop && cursorY <= dBot) {
+            val cursorP = Paint(Paint.ANTI_ALIAS_FLAG); cursorP.style = Paint.Style.STROKE; cursorP.strokeWidth = 1.5f; cursorP.color = Color.argb(80, 255, 255, 255); cursorP.pathEffect = DashPathEffect(floatArrayOf(6f, 4f), 0f); cursorP.isAntiAlias = true
             canvas.drawLine(cursorX, dTop, cursorX, dBot, cursorP)
             canvas.drawLine(dLeft, cursorY, dRight, cursorY, cursorP)
-
             val cT = tMin + (tMax - tMin) * (cursorX - dLeft) / dw
             val cP = pMin + (pMax - pMin) * (dBot - cursorY) / dh
-
-            // Determine phase
-            var phase = "Bilinmiyor"
-            val pSGB = pMin + (data[4] as Double) * 0.12 * exp((cT - (data[1] as Double)) * 0.02)
-            val pLGB = pMin + (data[4] as Double) * 0.25 * exp((cT - (data[1] as Double)) * 0.05)
-            val pSLB = pMin + (data[4] as Double) * (0.002 + max(0.0, (cT - (data[1] as Double)) * 0.008))
-            phase = when {
-                cT < (data[1] as Double) -> if (cP > pSGB) "Kati" else "Gaz"
-                else -> when {
-                    cP > pSLB -> "Kati"
-                    cP > pLGB -> "Sivi"
-                    else -> "Gaz"
-                }
+            var phase = when {
+                cT < d.tripleT -> if (cP > fSG(cT)) "Katı" else "Gaz"
+                else -> when { cP > fSL(cT) -> "Katı"; cP > fLG(cT) -> "Sıvı"; else -> "Gaz" }
             }
-
-            labelP.textSize = h * 0.028f
-            canvas.drawText("T = ${"%.1f".format(cT)}°C | P = ${"%.3f".format(cP)} atm", w / 2f, h * 0.77f, labelP)
-            valP.textSize = h * 0.025f; valP.color = 0xFF00F0FF.toInt()
-            canvas.drawText("Faz: $phase", w / 2f, h * 0.81f, valP)
-            valP.color = 0xFFFFA500.toInt()
+            val infoBg = Paint(Paint.ANTI_ALIAS_FLAG); infoBg.color = Color.argb(180, 22, 27, 34); infoBg.isAntiAlias = true
+            canvas.drawRoundRect(dLeft + 4f, dBot + 32f, dRight - 4f, dBot + 68f, 8f, 8f, infoBg)
+            dp.textSize = 13f; dp.color = Color.rgb(0, 240, 255)
+            canvas.drawText("T = ${"%.1f".format(cT)}°C  |  P = ${"%.3f".format(cP)} atm  |  Faz: $phase", dLeft + dw / 2, dBot + 52f, dp)
         } else {
-            textP.textSize = h * 0.025f
-            canvas.drawText("Parmaginizi diyagramda gezdirin -> sicaklik/basinca gore fazi gorun", w / 2f, h * 0.78f, textP)
+            ap.textSize = 12f; ap.color = Color.rgb(100, 100, 100)
+            canvas.drawText("Parmağınızı diyagramda gezdirin — sıcaklık/basınca göre fazı görün", dLeft + dw / 2, dBot + 50f, ap)
         }
 
-        // Explanation
-        textP.textSize = h * 0.02f; textP.color = 0xFF666666.toInt()
-        canvas.drawText("Faz diyagrami: Bir maddenin hangi sicaklik ve basincta kati, sivi veya gaz oldugunu gosterir", w / 2f, h * 0.86f, textP)
-        canvas.drawText("Cizgiler = faz siniri | Uclu nokta = uc faz birden | Kritik nokta = sivi-gaz ayrimin bittigi nokta", w / 2f, h * 0.89f, textP)
-        textP.color = 0xFFAAAAAA.toInt()
-
-        labelP.textSize = h * 0.03f
-        canvas.drawText(subNames[substance], w / 2f, h * 0.93f, labelP)
-        canvas.restore()
+        // Info panel
+        if (showInfo) drawInfo(canvas, w, h)
     }
 
-    companion object {
-        private val valP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFA500.toInt(); textSize = 0f; textAlign = Paint.Align.CENTER; isFakeBoldText = true }
+    private fun drawInfo(c: Canvas, w: Float, h: Float) {
+        val px = w * 0.03f; val py = 8f; val pw = w * 0.94f; val ph = h - 16f
+        c.drawRoundRect(px, py, px + pw, py + ph, 20f, 20f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(17, 24, 39); isAntiAlias = true })
+        c.drawRoundRect(px, py, px + pw, py + ph, 20f, 20f, Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2f; color = Color.rgb(0, 200, 255); isAntiAlias = true })
+        var ty = py + 40f
+        val hp = Paint(Paint.ANTI_ALIAS_FLAG); hp.textSize = 22f; hp.textAlign = Paint.Align.CENTER; hp.color = Color.rgb(0, 240, 255); hp.isFakeBoldText = true; hp.isAntiAlias = true
+        c.drawText("Faz Diyagramı Simülatörü", w / 2f, ty, hp); ty += 38f
+        val lp = Paint(Paint.ANTI_ALIAS_FLAG); lp.textSize = 16f; lp.textAlign = Paint.Align.LEFT; lp.isAntiAlias = true
+        val lines = listOf(
+            Pair("═══ NEDİR? ═══", Color.rgb(0, 240, 255)),
+            Pair("Faz diyagramı, bir maddenin hangi sıcaklık", Color.rgb(220, 220, 220)),
+            Pair("ve basınçta katı, sıvı veya gaz olduğunu gösterir.", Color.rgb(220, 220, 220)),
+            Pair("", Color.TRANSPARENT),
+            Pair("═══ FAZLAR ═══", Color.rgb(0, 240, 255)),
+            Pair("Katı: Düzenli moleküler yapı, sabit şekil", Color.rgb(130, 160, 255)),
+            Pair("Sıvı: Serbest moleküler hareket, belirli hacim", Color.rgb(100, 255, 160)),
+            Pair("Gaz: Serbest moleküler hareket, belirsiz hacim", Color.rgb(255, 240, 100)),
+            Pair("", Color.TRANSPARENT),
+            Pair("═══ SINIR NOKTALARI ═══", Color.rgb(0, 240, 255)),
+            Pair("Üçlü Nokta: 3 fazın bir arada olduğu T ve P", Color.rgb(255, 100, 180)),
+            Pair("Kritik Nokta: Sıvı-gaz ayrımının bittiği T ve P", Color.rgb(255, 80, 80)),
+            Pair("", Color.TRANSPARENT),
+            Pair("═══ KULLANIM ═══", Color.rgb(0, 240, 255)),
+            Pair("1. Madde seçin (Su veya CO₂)", Color.rgb(200, 230, 255)),
+            Pair("2. Diyagramda parmağınızı gezdirin", Color.rgb(200, 230, 255)),
+            Pair("3. T ve P değerlerine göre fazı görün", Color.rgb(200, 230, 255)),
+            Pair("4. Çimdikleme ile yakınlaştırın", Color.rgb(200, 230, 255))
+        )
+        for ((line, color) in lines) { if (line.isEmpty()) { ty += 6f; continue }; lp.color = color; c.drawText(line, px + 18f, ty, lp); ty += 22f }
     }
 }
 
 class PhaseDiagramFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val ll = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(0xFF0D1117.toInt()) }
-        val headerRow = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.HORIZONTAL; setPadding(8, 8, 8, 4)
+        val ctx = requireContext()
+        val root = LinearLayout(ctx).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(Color.rgb(10, 14, 23)); setPadding(12, 12, 12, 12) }
+        val view = PhaseDiagramView(ctx)
+
+        // Top bar
+        val top = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL; setPadding(0, 0, 0, 4) }
+        top.addView(TextView(ctx).apply { text = "Faz Diyagramı"; textSize = 22f; setTextColor(Color.rgb(0, 240, 255)); setTypeface(null, android.graphics.Typeface.BOLD) }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        val helpBtn = TextView(ctx).apply { text = "?"; textSize = 26f; setTextColor(Color.rgb(0, 240, 255)); setPadding(20, 8, 20, 8); setBackgroundColor(Color.rgb(20, 30, 50)) }
+        helpBtn.setOnClickListener { view.toggleInfo() }
+        top.addView(helpBtn)
+        root.addView(top)
+
+        root.addView(view, LinearLayout.LayoutParams.MATCH_PARENT, (resources.displayMetrics.heightPixels * 0.65f).toInt())
+
+        // Substance buttons
+        val row = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, 8, 0, 4) }
+        fun subBtn(text: String, idx: Int): TextView = TextView(ctx).apply {
+            this.text = text; textSize = 14f; setTextColor(Color.WHITE); setPadding(24, 12, 24, 12)
+            setBackgroundColor(if (idx == 0) Color.rgb(0, 120, 200) else Color.rgb(0, 100, 160))
+            setOnClickListener { view.setSubstance(idx) }
         }
-        headerRow.addView(TextView(requireContext()).apply {
-            text = "Faz Diyagrami"; setTextColor(0xFF00F0FF.toInt())
-            textSize = 22f; setTypeface(null, android.graphics.Typeface.BOLD)
-            layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+        row.addView(subBtn("Su (H₂O)", 0))
+        row.addView(subBtn("CO₂", 1).apply { (layoutParams as? LinearLayout.LayoutParams)?.marginStart = 12 })
+        root.addView(row)
+
+        // Bottom info
+        root.addView(TextView(ctx).apply {
+            text = "Üçlü noktada katı, sıvı ve gaz bir arada bulunur. Kritik noktanın ötesinde sıvı-gaz ayrımı ortadan kalkar."
+            textSize = 11f; setTextColor(Color.rgb(100, 100, 100)); gravity = Gravity.CENTER; setPadding(0, 8, 0, 0)
         })
-        val helpBtnPhase = android.widget.Button(requireContext()).apply {
-            text = "?"; textSize = 20f; setTextColor(-0x1)
-            backgroundTintList = androidx.core.content.ContextCompat.getColorStateList(requireContext(), R.color.neon_purp)
-            layoutParams = LinearLayout.LayoutParams((40 * resources.displayMetrics.density).toInt(), (40 * resources.displayMetrics.density).toInt())
-        }
-        headerRow.addView(helpBtnPhase)
-        ll.addView(headerRow)
-        val view = PhaseDiagramView(requireContext()).apply {
-            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (650 * resources.displayMetrics.density).toInt())
-        }
-        ll.addView(view)
-        val row = LinearLayout(requireContext()).apply { orientation = LinearLayout.HORIZONTAL; setPadding(8, 4, 8, 4) }
-        listOf("Su (H2O)", "CO2").forEachIndexed { i, name ->
-            Button(requireContext()).apply {
-                text = name; setTextColor(-0x1); setPadding(8, 4, 8, 4)
-                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f).apply { setMargins(6, 4, 6, 4) }
-                setOnClickListener { view.setSubstance(i) }; row.addView(this)
-            }
-        }
-        ll.addView(row)
-        ll.addView(TextView(requireContext()).apply {
-            text = "Ne ise yarar? → Bir maddeyi belirli T ve P'de hangi fazda oldugunu bulmak icin. Ornek: Su 100°C'de 1 atm'de kaynar (sivi->gaz)"
-            setTextColor(0xFFAAAAAA.toInt()); textSize = 12f;             gravity = android.view.Gravity.CENTER; setPadding(8, 4, 8, 8)
-        })
-        helpBtnPhase.setOnClickListener {
-            AlertDialog.Builder(requireContext())
-                .setTitle("Faz Diyagrami")
-                .setMessage("Bir maddenin sicaklik ve basinc deger gore hangi fazda oldugunu gosterir.\n\n" +
-                    "- Su ve CO2 icin faz diyagramlari mevcuttur\n" +
-                    "- Diyagram uzerinde gezinerek faz sinirlarini gorebilirsiniz\n" +
-                    "- Katı/sivi/gaz bolgeleri renklerle ayirtilmistir\n" +
-                    "- Uct noktalar ve kritik nokta isaretlenmistir\n\n" +
-                    "Ornek: Su 100°C'de 1 atm'de kaynar (sivi->gaz donusumu).")
-                .setPositiveButton("Anladim") { d, _ -> d.dismiss() }
-                .show()
-        }
-        return ll
+
+        return root
     }
 }
