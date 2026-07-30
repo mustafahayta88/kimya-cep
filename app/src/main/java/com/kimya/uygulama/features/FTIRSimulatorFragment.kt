@@ -58,7 +58,7 @@ class FTIRSimulatorFragment : Fragment() {
         buildGroupChips()
         setupControls(v)
 
-        v.findViewById<Button>(R.id.btn_ftir_help).setOnClickListener { showHelp() }
+        v.findViewById<Button>(R.id.btn_ftir_help).setOnClickListener { ftirView.toggleInfo() }
 
         return v
     }

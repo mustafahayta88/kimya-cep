@@ -5,6 +5,8 @@ import android.graphics.*
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
 import kotlin.math.*
 
@@ -66,7 +68,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
             FunctionalGroup("ch_alkane", "C-H (Alkan)", "Alkan C-H",
                 2845f, 2970f, 2920f, 0.7f, 50f,
                 Color.rgb(200, 200, 80), "Keskin",
-                "Güçlü, keskin pik. sp³ C-H gerilmesi. Hemen her органик bileşikte bulunur.",
+                "Güçlü, keskin pik. sp³ C-H gerilmesi. Hemen her organik bileşikte bulunur.",
                 "Hekzan, Sikloheksan"),
             FunctionalGroup("ch_alkene", "C-H (Alken)", "Alken =C-H",
                 3020f, 3100f, 3080f, 0.45f, 40f,
@@ -83,6 +85,11 @@ class FTIRSimulatorView @JvmOverloads constructor(
                 Color.rgb(200, 180, 100), "Çift Pik",
                 "Fermi çift pik (2720 ve 2820 cm⁻¹). Aldehit belirleyici.",
                 "Benzaldehit, Formaldehit"),
+            FunctionalGroup("ch_aldehyde2", "C-H (Aldehit 2)", "Aldehit C-H (Fermi)",
+                2720f, 2820f, 2720f, 0.3f, 30f,
+                Color.rgb(220, 190, 90), "Keskin",
+                "Fermi rezonans çiftinin alt pik. Aldehit onayı.",
+                "Benzaldehit"),
             FunctionalGroup("ch_alkyne", "≡C-H (Alkin)", "Terminal Alkin ≡C-H",
                 3260f, 3330f, 3300f, 0.7f, 30f,
                 Color.rgb(255, 220, 80), "Keskin",
@@ -91,7 +98,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
             FunctionalGroup("co_ketone", "C=O (Keton)", "Keton Karbonil",
                 1705f, 1725f, 1715f, 0.95f, 35f,
                 Color.rgb(255, 200, 50), "Keskin",
-                "Çok güçlü, keskin pik. Keton belirleyici absorption.",
+                "Çok güçlü, keskin pik. Keton belirleyici absorpsiyon.",
                 "Aseton, sikloheksanon"),
             FunctionalGroup("co_aldehyde", "C=O (Aldehit)", "Aldehit Karbonil",
                 1720f, 1740f, 1730f, 0.9f, 30f,
@@ -131,7 +138,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
             FunctionalGroup("cn_nitrile", "C≡N (Nitril)", "Nitril C≡N",
                 2210f, 2260f, 2250f, 0.5f, 25f,
                 Color.rgb(150, 255, 150), "Orta-Keskin",
-                "Karakteristik pik. Nitril belirleyici absorption.",
+                "Karakteristik pik. Nitril belirleyici absorpsiyon.",
                 "Asetonitril, Benzonitril"),
             FunctionalGroup("no2", "NO₂ (Nitro)", "Nitro",
                 1515f, 1570f, 1540f, 0.8f, 35f,
@@ -322,7 +329,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
         val SAMPLE_TYPES = listOf(
             "KBr Pellet" to "Katı numuneler için KBr ile sıkıştırma",
             "İnce Film" to "Sıvı numuneler için NaCl plakları arasında",
-            "ATR" to "Tam yansıma ekinci tekniği",
+            "ATR" to "Tam yansıma tekniği",
             "Çözelti" to "Kuvvetli çözücüde seyreltme (CCl₄)"
         )
     }
@@ -340,11 +347,20 @@ class FTIRSimulatorView @JvmOverloads constructor(
     var scanProgress = 0f
         private set
     var showInterferogram = false
+    var showInfo = false
 
     private var time = 0f
     private var themeColors = ThemeColors()
     private val spectrumData = FloatArray(2000)
     private val interferogramData = FloatArray(200)
+
+    // Zoom & Pan
+    private var zoomScale = 1f; private var panX = 0f; private var panY = 0f
+    private var lastTx = 0f; private var lastTy = 0f; private var touchMode = 0
+    private val sDetector: ScaleGestureDetector
+
+    // Cursor
+    private var cursorX = 0f; private var cursorY = 0f; private var showCursor = false
 
     private val handler = Handler(Looper.getMainLooper())
     private val ticker = object : Runnable {
@@ -353,6 +369,24 @@ class FTIRSimulatorView @JvmOverloads constructor(
             updateData()
             invalidate()
             handler.postDelayed(this, 16L)
+        }
+    }
+
+    init {
+        sDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(d: ScaleGestureDetector): Boolean { zoomScale *= d.scaleFactor; zoomScale = zoomScale.coerceIn(0.5f, 4f); return true }
+        })
+        setOnTouchListener { _, e ->
+            sDetector.onTouchEvent(e)
+            if (e.pointerCount == 1) when (e.action) {
+                0 -> { lastTx = e.x; lastTy = e.y; touchMode = 0 }
+                2 -> { val dx = e.x - lastTx; val dy = e.y - lastTy; if (abs(dx) > 5 || abs(dy) > 5) touchMode = 1; if (touchMode == 1) { panX += dx; panY += dy; lastTx = e.x; lastTy = e.y } }
+                1, 3 -> { touchMode = 0; showCursor = false }
+            }
+            if (e.action == MotionEvent.ACTION_MOVE && touchMode == 0) {
+                cursorX = e.x; cursorY = e.y; showCursor = true
+            }
+            true
         }
     }
 
@@ -379,9 +413,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
     private val peakLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE; strokeWidth = 1f
     }
-    private val peakBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL
-    }
+    private val peakBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     private val peakLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textSize = 11f; textAlign = Paint.Align.CENTER; isFakeBoldText = true
     }
@@ -396,26 +428,21 @@ class FTIRSimulatorView @JvmOverloads constructor(
     fun toggleGroup(groupId: String) {
         if (selectedGroups.contains(groupId)) selectedGroups.remove(groupId)
         else selectedGroups.add(groupId)
-        generateSpectrum()
-        invalidate()
+        generateSpectrum(); invalidate()
     }
 
     fun selectPreset(compound: CookbookCompound) {
-        selectedGroups.clear()
-        selectedGroups.addAll(compound.groups)
-        generateSpectrum()
-        invalidate()
+        selectedGroups.clear(); selectedGroups.addAll(compound.groups)
+        generateSpectrum(); invalidate()
     }
 
     fun setResolution(res: Int) { resolution = res.coerceIn(1, 8); generateSpectrum() }
     fun setScanCount(count: Int) { scanCount = count.coerceIn(1, 128) }
     fun setSampleType(type: String) { sampleType = type }
+    fun toggleInfo() { showInfo = !showInfo; invalidate() }
 
     fun startScan() {
-        isScanning = true
-        scanProgress = 0f
-        generateSpectrum()
-        invalidate()
+        isScanning = true; scanProgress = 0f; generateSpectrum(); invalidate()
     }
 
     fun setThemeColors(colors: ThemeColors) {
@@ -425,11 +452,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
     private fun updateData() {
         if (isScanning) {
             scanProgress += 0.004f
-            if (scanProgress >= 1f) {
-                scanProgress = 1f
-                isScanning = false
-                generateSpectrum()
-            }
+            if (scanProgress >= 1f) { scanProgress = 1f; isScanning = false; generateSpectrum() }
         }
         val zpd = interferogramData.size / 2
         for (i in interferogramData.indices) {
@@ -448,16 +471,13 @@ class FTIRSimulatorView @JvmOverloads constructor(
 
         for (i in spectrumData.indices) {
             val wn = 4000f - i * (3600f / spectrumData.size)
-
             val baselineCurve = 0.5f * sin(wn / 4000f * PI.toFloat()) * 0.02f
             val slowDrift = 0.015f * sin(wn / 800f * PI.toFloat()) * sin(wn / 1200f * PI.toFloat())
             spectrumData[i] += baselineCurve + slowDrift
 
-            val co2Center1 = 2349f; val co2Center2 = 2361f
-            val co2W = 15f; val co2Depth = 0.12f
-            val co2peak1 = co2Depth * exp(-((wn - co2Center1) * (wn - co2Center1)) / (2f * co2W * co2W))
-            val co2peak2 = co2Depth * 0.8f * exp(-((wn - co2Center2) * (wn - co2Center2)) / (2f * co2W * co2W))
-            spectrumData[i] -= (co2peak1 + co2peak2)
+            val co2Center1 = 2349f; val co2Center2 = 2361f; val co2W = 15f; val co2Depth = 0.12f
+            spectrumData[i] -= co2Depth * exp(-((wn - co2Center1).pow(2)) / (2f * co2W * co2W))
+            spectrumData[i] -= co2Depth * 0.8f * exp(-((wn - co2Center2).pow(2)) / (2f * co2W * co2W))
 
             val h2oCenters = floatArrayOf(1595f, 1650f, 3750f, 3660f, 3600f)
             val h2oWidths = floatArrayOf(20f, 25f, 40f, 30f, 35f)
@@ -472,7 +492,6 @@ class FTIRSimulatorView @JvmOverloads constructor(
             if (!selectedGroups.contains(group.id)) continue
             val halfW = group.peakWidth / resolution
             val useLorentzian = group.peakIntensity > 0.7f
-
             for (i in spectrumData.indices) {
                 val wn = 4000f - i * (3600f / spectrumData.size)
                 val dist = wn - group.peakCenter
@@ -486,11 +505,21 @@ class FTIRSimulatorView @JvmOverloads constructor(
         }
 
         for (i in spectrumData.indices) {
-            val whiteNoise = (Math.random().toFloat() - 0.5f) * noiseLevel * 0.012f
-            val spike = if (Math.random().toFloat() > 0.997f) (Math.random().toFloat() - 0.5f) * 0.03f else 0f
-            spectrumData[i] += whiteNoise + spike
+            spectrumData[i] += (Math.random().toFloat() - 0.5f) * noiseLevel * 0.012f
+            if (Math.random().toFloat() > 0.997f) spectrumData[i] += (Math.random().toFloat() - 0.5f) * 0.03f
             spectrumData[i] = spectrumData[i].coerceIn(0.02f, 0.98f)
         }
+    }
+
+    fun getPeakTable(): List<Triple<String, Float, Float>> {
+        val peaks = mutableListOf<Triple<String, Float, Float>>()
+        for (group in FUNCTIONAL_GROUPS) {
+            if (!selectedGroups.contains(group.id)) continue
+            val idx = ((4000f - group.peakCenter) / 3600f * spectrumData.size).toInt().coerceIn(0, spectrumData.size - 1)
+            val transmittance = spectrumData[idx] * 100f
+            peaks.add(Triple(group.name, group.peakCenter, transmittance))
+        }
+        return peaks.sortedByDescending { it.second }
     }
 
     override fun onAttachedToWindow() { super.onAttachedToWindow(); handler.post(ticker) }
@@ -498,16 +527,24 @@ class FTIRSimulatorView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val w = width.toFloat()
-        val h = height.toFloat()
+        val w = width.toFloat(); val h = height.toFloat()
         canvas.drawRect(0f, 0f, w, h, bgPaint)
+
+        canvas.save()
+        canvas.scale(zoomScale, zoomScale, w / 2, h / 2)
+        canvas.translate(panX / zoomScale, panY / zoomScale)
 
         if (showInterferogram) {
             drawInterferogram(canvas, w, h)
         } else {
-            drawSchematic(canvas, w, h * 0.1f)
-            drawSpectrum(canvas, 0f, h * 0.11f, w, h * 0.89f)
+            drawSchematic(canvas, w, h * 0.08f)
+            drawSpectrum(canvas, 0f, h * 0.09f, w, h * 0.91f)
         }
+
+        canvas.restore()
+
+        // Info overlay
+        if (showInfo) drawInfo(canvas, w, h)
     }
 
     private fun drawInterferogram(canvas: Canvas, w: Float, h: Float) {
@@ -516,25 +553,21 @@ class FTIRSimulatorView @JvmOverloads constructor(
         val plotW = plotR - plotL; val plotH = plotB - plotT
 
         rect.set(plotL, plotT, plotR, plotB)
-        boxPaint.color = darken(themeColors.bg, 0.9f)
-        canvas.drawRoundRect(rect, 4f, 4f, boxPaint)
-        linePaint.color = themeColors.line; linePaint.strokeWidth = 1f
-        canvas.drawRoundRect(rect, 4f, 4f, linePaint)
+        boxPaint.color = darken(themeColors.bg, 0.9f); canvas.drawRoundRect(rect, 4f, 4f, boxPaint)
+        linePaint.color = themeColors.line; linePaint.strokeWidth = 1f; canvas.drawRoundRect(rect, 4f, 4f, linePaint)
 
         gridPaint.color = colorWithAlpha(themeColors.line, 50); gridPaint.strokeWidth = 0.8f
         canvas.drawLine(plotL, plotT + plotH * 0.5f, plotR, plotT + plotH * 0.5f, gridPaint)
         canvas.drawLine(plotL + plotW * 0.5f, plotT, plotL + plotW * 0.5f, plotB, gridPaint)
 
-        smallLabelPaint.color = themeColors.muted; smallLabelPaint.textSize = 11f
-        smallLabelPaint.textAlign = Paint.Align.CENTER
+        smallLabelPaint.color = themeColors.muted; smallLabelPaint.textSize = 11f; smallLabelPaint.textAlign = Paint.Align.CENTER
         canvas.drawText("0", plotL + plotW * 0.5f, plotB + 14f, smallLabelPaint)
         canvas.drawText("-OPD", plotL + 5f, plotB + 14f, smallLabelPaint)
         canvas.drawText("+OPD", plotR - 5f, plotB + 14f, smallLabelPaint)
         smallLabelPaint.textAlign = Paint.Align.RIGHT
         canvas.drawText("ZPD", plotL - 4f, plotT + plotH * 0.5f + 4f, smallLabelPaint)
 
-        spectrumPaint.color = themeColors.accent; spectrumPaint.strokeWidth = 1.8f
-        spectrumPaint.style = Paint.Style.STROKE; spectrumPaint.strokeCap = Paint.Cap.ROUND
+        spectrumPaint.color = themeColors.accent; spectrumPaint.strokeWidth = 1.8f; spectrumPaint.style = Paint.Style.STROKE; spectrumPaint.strokeCap = Paint.Cap.ROUND
         path.reset()
         for (i in interferogramData.indices) {
             val x = plotL + plotW * i / interferogramData.size
@@ -549,12 +582,8 @@ class FTIRSimulatorView @JvmOverloads constructor(
     }
 
     private fun drawSchematic(canvas: Canvas, w: Float, h: Float) {
-        val cy = h * 0.55f
-        val dotR = h * 0.2f
-        val seg = w / 7f
-
-        val irPulse = (0.6f + sin(time * 3f) * 0.2f).coerceIn(0.4f, 0.9f)
-        val irAlpha = (irPulse * 255).toInt()
+        val cy = h * 0.55f; val dotR = h * 0.2f; val seg = w / 7f
+        val irPulse = (0.6f + sin(time * 3f) * 0.2f).coerceIn(0.4f, 0.9f); val irAlpha = (irPulse * 255).toInt()
 
         laserPaint.strokeWidth = 2f; laserPaint.color = Color.argb(irAlpha, 255, 130, 60)
         canvas.drawLine(seg * 0.4f, cy, seg * 6.6f, cy, laserPaint)
@@ -562,27 +591,23 @@ class FTIRSimulatorView @JvmOverloads constructor(
         val xS = seg * 0.5f
         glowPaint.shader = RadialGradient(xS, cy, dotR, intArrayOf(Color.argb(irAlpha, 255, 120, 40), Color.TRANSPARENT), floatArrayOf(0f, 1f), Shader.TileMode.CLAMP)
         canvas.drawCircle(xS, cy, dotR, glowPaint); glowPaint.shader = null
-        labelPaint.textSize = 7f; labelPaint.color = themeColors.primary
-        canvas.drawText("Kaynak", xS, cy + h * 0.4f, labelPaint)
+        labelPaint.textSize = 7f; labelPaint.color = themeColors.primary; canvas.drawText("Kaynak", xS, cy + h * 0.4f, labelPaint)
 
         val xB = seg * 1.8f
         path.reset(); path.moveTo(xB, cy - dotR * 0.8f); path.lineTo(xB + dotR * 0.8f, cy)
         path.lineTo(xB, cy + dotR * 0.8f); path.lineTo(xB - dotR * 0.8f, cy); path.close()
         boxPaint.color = colorWithAlpha(themeColors.accent, 90); canvas.drawPath(path, boxPaint)
-        labelPaint.textSize = 6f; labelPaint.color = themeColors.accent
-        canvas.drawText("Bölücü", xB, cy + h * 0.4f, labelPaint)
+        labelPaint.textSize = 6f; labelPaint.color = themeColors.accent; canvas.drawText("Bölücü", xB, cy + h * 0.4f, labelPaint)
 
         val xM = seg * 2.6f
         rect.set(xM - dotR * 0.9f, cy - 2f, xM + dotR * 0.9f, cy + 2f)
         boxPaint.color = themeColors.muted; canvas.drawRect(rect, boxPaint)
-        labelPaint.textSize = 6f; labelPaint.color = themeColors.muted
-        canvas.drawText("Aynalar", xM, cy + h * 0.4f, labelPaint)
+        labelPaint.textSize = 6f; labelPaint.color = themeColors.muted; canvas.drawText("Aynalar", xM, cy + h * 0.4f, labelPaint)
 
         val xSm = seg * 3.8f
         rect.set(xSm - dotR, cy - dotR * 0.7f, xSm + dotR, cy + dotR * 0.7f)
         boxPaint.color = Color.argb(40, 180, 180, 180); canvas.drawRoundRect(rect, 3f, 3f, boxPaint)
-        labelPaint.textSize = 6f; labelPaint.color = themeColors.text
-        canvas.drawText("Numune", xSm, cy + h * 0.4f, labelPaint)
+        labelPaint.textSize = 6f; labelPaint.color = themeColors.text; canvas.drawText("Numune", xSm, cy + h * 0.4f, labelPaint)
 
         val xD = seg * 5.5f
         rect.set(xD - dotR * 0.8f, cy - dotR * 0.6f, xD + dotR * 0.8f, cy + dotR * 0.6f)
@@ -592,8 +617,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
             glowPaint.shader = RadialGradient(xD, cy, dotR * 0.7f, intArrayOf(colorWithAlpha(themeColors.primary, dA), Color.TRANSPARENT), floatArrayOf(0f, 1f), Shader.TileMode.CLAMP)
             canvas.drawCircle(xD, cy, dotR * 0.7f, glowPaint); glowPaint.shader = null
         }
-        labelPaint.textSize = 6f; labelPaint.color = themeColors.primary
-        canvas.drawText("Dedektör", xD, cy + h * 0.4f, labelPaint)
+        labelPaint.textSize = 6f; labelPaint.color = themeColors.primary; canvas.drawText("Dedektör", xD, cy + h * 0.4f, labelPaint)
 
         if (isScanning) {
             val barW = w * 0.35f; val barH = 3f; val barX = (w - barW) / 2f; val barY = h - 4f
@@ -611,30 +635,26 @@ class FTIRSimulatorView @JvmOverloads constructor(
 
         rect.set(pL, pT, pR, pB)
         boxPaint.color = darken(themeColors.bg, 0.85f); canvas.drawRoundRect(rect, 4f, 4f, boxPaint)
-        linePaint.color = themeColors.line; linePaint.strokeWidth = 1f
-        canvas.drawRoundRect(rect, 4f, 4f, linePaint)
+        linePaint.color = themeColors.line; linePaint.strokeWidth = 1f; canvas.drawRoundRect(rect, 4f, 4f, linePaint)
 
+        // Grid
         gridPaint.color = colorWithAlpha(themeColors.line, 50); gridPaint.strokeWidth = 0.8f
-        for (pct in listOf(0f, 0.2f, 0.4f, 0.6f, 0.8f, 1f)) {
-            canvas.drawLine(pL, pT + pH * pct, pR, pT + pH * pct, gridPaint)
-        }
+        for (pct in listOf(0f, 0.2f, 0.4f, 0.6f, 0.8f, 1f)) canvas.drawLine(pL, pT + pH * pct, pR, pT + pH * pct, gridPaint)
         for (wn in listOf(4000f, 3500f, 3000f, 2500f, 2000f, 1500f, 1000f, 500f)) {
-            val x = pL + pW * (1f - (wn - 400f) / 3600f)
-            canvas.drawLine(x, pT, x, pB, gridPaint)
+            val x = pL + pW * (1f - (wn - 400f) / 3600f); canvas.drawLine(x, pT, x, pB, gridPaint)
         }
 
-        smallLabelPaint.color = themeColors.muted; smallLabelPaint.textSize = 11f
-        smallLabelPaint.textAlign = Paint.Align.CENTER
+        // Labels
+        smallLabelPaint.color = themeColors.muted; smallLabelPaint.textSize = 11f; smallLabelPaint.textAlign = Paint.Align.CENTER
         for (wn in listOf(4000f, 3500f, 3000f, 2500f, 2000f, 1500f, 1000f, 500f)) {
-            val x = pL + pW * (1f - (wn - 400f) / 3600f)
-            canvas.drawText("${wn.toInt()}", x, pB + 14f, smallLabelPaint)
+            val x = pL + pW * (1f - (wn - 400f) / 3600f); canvas.drawText("${wn.toInt()}", x, pB + 14f, smallLabelPaint)
         }
         smallLabelPaint.textAlign = Paint.Align.RIGHT
         for (t in listOf(100, 80, 60, 40, 20, 0)) {
-            val y = pT + pH * (1f - t / 100f)
-            canvas.drawText("$t", pL - 4f, y + 4f, smallLabelPaint)
+            val y = pT + pH * (1f - t / 100f); canvas.drawText("$t", pL - 4f, y + 4f, smallLabelPaint)
         }
 
+        // Axis titles
         labelPaint.textSize = 11f; labelPaint.color = themeColors.muted; labelPaint.textAlign = Paint.Align.CENTER
         canvas.drawText("Dalga Sayısı (cm⁻¹)", pL + pW / 2f, pB + 24f, labelPaint)
         canvas.save(); canvas.rotate(-90f, pL - 30f, pT + pH / 2f)
@@ -642,18 +662,30 @@ class FTIRSimulatorView @JvmOverloads constructor(
 
         if (selectedGroups.isEmpty()) {
             labelPaint.textSize = 14f; labelPaint.color = themeColors.muted
-            canvas.drawText("Fonksiyonel grup seçin veya Cookbook kullanın", pL + pW / 2f, pT + pH / 2f, labelPaint)
-            labelPaint.textAlign = Paint.Align.LEFT
-            return
+            canvas.drawText("Fonksiyonel grup seçin veya Kitap'tan hazır bileşik seçin", pL + pW / 2f, pT + pH / 2f, labelPaint)
+            labelPaint.textAlign = Paint.Align.LEFT; return
         }
 
-        spectrumPaint.color = themeColors.primary
-        spectrumPaint.strokeWidth = 2.5f
-        spectrumPaint.style = Paint.Style.STROKE
-        spectrumPaint.strokeCap = Paint.Cap.ROUND
-        spectrumPaint.strokeJoin = Paint.Join.ROUND
-        path.reset()
-        var first = true
+        // Spectrum fill gradient
+        val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; isAntiAlias = true }
+        fillPaint.shader = LinearGradient(0f, pT, 0f, pB, Color.argb(30, 0, 200, 255), Color.argb(5, 0, 200, 255), Shader.TileMode.CLAMP)
+        val fillPath = Path()
+        fillPath.moveTo(pL, pB)
+        var firstFill = true
+        for (i in spectrumData.indices) {
+            val wn = 4000f - i * (3600f / spectrumData.size)
+            val x = pL + pW * (1f - (wn - 400f) / 3600f)
+            val y = pT + pH * (1f - spectrumData[i])
+            if (x < pL || x > pR) continue
+            if (firstFill) { fillPath.lineTo(x, y); firstFill = false } else fillPath.lineTo(x, y)
+        }
+        fillPath.lineTo(pR, pB); fillPath.close()
+        canvas.drawPath(fillPath, fillPaint)
+
+        // Spectrum line
+        spectrumPaint.color = themeColors.primary; spectrumPaint.strokeWidth = 2.5f
+        spectrumPaint.style = Paint.Style.STROKE; spectrumPaint.strokeCap = Paint.Cap.ROUND; spectrumPaint.strokeJoin = Paint.Join.ROUND
+        path.reset(); var first = true
         for (i in spectrumData.indices) {
             val wn = 4000f - i * (3600f / spectrumData.size)
             val x = pL + pW * (1f - (wn - 400f) / 3600f)
@@ -663,40 +695,36 @@ class FTIRSimulatorView @JvmOverloads constructor(
         }
         canvas.drawPath(path, spectrumPaint)
 
+        // Peak labels with lines
         val labelPositions = mutableListOf<Pair<Float, Float>>()
         for (group in FUNCTIONAL_GROUPS) {
             if (!selectedGroups.contains(group.id)) continue
             val x = pL + pW * (1f - (group.peakCenter - 400f) / 3600f)
-            val idx = ((4000f - group.peakCenter) / 3600f * spectrumData.size).toInt()
-                .coerceIn(0, spectrumData.size - 1)
+            val idx = ((4000f - group.peakCenter) / 3600f * spectrumData.size).toInt().coerceIn(0, spectrumData.size - 1)
             val y = pT + pH * (1f - spectrumData[idx])
             if (x < pL || x > pR) continue
 
-            peakDotPaint.color = group.color
-            canvas.drawCircle(x, y, 4f, peakDotPaint)
+            // Vertical line from peak to label area
+            peakLinePaint.color = colorWithAlpha(group.color, 100); peakLinePaint.strokeWidth = 1f
+            peakLinePaint.pathEffect = DashPathEffect(floatArrayOf(4f, 3f), 0f)
+            canvas.drawLine(x, y, x, pT + 2f, peakLinePaint)
+            peakLinePaint.pathEffect = null
 
-            val shortName = group.nameTr
-            val wnText = "${group.peakCenter.toInt()} cm⁻¹"
+            peakDotPaint.color = group.color; canvas.drawCircle(x, y, 5f, peakDotPaint)
+            peakDotPaint.color = Color.argb(60, Color.red(group.color), Color.green(group.color), Color.blue(group.color))
+            canvas.drawCircle(x, y, 9f, peakDotPaint)
 
-            peakLabelPaint.textSize = 11f
-            peakLabelPaint.color = group.color
-            peakWnPaint.textSize = 9f
-            peakWnPaint.color = colorWithAlpha(Color.WHITE, 200)
+            val shortName = group.nameTr; val wnText = "${group.peakCenter.toInt()} cm⁻¹"
+            peakLabelPaint.textSize = 11f; peakLabelPaint.color = group.color
+            peakWnPaint.textSize = 9f; peakWnPaint.color = colorWithAlpha(Color.WHITE, 200)
 
-            val nameW = peakLabelPaint.measureText(shortName)
-            val wnW = peakWnPaint.measureText(wnText)
-            val boxW = maxOf(nameW, wnW) + 10f
-            val boxH = 26f
-
-            var labelY = pT + 2f
-            var tries = 0
+            val nameW = peakLabelPaint.measureText(shortName); val wnW = peakWnPaint.measureText(wnText)
+            val boxW = maxOf(nameW, wnW) + 10f; val boxH = 26f
+            var labelY = pT + 2f; var tries = 0
             while (tries < 12) {
-                val collision = labelPositions.any { (lx, ly) ->
-                    abs(lx - x) < boxW * 0.85f && abs(ly - labelY) < boxH + 2f
-                }
+                val collision = labelPositions.any { (lx, ly) -> abs(lx - x) < boxW * 0.85f && abs(ly - labelY) < boxH + 2f }
                 if (!collision) break
-                labelY += boxH + 3f
-                tries++
+                labelY += boxH + 3f; tries++
             }
             labelPositions.add(Pair(x, labelY))
 
@@ -708,20 +736,61 @@ class FTIRSimulatorView @JvmOverloads constructor(
             canvas.drawText(wnText, x, labelY + 21f, peakWnPaint)
         }
 
+        // Cursor crosshair
+        if (showCursor && cursorX >= pL && cursorX <= pR && cursorY >= pT && cursorY <= pB) {
+            val cursorP = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 1f; color = Color.argb(60, 255, 255, 255); pathEffect = DashPathEffect(floatArrayOf(5f, 4f), 0f) }
+            canvas.drawLine(cursorX, pT, cursorX, pB, cursorP)
+            canvas.drawLine(pL, cursorY, pR, cursorY, cursorP)
+            val cWn = 4000f - (cursorX - pL) / pW * 3600f
+            val cT = 100f - (cursorY - pT) / pH * 100f
+            val infoBg = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(180, 22, 27, 34); isAntiAlias = true }
+            canvas.drawRoundRect(pL + 4f, pB + 16f, pR - 4f, pB + 32f, 6f, 6f, infoBg)
+            smallLabelPaint.textSize = 10f; smallLabelPaint.color = themeColors.primary; smallLabelPaint.textAlign = Paint.Align.CENTER
+            canvas.drawText("WN: ${"%.0f".format(cWn)} cm⁻¹  |  T: ${"%.1f".format(cT)}%", pL + pW / 2, pB + 28f, smallLabelPaint)
+        }
+
+        // Title
         labelPaint.textSize = 13f; labelPaint.color = themeColors.primary; labelPaint.textAlign = Paint.Align.CENTER
         canvas.drawText("FT-IR Spektrumu", pL + pW / 2f, top + 12f, labelPaint)
         labelPaint.textAlign = Paint.Align.LEFT
     }
 
-    private fun colorWithAlpha(color: Int, alpha: Int): Int {
-        return Color.argb(alpha.coerceIn(0, 255), Color.red(color), Color.green(color), Color.blue(color))
+    private fun drawInfo(c: Canvas, w: Float, h: Float) {
+        val px = w * 0.03f; val py = 8f; val pw = w * 0.94f; val ph = h - 16f
+        c.drawRoundRect(px, py, px + pw, py + ph, 20f, 20f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(17, 24, 39); isAntiAlias = true })
+        c.drawRoundRect(px, py, px + pw, py + ph, 20f, 20f, Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2f; color = Color.rgb(0, 200, 255); isAntiAlias = true })
+        var ty = py + 40f
+        val hp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 22f; textAlign = Paint.Align.CENTER; color = Color.rgb(0, 240, 255); isFakeBoldText = true; isAntiAlias = true }
+        c.drawText("FT-IR Simülatörü", w / 2f, ty, hp); ty += 38f
+        val lp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 16f; textAlign = Paint.Align.LEFT; isAntiAlias = true }
+        val lines = listOf(
+            Pair("═══ NEDİR? ═══", Color.rgb(0, 240, 255)),
+            Pair("Fourier Dönüşümle Kızılötesi Spektroskopisi", Color.rgb(220, 220, 220)),
+            Pair("Moleküllerin fonksiyonel gruplarını belirler.", Color.rgb(220, 220, 220)),
+            Pair("", Color.TRANSPARENT),
+            Pair("═══ NASIL ÇALIŞIR? ═══", Color.rgb(0, 240, 255)),
+            Pair("1. IR Kaynak: Kızılötesi ışık yayar", Color.rgb(170, 204, 255)),
+            Pair("2. Michelson İnterferometresi: Işığı ikiye böler", Color.rgb(170, 204, 255)),
+            Pair("3. Sabit ve Hareketli Aynalar", Color.rgb(170, 204, 255)),
+            Pair("4. Numune: IR ışığını emer", Color.rgb(170, 204, 255)),
+            Pair("5. Dedektör: Geçen ışığı ölçer", Color.rgb(170, 204, 255)),
+            Pair("", Color.TRANSPARENT),
+            Pair("═══ BÖLGELER ═══", Color.rgb(0, 240, 255)),
+            Pair("Fonksiyonel Bölge: 4000-1500 cm⁻¹", Color.rgb(100, 255, 160)),
+            Pair("Parmak İzi: 1500-400 cm⁻¹", Color.rgb(255, 200, 100)),
+            Pair("", Color.TRANSPARENT),
+            Pair("═══ KULLANIM ═══", Color.rgb(0, 240, 255)),
+            Pair("1. Fonksiyonel grupları seçin veya Kitap'tan", Color.rgb(200, 230, 255)),
+            Pair("2. Tarama Başlat ile spektrum oluşturun", Color.rgb(200, 230, 255)),
+            Pair("3. Çimdikleme ile yakınlaştırın", Color.rgb(200, 230, 255)),
+            Pair("4. ParmağınızlaWN ve T değerlerini görün", Color.rgb(200, 230, 255))
+        )
+        for ((line, color) in lines) { if (line.isEmpty()) { ty += 6f; continue }; lp.color = color; c.drawText(line, px + 18f, ty, lp); ty += 22f }
     }
 
-    private fun darken(color: Int, factor: Float): Int {
-        return Color.rgb(
-            (Color.red(color) * factor).toInt().coerceIn(0, 255),
-            (Color.green(color) * factor).toInt().coerceIn(0, 255),
-            (Color.blue(color) * factor).toInt().coerceIn(0, 255)
-        )
-    }
+    private fun colorWithAlpha(color: Int, alpha: Int): Int =
+        Color.argb(alpha.coerceIn(0, 255), Color.red(color), Color.green(color), Color.blue(color))
+
+    private fun darken(color: Int, factor: Float): Int =
+        Color.rgb((Color.red(color) * factor).toInt().coerceIn(0, 255), (Color.green(color) * factor).toInt().coerceIn(0, 255), (Color.blue(color) * factor).toInt().coerceIn(0, 255))
 }
