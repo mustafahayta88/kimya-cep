@@ -735,16 +735,16 @@ class FTIRSimulatorView @JvmOverloads constructor(
             canvas.drawLine(x, y, x, pT + 2f, peakLinePaint)
             peakLinePaint.pathEffect = null
 
-            peakDotPaint.color = group.color; canvas.drawCircle(x, y, 6f, peakDotPaint)
+            peakDotPaint.color = group.color; canvas.drawCircle(x, y, 7f, peakDotPaint)
             peakDotPaint.color = Color.argb(60, Color.red(group.color), Color.green(group.color), Color.blue(group.color))
-            canvas.drawCircle(x, y, 11f, peakDotPaint)
+            canvas.drawCircle(x, y, 13f, peakDotPaint)
 
             val shortName = group.nameTr; val wnText = "${group.peakCenter.toInt()} cm⁻¹"
-            peakLabelPaint.textSize = 13f; peakLabelPaint.color = group.color
-            peakWnPaint.textSize = 11f; peakWnPaint.color = colorWithAlpha(Color.WHITE, 200)
+            peakLabelPaint.textSize = 15f; peakLabelPaint.color = group.color
+            peakWnPaint.textSize = 13f; peakWnPaint.color = colorWithAlpha(Color.WHITE, 200)
 
             val nameW = peakLabelPaint.measureText(shortName); val wnW = peakWnPaint.measureText(wnText)
-            val boxW = maxOf(nameW, wnW) + 14f; val boxH = 32f
+            val boxW = maxOf(nameW, wnW) + 16f; val boxH = 38f
             var labelY = pT + 2f; var tries = 0
             while (tries < 12) {
                 val collision = labelPositions.any { (lx, ly) -> abs(lx - x) < boxW * 0.85f && abs(ly - labelY) < boxH + 2f }
@@ -757,8 +757,8 @@ class FTIRSimulatorView @JvmOverloads constructor(
             labelBgRect.set(x - boxW / 2f, labelY, x + boxW / 2f, labelY + boxH)
             canvas.drawRoundRect(labelBgRect, 3f, 3f, peakBgPaint)
 
-            canvas.drawText(shortName, x, labelY + 14f, peakLabelPaint)
-            canvas.drawText(wnText, x, labelY + 27f, peakWnPaint)
+            canvas.drawText(shortName, x, labelY + 16f, peakLabelPaint)
+            canvas.drawText(wnText, x, labelY + 32f, peakWnPaint)
         }
 
         // Cursor crosshair
