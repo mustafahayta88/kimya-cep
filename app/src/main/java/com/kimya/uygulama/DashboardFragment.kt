@@ -75,6 +75,7 @@ class DashboardFragment : Fragment() {
             ToolItem("pH Metre", "Asit-baz karıştırma, renkli gösterge", PhMeterFragment(), R.color.cat_tepkime),
             ToolItem("Kalibrasyon Eğrisi", "Spektroskopi analizi", EnstrumantalFragment(), R.color.cat_araclar),
             ToolItem("Çözünürlük", "Çözünürlük ve doygunluk", SolubilityFragment(), R.color.cat_hesapla),
+            ToolItem("FTIR Simülatörü", "Kızılötesi spektrum analizi", FTIRSimulatorFragment(), R.color.cat_tepkime),
         )
         addCards(v, R.id.kesfet_grid, kesfet)
         addCards(v, R.id.hesapla_grid, hesapla)
