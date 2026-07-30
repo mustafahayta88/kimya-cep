@@ -56,6 +56,10 @@
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\color\\nav_icon_tint.xml"
     },
     {
+        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\layout_fragment_aas_simulator.xml.flat",
+        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_aas_simulator.xml"
+    },
+    {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\mipmap-hdpi_ic_launcher.png.flat",
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\mipmap-hdpi\\ic_launcher.png"
     },
@@ -132,6 +136,10 @@
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_quiz.xml"
     },
     {
+        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\drawable_splash_clean_logo.png.flat",
+        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\drawable\\splash_clean_logo.png"
+    },
+    {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\layout_fragment_asitbaz.xml.flat",
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_asitbaz.xml"
     },
@@ -154,6 +162,10 @@
     {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\layout_fragment_stoykiyometri.xml.flat",
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_stoykiyometri.xml"
+    },
+    {
+        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\layout_fragment_ftir_simulator.xml.flat",
+        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_ftir_simulator.xml"
     },
     {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\mipmap-xxhdpi_ic_launcher_round.png.flat",
@@ -188,6 +200,14 @@
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_kinematik.xml"
     },
     {
+        "merged": "com.kimya.uygulama.app-debug-47:/layout_fragment_ftir_simulator.xml.flat",
+        "source": "com.kimya.uygulama.app-main-49:/layout/fragment_ftir_simulator.xml"
+    },
+    {
+        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\layout_activity_aas_simulator.xml.flat",
+        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\activity_aas_simulator.xml"
+    },
+    {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\layout_fragment_dashboard.xml.flat",
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_dashboard.xml"
     },
@@ -200,14 +220,6 @@
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_bilesik.xml"
     },
     {
-        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\drawable_ic_launcher_foreground.xml.flat",
-        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\drawable\\ic_launcher_foreground.xml"
-    },
-    {
-        "merged": "com.kimya.uygulama.app-debug-47:/menu_nav_drawer_menu.xml.flat",
-        "source": "com.kimya.uygulama.app-main-49:/menu/nav_drawer_menu.xml"
-    },
-    {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\drawable_ic_launcher_background.xml.flat",
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\drawable\\ic_launcher_background.xml"
     },
@@ -216,8 +228,16 @@
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_isomerism.xml"
     },
     {
+        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\drawable_ic_launcher_foreground.png.flat",
+        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\drawable\\ic_launcher_foreground.png"
+    },
+    {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\menu_toolbar_menu.xml.flat",
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\menu\\toolbar_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\drawable_splash_bg.png.flat",
+        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\drawable\\splash_bg.png"
     },
     {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\drawable_bg_titrasyon_card.xml.flat",
@@ -258,10 +278,6 @@
     {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\layout_fragment_seyreltme.xml.flat",
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_seyreltme.xml"
-    },
-    {
-        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\layout_fragment_aas.xml.flat",
-        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_aas.xml"
     },
     {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-debug-47:\\layout_fragment_petroleum.xml.flat",

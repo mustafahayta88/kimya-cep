@@ -8,12 +8,16 @@
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_organic.xml"
     },
     {
-        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-mergeDebugResources-46:\\layout\\fragment_cozelti.xml",
-        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_cozelti.xml"
+        "merged": "com.kimya.uygulama.app-mergeDebugResources-46:/layout/fragment_ftir_simulator.xml",
+        "source": "com.kimya.uygulama.app-main-49:/layout/fragment_ftir_simulator.xml"
     },
     {
-        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-mergeDebugResources-46:\\layout\\fragment_aas.xml",
-        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_aas.xml"
+        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-mergeDebugResources-46:\\layout\\fragment_ftir_simulator.xml",
+        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_ftir_simulator.xml"
+    },
+    {
+        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-mergeDebugResources-46:\\layout\\fragment_cozelti.xml",
+        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_cozelti.xml"
     },
     {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-mergeDebugResources-46:\\layout\\fragment_molarite.xml",
@@ -26,6 +30,10 @@
     {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-mergeDebugResources-46:\\layout\\fragment_stoykiyometri.xml",
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_stoykiyometri.xml"
+    },
+    {
+        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-mergeDebugResources-46:\\layout\\activity_aas_simulator.xml",
+        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\activity_aas_simulator.xml"
     },
     {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-mergeDebugResources-46:\\layout\\fragment_molkutlesi.xml",
@@ -108,8 +116,8 @@
         "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_gaz.xml"
     },
     {
-        "merged": "com.kimya.uygulama.app-mergeDebugResources-46:/layout/fragment_aas.xml",
-        "source": "com.kimya.uygulama.app-main-49:/layout/fragment_aas.xml"
+        "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-mergeDebugResources-46:\\layout\\fragment_aas_simulator.xml",
+        "source": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-main-49:\\layout\\fragment_aas_simulator.xml"
     },
     {
         "merged": "C:\\Users\\musta\\.gradle\\daemon\\8.13\\com.kimya.uygulama.app-mergeDebugResources-46:\\layout\\fragment_search.xml",

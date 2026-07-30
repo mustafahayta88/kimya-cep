@@ -43,6 +43,11 @@
             android:exported="false"
             android:windowLayoutInDisplayCutoutMode="never"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name="com.kimya.uygulama.features.AASSimulatorActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.KimyaUygulamasi" />
 
         <provider
             android:name="androidx.startup.InitializationProvider"

@@ -3238,6 +3238,8 @@ drawable notification_template_icon_bg
 drawable notification_template_icon_low_bg
 drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
+drawable splash_bg
+drawable splash_clean_logo
 drawable test_level_drawable
 drawable tooltip_frame_dark
 drawable tooltip_frame_light
@@ -3255,6 +3257,7 @@ id SHOW_PROGRESS
 id SYM
 id TOP_END
 id TOP_START
+id aas_view
 id ab_analiz
 id ab_asit
 id ab_asit_detay
@@ -3416,12 +3419,14 @@ id btn_bp
 id btn_calc_gibbs
 id btn_calc_hess
 id btn_cell_calc
+id btn_cookbook
 id btn_ex1
 id btn_ex2
 id btn_ex3
 id btn_faraday
 id btn_first
 id btn_fp
+id btn_ftir_help
 id btn_geo_next
 id btn_geo_prev
 id btn_help
@@ -3436,10 +3441,20 @@ id btn_lewis_next
 id btn_lewis_prev
 id btn_nernst
 id btn_raoult
+id btn_res_1
+id btn_res_2
+id btn_res_4
+id btn_res_8
 id btn_reset
+id btn_scan
+id btn_scan_1
+id btn_scan_16
+id btn_scan_4
+id btn_scan_64
 id btn_second
 id btn_start
 id btn_stop
+id btn_toggle_interferogram
 id btn_zero
 id buttonPanel
 id cache_measures
@@ -3628,6 +3643,7 @@ id floating
 id forever
 id fragment_container_view_tag
 id frost
+id ftir_view
 id fullscreen_header
 id gaz_P
 id gaz_T
@@ -3652,6 +3668,7 @@ id ghost_view_holder
 id gone
 id graph
 id graph_wrap
+id group_chips
 id group_divider
 id grouping
 id groups
@@ -3806,6 +3823,7 @@ id mtrl_picker_text_input_range_start
 id mtrl_picker_title_text
 id mtrl_view_tag_bottom_padding
 id multiply
+id nav_aas_sim
 id nav_asitbaz
 id nav_bilesik
 id nav_biomolecules
@@ -3820,6 +3838,7 @@ id nav_elektrokimya
 id nav_element
 id nav_enstrumantal
 id nav_flame_test
+id nav_ftir_sim
 id nav_gaz
 id nav_giris
 id nav_history
@@ -4053,6 +4072,8 @@ id solution_view
 id south
 id spacer
 id special_effects_controller_view_tag
+id spinner_sample_type
+id splash_logo
 id spline
 id split_action_bar
 id spread
@@ -4144,6 +4165,7 @@ id transition_transform
 id trend_canvas
 id trend_info
 id triangle
+id tv_active_sample
 id tv_bp_result
 id tv_cell_result
 id tv_faraday_result
@@ -4152,6 +4174,7 @@ id tv_geo_counter
 id tv_geo_info
 id tv_geo_name
 id tv_gibbs_result
+id tv_group_desc
 id tv_hess_result
 id tv_kin_formula
 id tv_kin_graph_info
@@ -4165,6 +4188,9 @@ id tv_lewis_info
 id tv_lewis_name
 id tv_nernst_result
 id tv_raoult_result
+id tv_resolution
+id tv_scan_count
+id tv_selected_groups
 id unchecked
 id uniform
 id unlabeled
@@ -4310,6 +4336,7 @@ layout abc_search_dropdown_item_icons_2line
 layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
+layout activity_aas_simulator
 layout activity_main
 layout activity_splash
 layout card_tool
@@ -4330,6 +4357,7 @@ layout design_navigation_menu_item
 layout design_text_input_end_icon
 layout design_text_input_start_icon
 layout drawer_header
+layout fragment_aas_simulator
 layout fragment_asitbaz
 layout fragment_bilesik
 layout fragment_biomolecules
@@ -4342,6 +4370,7 @@ layout fragment_elektrokimya
 layout fragment_element
 layout fragment_enstrumantal
 layout fragment_flame_test
+layout fragment_ftir_simulator
 layout fragment_gaz
 layout fragment_history
 layout fragment_isomerism

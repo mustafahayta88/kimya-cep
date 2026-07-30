@@ -88,7 +88,7 @@
     <color name="surface">#161B22</color>
     <color name="text">#E6EDF3</color>
     <color name="white">#FFFFFF</color>
-    <string name="app_name">Kimya Araci</string>
+    <string name="app_name">Kimya Cep</string>
     <string name="app_subtitle">MUSTAFA HAYTA</string>
     <string name="nav_araclar">Araclar</string>
     <string name="nav_endustriyel">Endustriyel</string>

@@ -46,6 +46,8 @@
     <item android:title="@string/nav_araclar">
         <menu>
             <item android:id="@+id/nav_flame_test" android:title="Alev Testi" android:icon="@android:drawable/ic_menu_gallery"/>
+            <item android:id="@+id/nav_aas_sim" android:title="AAS Simülatörü" android:icon="@android:drawable/ic_menu_gallery"/>
+            <item android:id="@+id/nav_ftir_sim" android:title="FT-IR Simülatörü" android:icon="@android:drawable/ic_menu_gallery"/>
             <item android:id="@+id/nav_drawer" android:title="Molekül Çiz" android:icon="@android:drawable/ic_menu_edit"/>
             <item android:id="@+id/nav_timer" android:title="Kronometre" android:icon="@android:drawable/ic_menu_manage"/>
             <item android:id="@+id/nav_not" android:title="Not Defteri" android:icon="@android:drawable/ic_menu_edit"/>
