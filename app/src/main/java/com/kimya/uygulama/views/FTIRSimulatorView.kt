@@ -518,6 +518,8 @@ class FTIRSimulatorView @JvmOverloads constructor(
     private val peakNumPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 12f; textAlign = Paint.Align.CENTER; isFakeBoldText = true; color = Color.WHITE }
     private val peakDotPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val scanLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2f }
+    private val interferGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val zpdPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
     private val path = Path()
     private val rect = RectF()
     private val labelBgRect = RectF()
@@ -528,15 +530,22 @@ class FTIRSimulatorView @JvmOverloads constructor(
     fun setScanCount(c: Int) { scanCount = c.coerceIn(1, 128) }
     fun setSampleType(t: String) { sampleType = t }
     fun toggleInfo() { showInfo = !showInfo; invalidate() }
-    fun startScan() { isScanning = true; scanProgress = 0f; generateSpectrum(); invalidate() }
+    fun startScan() { isScanning = true; scanProgress = 0f; scanLineX = 0f; scanLineActive = true; generateSpectrum(); invalidate() }
     fun setThemeColors(c: ThemeColors) { themeColors = c; bgPaint.color = c.bg; generateSpectrum(); invalidate() }
 
     private fun updateData() {
-        if (isScanning) { scanProgress += 0.004f; if (scanProgress >= 1f) { scanProgress = 1f; isScanning = false; generateSpectrum() } }
+        if (isScanning) { scanProgress += 0.005f; if (scanProgress >= 1f) { scanProgress = 1f; isScanning = false } }
         val zpd = interferogramData.size / 2
+        val opdScale = 0.5f + scanCount * 0.05f
         for (i in interferogramData.indices) {
-            val opd = (i - zpd).toFloat(); val env = exp(-(opd * opd) / (3000f + scanCount * 50f))
-            interferogramData[i] = env * cos(opd * 0.08f + time * 2f) + env * 0.4f * cos(opd * 0.12f + time * 1.3f) + (Math.random().toFloat() - 0.5f) * 0.01f
+            val opd = (i - zpd).toFloat() / interferogramData.size * opdScale
+            val env = exp(-(opd * opd) / (0.1f + resolution * 0.02f))
+            var sig = env * cos(opd * 800f + time * 2f)
+            sig += env * 0.4f * cos(opd * 1200f + time * 1.3f)
+            sig += env * 0.2f * cos(opd * 2000f + time * 0.8f)
+            val nl = 0.005f / (1f + scanCount * 0.1f)
+            sig += (Math.random().toFloat() - 0.5f) * nl
+            interferogramData[i] = sig
         }
     }
 
@@ -587,7 +596,21 @@ class FTIRSimulatorView @JvmOverloads constructor(
         }
         canvas.restore()
 
-        if (scanLineActive) { val x = w * scanLineX; scanLinePaint.color = Color.argb(200, 0, 255, 200); canvas.drawLine(x, 0f, x, h, scanLinePaint) }
+        if (scanLineActive) {
+            val sx = w * scanLineX
+            val scanGlow = Paint(Paint.ANTI_ALIAS_FLAG).apply { shader = LinearGradient(sx - 20f, 0f, sx + 20f, 0f, intArrayOf(Color.TRANSPARENT, Color.argb(180, 0, 255, 200), Color.TRANSPARENT), floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP) }
+            canvas.drawRect(sx - 20f, 0f, sx + 20f, h, scanGlow); scanGlow.shader = null
+            scanLinePaint.color = Color.argb(230, 0, 255, 200); scanLinePaint.strokeWidth = 2.5f; canvas.drawLine(sx, 0f, sx, h, scanLinePaint)
+            val pct = (scanLineX * 100).toInt().coerceAtMost(100)
+            val sp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 14f; textAlign = Paint.Align.CENTER; color = Color.WHITE; typeface = Typeface.MONOSPACE; isFakeBoldText = true }
+            val sBg = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(180, 10, 14, 20) }
+            canvas.drawRoundRect(w * 0.3f, 4f, w * 0.7f, 28f, 8f, 8f, sBg)
+            canvas.drawText("TARANIYOR... %$pct", w * 0.5f, 20f, sp)
+            if (!isScanning && scanLineX >= 1f) {
+                val dp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 12f; textAlign = Paint.Align.CENTER; color = C_GREEN; typeface = Typeface.MONOSPACE }
+                canvas.drawText("TARAMA TAMAMLANDI", w * 0.5f, 20f, dp)
+            }
+        }
         if (showInfo) drawInfo(canvas, w, h)
     }
 
@@ -635,14 +658,44 @@ class FTIRSimulatorView @JvmOverloads constructor(
     }
 
     private fun drawInterferogram(canvas: Canvas, w: Float, h: Float) {
-        val mL = 38f; val mR = 8f; val mT = 16f; val mB = 28f; val pL = mL; val pT = mT; val pR = w - mR; val pB = h - mB; val pW = pR - pL; val pH = pB - pT
-        rect.set(pL, pT, pR, pB); boxPaint.color = darken(themeColors.bg, 0.9f); canvas.drawRoundRect(rect, 4f, 4f, boxPaint)
-        linePaint.color = themeColors.line; canvas.drawRoundRect(rect, 4f, 4f, linePaint)
-        spectrumPaint.color = C_GREEN; spectrumPaint.strokeWidth = 1.8f; path.reset()
+        val mL = 38f; val mR = 8f; val mT = 28f; val mB = 44f; val pL = mL; val pT = mT; val pR = w - mR; val pB = h - mB; val pW = pR - pL; val pH = pB - pT
+        rect.set(pL, pT, pR, pB); boxPaint.color = darken(themeColors.bg, 0.9f); canvas.drawRoundRect(rect, 6f, 6f, boxPaint)
+        linePaint.color = Color.argb(40, 0, 255, 200); linePaint.strokeWidth = 1f; canvas.drawRoundRect(rect, 6f, 6f, linePaint)
+
+        gridPaint.color = Color.argb(15, 0, 255, 200); gridPaint.strokeWidth = 0.5f
+        for (pct in listOf(0f, 0.25f, 0.5f, 0.75f, 1f)) { canvas.drawLine(pL, pT + pH * pct, pR, pT + pH * pct, gridPaint) }
+        val zpd = interferogramData.size / 2
+        val zpdX = pL + pW * zpd / interferogramData.size
+        zpdPaint.color = Color.argb(60, 255, 255, 0); zpdPaint.strokeWidth = 1f; zpdPaint.pathEffect = DashPathEffect(floatArrayOf(4f, 3f), 0f)
+        canvas.drawLine(zpdX, pT, zpdX, pB, zpdPaint); zpdPaint.pathEffect = null
+
+        interferGlowPaint.shader = LinearGradient(0f, pT, 0f, pB, intArrayOf(Color.argb(40, 0, 200, 120), Color.TRANSPARENT, Color.argb(40, 0, 200, 120)), floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP)
+        path.reset()
+        for (i in interferogramData.indices) { val x = pL + pW * i / interferogramData.size; val y = pT + pH * 0.5f - interferogramData[i] * pH * 0.45f; if (i == 0) path.moveTo(x, y) else path.lineTo(x, y) }
+        canvas.drawPath(path, interferGlowPaint); interferGlowPaint.shader = null
+        spectrumPaint.color = C_GREEN; spectrumPaint.strokeWidth = 2f; path.reset()
         for (i in interferogramData.indices) { val x = pL + pW * i / interferogramData.size; val y = pT + pH * 0.5f - interferogramData[i] * pH * 0.45f; if (i == 0) path.moveTo(x, y) else path.lineTo(x, y) }
         canvas.drawPath(path, spectrumPaint)
-        labelPaint.textSize = 13f; labelPaint.color = C_CYAN; labelPaint.textAlign = Paint.Align.CENTER
-        canvas.drawText("İnterferogram", pL + pW / 2f, pT - 4f, labelPaint); labelPaint.textAlign = Paint.Align.LEFT
+
+        val axP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 10f; color = themeColors.muted; typeface = Typeface.MONOSPACE; textAlign = Paint.Align.CENTER }
+        canvas.drawText("OPD (cm)", pL + pW / 2f, pB + 14f, axP)
+        val opdMax = 0.5f + scanCount * 0.05f
+        for (pct in listOf(0f, 0.25f, 0.5f, 0.75f, 1f)) {
+            val opd = -opdMax + 2 * opdMax * pct
+            val x = pL + pW * pct
+            axP.textSize = 8f; canvas.drawText("${"%.2f".format(opd)}", x, pB + 26f, axP)
+        }
+        val zpdLblP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 9f; color = Color.argb(150, 255, 255, 0); typeface = Typeface.MONOSPACE; textAlign = Paint.Align.CENTER }
+        canvas.drawText("ZPD", zpdX, pT - 14f, zpdLblP)
+
+        val snr = 100f + scanCount * 80f + resolution * 10f
+        val infoP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 10f; color = Color.rgb(0, 240, 200); typeface = Typeface.MONOSPACE; textAlign = Paint.Align.LEFT }
+        canvas.drawText("SNR: ${"%.0f".format(snr)}:1", pL + 4f, pT - 8f, infoP)
+        val resP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 10f; color = themeColors.muted; typeface = Typeface.MONOSPACE; textAlign = Paint.Align.RIGHT }
+        canvas.drawText("Çözünürlük: ${resolution} cm⁻¹", pR - 4f, pT - 8f, resP)
+
+        labelPaint.textSize = 15f; labelPaint.color = C_CYAN; labelPaint.textAlign = Paint.Align.CENTER
+        canvas.drawText("İNTERFEROGRAM", pL + pW / 2f, pT - 18f, labelPaint); labelPaint.textAlign = Paint.Align.LEFT
     }
 
     private fun drawSpectrum(canvas: Canvas, left: Float, top: Float, w: Float, h: Float) {
@@ -707,9 +760,19 @@ class FTIRSimulatorView @JvmOverloads constructor(
         c.drawRoundRect(px, py, px + pw, py + ph, 16f, 16f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(10, 14, 20); isAntiAlias = true })
         c.drawRoundRect(px, py, px + pw, py + ph, 16f, 16f, Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2f; color = C_CYAN; isAntiAlias = true })
         var ty = py + 40f; val hp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 24f; textAlign = Paint.Align.CENTER; color = C_CYAN; isFakeBoldText = true; typeface = Typeface.MONOSPACE }
-        c.drawText("FT-IR SIMULATOR", w / 2f, ty, hp); ty += 36f
+        c.drawText("FT-IR SİMÜLATÖRÜ", w / 2f, ty, hp); ty += 36f
         val lp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 16f; textAlign = Paint.Align.LEFT; isAntiAlias = true }
-        for ((l, cl) in listOf("═══ WHAT IS IT? ═══" to C_CYAN, "Fourier Transform Infrared Spectroscopy" to Color.WHITE, "Identifies functional groups." to Color.WHITE, "" to Color.TRANSPARENT, "═══ USAGE ═══" to C_CYAN, "1. Select groups or Library compound" to Color.rgb(200, 230, 255), "2. Press SCAN" to Color.rgb(200, 230, 255), "3. Pinch to zoom" to Color.rgb(200, 230, 255), "4. Touch to see WN/T" to Color.rgb(200, 230, 255))) { if (l.isEmpty()) { ty += 6f; continue }; lp.color = cl; c.drawText(l, px + 16f, ty, lp); ty += 24f }
+        for ((l, cl) in listOf(
+            "═══ NE İŞE YARAR? ═══" to C_CYAN,
+            "Fourier Transform Infrared Spektroskopisi" to Color.WHITE,
+            "Fonksiyonel grupları tespit eder." to Color.WHITE,
+            "" to Color.TRANSPARENT,
+            "═══ KULLANIM ═══" to C_CYAN,
+            "1. Fonksiyonel grup seç veya Kütüphane'den bileşik seç" to Color.rgb(200, 230, 255),
+            "2. TARA butonuna bas" to Color.rgb(200, 230, 255),
+            "3. DokunarakWN/Ortam sıcaklığını gör" to Color.rgb(200, 230, 255),
+            "4. pinch-to-zoom ile yakınlaştır" to Color.rgb(200, 230, 255)
+        )) { if (l.isEmpty()) { ty += 6f; continue }; lp.color = cl; c.drawText(l, px + 16f, ty, lp); ty += 24f }
     }
 
     private fun colorWithAlpha(c: Int, a: Int): Int = Color.argb(a.coerceIn(0, 255), Color.red(c), Color.green(c), Color.blue(c))

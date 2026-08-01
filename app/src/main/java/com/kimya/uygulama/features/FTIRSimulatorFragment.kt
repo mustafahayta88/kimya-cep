@@ -114,7 +114,7 @@ class FTIRSimulatorFragment : Fragment() {
         btnScan.setOnClickListener {
             ftirView.startScan()
             btnScan.isEnabled = false
-            btnScan.text = "SCANNING... %0"
+            btnScan.text = "TARANIYOR... %0"
             val startTime = System.currentTimeMillis()
             val duration = 2000L
             val updater = object : Runnable {
@@ -122,12 +122,12 @@ class FTIRSimulatorFragment : Fragment() {
                     if (!isAdded) return
                     val elapsed = System.currentTimeMillis() - startTime
                     val pct = ((elapsed.toFloat() / duration) * 100).toInt().coerceAtMost(100)
-                    btnScan.text = "SCANNING... %$pct"
+                    btnScan.text = "TARANIYOR... %$pct"
                     if (elapsed < duration) {
                         btnScan.postDelayed(this, 50L)
                     } else {
                         btnScan.isEnabled = true
-                        btnScan.text = "SCAN"
+                        btnScan.text = "TARA"
                     }
                 }
             }
@@ -139,7 +139,7 @@ class FTIRSimulatorFragment : Fragment() {
         val btnToggleInterferogram = v.findViewById<Button>(R.id.btn_toggle_interferogram)
         btnToggleInterferogram?.setOnClickListener {
             ftirView.showInterferogram = !ftirView.showInterferogram
-            btnToggleInterferogram.text = if (ftirView.showInterferogram) "SPECTRUM" else "INTERFEROGRAM"
+            btnToggleInterferogram.text = if (ftirView.showInterferogram) "SPEKTRUM" else "İNTERFEROGRAM"
         }
     }
 
@@ -279,7 +279,7 @@ class FTIRSimulatorFragment : Fragment() {
     private fun updateReadings() {
         val groups = ftirView.selectedGroups
         if (groups.isEmpty()) {
-            tvSelectedGroups.text = "NONE"
+            tvSelectedGroups.text = "YOK"
             tvActiveSample.visibility = View.GONE
         } else {
             val names = FTIRSimulatorView.FUNCTIONAL_GROUPS
@@ -289,7 +289,7 @@ class FTIRSimulatorFragment : Fragment() {
         }
 
         currentCompoundName?.let {
-            tvActiveSample.text = "SAMPLE: $it"
+            tvActiveSample.text = "ÖRNEK: $it"
             tvActiveSample.visibility = View.VISIBLE
         } ?: run {
             tvActiveSample.visibility = View.GONE
