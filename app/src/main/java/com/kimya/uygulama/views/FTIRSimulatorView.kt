@@ -367,6 +367,88 @@ class FTIRSimulatorView @JvmOverloads constructor(
             }
             return MoleculeStructure(a, b)
         }
+        fun diisopropylether(): MoleculeStructure = MoleculeStructure(
+            listOf(Atom("C", -60f, -20f, C_GREEN), Atom("C", -20f, -20f, C_GREEN), Atom("O", 20f, 0f, C_O), Atom("C", 60f, -20f, C_GREEN), Atom("C", 100f, -20f, C_GREEN), Atom("C", -60f, -60f, C_GREEN), Atom("C", 100f, -60f, C_GREEN)),
+            listOf(Bond(0, 1), Bond(1, 2), Bond(2, 3), Bond(3, 4), Bond(0, 5), Bond(4, 6))
+        )
+        fun cyclopentanone(): MoleculeStructure {
+            val a = mutableListOf<Atom>(); val b = mutableListOf<Bond>()
+            for (i in 0 until 5) {
+                val ang = Math.toRadians(72.0 * i - 90.0)
+                a.add(Atom("C", (cos(ang) * 32).toFloat(), (sin(ang) * 32).toFloat(), C_GREEN))
+            }
+            for (i in 0 until 5) b.add(Bond(i, (i + 1) % 5))
+            a.add(Atom("O", (cos(-90.0) * 60).toFloat(), (sin(-90.0) * 60).toFloat(), C_O)); b.add(Bond(0, 5, 2))
+            return MoleculeStructure(a, b)
+        }
+        fun pyridine(): MoleculeStructure {
+            val a = mutableListOf<Atom>(); val b = mutableListOf<Bond>()
+            for (i in 0 until 6) {
+                val ang = Math.toRadians(60.0 * i - 90.0)
+                val sym = if (i == 0) "N" else "C"; val col = if (i == 0) C_N else C_GREEN
+                a.add(Atom(sym, (cos(ang) * 38).toFloat(), (sin(ang) * 38).toFloat(), col))
+            }
+            for (i in 0 until 6) b.add(Bond(i, (i + 1) % 6, if (i % 2 == 0) 2 else 1))
+            return MoleculeStructure(a, b)
+        }
+        fun furan(): MoleculeStructure {
+            val a = mutableListOf<Atom>(); val b = mutableListOf<Bond>()
+            val oAng = Math.toRadians(-90.0)
+            a.add(Atom("O", (cos(oAng) * 30).toFloat(), (sin(oAng) * 30).toFloat(), C_O))
+            for (i in 0 until 4) {
+                val ang = Math.toRadians(72.0 * (i + 1) - 90.0)
+                a.add(Atom("C", (cos(ang) * 38).toFloat(), (sin(ang) * 38).toFloat(), C_GREEN))
+            }
+            for (i in 0 until 4) b.add(Bond(i, i + 1))
+            b.add(Bond(4, 0))
+            b.add(Bond(1, 2, 2)); b.add(Bond(3, 4, 2))
+            return MoleculeStructure(a, b)
+        }
+        fun thiophene(): MoleculeStructure {
+            val a = mutableListOf<Atom>(); val b = mutableListOf<Bond>()
+            a.add(Atom("S", 0f, -35f, Color.rgb(255, 220, 50)))
+            for (i in 0 until 4) {
+                val ang = Math.toRadians(72.0 * (i + 1) - 90.0)
+                a.add(Atom("C", (cos(ang) * 38).toFloat(), (sin(ang) * 38).toFloat(), C_GREEN))
+            }
+            for (i in 0 until 4) b.add(Bond(i, i + 1))
+            b.add(Bond(4, 0))
+            b.add(Bond(1, 2, 2)); b.add(Bond(3, 4, 2))
+            return MoleculeStructure(a, b)
+        }
+        fun piperidine(): MoleculeStructure {
+            val a = mutableListOf<Atom>(); val b = mutableListOf<Bond>()
+            for (i in 0 until 6) {
+                val ang = Math.toRadians(60.0 * i - 90.0)
+                val sym = if (i == 0) "N" else "C"; val col = if (i == 0) C_N else C_GREEN
+                a.add(Atom(sym, (cos(ang) * 38).toFloat(), (sin(ang) * 38).toFloat(), col))
+            }
+            for (i in 0 until 6) b.add(Bond(i, (i + 1) % 6))
+            return MoleculeStructure(a, b)
+        }
+        fun morpholine(): MoleculeStructure {
+            val a = mutableListOf<Atom>(); val b = mutableListOf<Bond>()
+            for (i in 0 until 6) {
+                val ang = Math.toRadians(60.0 * i - 90.0)
+                val sym = when (i) { 0 -> "N"; 3 -> "O"; else -> "C" }
+                val col = when (i) { 0 -> C_N; 3 -> C_O; else -> C_GREEN }
+                a.add(Atom(sym, (cos(ang) * 38).toFloat(), (sin(ang) * 38).toFloat(), col))
+            }
+            for (i in 0 until 6) b.add(Bond(i, (i + 1) % 6))
+            return MoleculeStructure(a, b)
+        }
+        fun diethylcarbonate(): MoleculeStructure = MoleculeStructure(
+            listOf(Atom("C", -60f, 0f, C_GREEN), Atom("C", -20f, 0f, C_GREEN), Atom("O", 20f, -30f, C_O), Atom("C", 60f, 0f, C_GREEN), Atom("O", 60f, 40f, C_O), Atom("C", -20f, 40f, C_GREEN)),
+            listOf(Bond(0, 1), Bond(1, 2), Bond(2, 3), Bond(3, 4), Bond(1, 5))
+        )
+        fun nndimethylformamide(): MoleculeStructure = MoleculeStructure(
+            listOf(Atom("C", -25f, 0f, C_GREEN), Atom("C", 25f, 0f, C_GREEN), Atom("O", 25f, -42f, C_O), Atom("N", 68f, 20f, C_N), Atom("C", 100f, 0f, C_GREEN), Atom("C", 68f, 55f, C_GREEN), Atom("H", -25f, -35f, C_H)),
+            listOf(Bond(0, 1), Bond(1, 2, 2), Bond(1, 3), Bond(3, 4), Bond(3, 5), Bond(0, 6))
+        )
+        fun dimethylsulfoxide(): MoleculeStructure = MoleculeStructure(
+            listOf(Atom("C", -40f, 0f, C_GREEN), Atom("S", 0f, 0f, Color.rgb(255, 220, 50)), Atom("O", 0f, -45f, C_O), Atom("C", 40f, 0f, C_GREEN)),
+            listOf(Bond(0, 1), Bond(1, 2, 2), Bond(1, 3))
+        )
 
         val FUNCTIONAL_GROUPS = listOf(
             FunctionalGroup("oh_alcohol", "O-H (Alkol)", "Hidroksil", 3200f, 3600f, 3350f, 0.85f, 180f, Color.rgb(255, 80, 80), "Geniş", "Geniş pik. Alkol ve fenol.", "Etanol"),
@@ -434,10 +516,19 @@ class FTIRSimulatorView @JvmOverloads constructor(
             CookbookCompound("Dietil Eter", "(C₂H₅)₂O", listOf("ch_alkane", "co_alcohol"), "C-H (2920), C-O (1120)", "74.12", "Eter", diethylEther()),
             CookbookCompound("THF", "C₄H₈O", listOf("ch_alkane", "co_alcohol"), "C-H (2920), C-O (1070)", "72.11", "Eter", thf()),
             CookbookCompound("Difenil Metan", "(C₆H₅)₂CH₂", listOf("ch_aro", "cc_aro", "ch_alkane"), "Aromatik (3050), C=C (1500)", "166.22", "Aromatik", diphenylmethane()),
-            CookbookCompound("Naylon 6,6", "(C₁₂H₂₂N₂O₂)ₙ", listOf("nh_amide", "co_amide1", "nh_bend", "ch_alkane"), "N-H (3300), Amid I (1660)", "226.32", "Polimer"),
-            CookbookCompound("Polietilen", "(C₂H₄)ₙ", listOf("ch_alkane"), "C-H (2920, 2850, 1470)", "—", "Polimer"),
-            CookbookCompound("Polistiren", "(C₈H₈)ₙ", listOf("ch_aro", "cc_aro", "ch_alkane"), "Aromatik (3025), C=C (1600)", "—", "Polimer"),
-            CookbookCompound("Şeker (Sucroz)", "C₁₂H₂₂O₁₁", listOf("oh_alcohol", "co_alcohol", "ch_alkane"), "O-H (3400), C-O (1000-1100)", "342.30", "Karbonhidrat")
+            CookbookCompound("Naylon 6,6", "(C₁₂H₂₂N₂O₂)ₙ", listOf("nh_amide", "co_amide1", "nh_bend", "ch_alkane"), "N-H (3300), Amid I (1660)", "226.32", "Polimer", null),
+            CookbookCompound("Polietilen", "(C₂H₄)ₙ", listOf("ch_alkane"), "C-H (2920, 2850, 1470)", "—", "Polimer", null),
+            CookbookCompound("Polistiren", "(C₈H₈)ₙ", listOf("ch_aro", "cc_aro", "ch_alkane"), "Aromatik (3025), C=C (1600)", "—", "Polimer", null),
+            CookbookCompound("Şeker (Sucroz)", "C₁₂H₂₂O₁₁", listOf("oh_alcohol", "co_alcohol", "ch_alkane"), "O-H (3400), C-O (1000-1100)", "342.30", "Karbonhidrat", null),
+            CookbookCompound("Piridin", "C₅H₅N", listOf("ch_aro", "cc_aro"), "Aromatik C-H, C=C, C=N", "79.10", "Aromatik", pyridine()),
+            CookbookCompound("Furan", "C₄H₄O", listOf("cc_alkene", "co_alcohol"), "C=C (1600), C-O (1000)", "68.07", "Heteroaromatik", furan()),
+            CookbookCompound("Tiyofen", "C₄H₄S", listOf("cc_alkene"), "C=C (1400-1600)", "84.14", "Heteroaromatik", thiophene()),
+            CookbookCompound("Piperidin", "C₅H₁₁N", listOf("nh_secondary", "ch_alkane"), "N-H (3300), C-H (2920)", "85.15", "Amin", piperidine()),
+            CookbookCompound("Morfolin", "C₄H₉NO", listOf("nh_secondary", "ch_alkane", "co_alcohol"), "N-H (3300), C-O (1100)", "87.12", "Amin", morpholine()),
+            CookbookCompound("Siklopentanon", "C₅H₈O", listOf("co_ketone", "ch_alkane"), "C=O (1745), C-H (2920)", "84.12", "Keton", cyclopentanone()),
+            CookbookCompound("Dietil Karbonat", "C₅H₁₀O₃", listOf("co_ester", "co_ester_coc", "ch_alkane"), "C=O (1740), C-O (1260)", "118.13", "Ester", diethylcarbonate()),
+            CookbookCompound("DMF", "(CH₃)₂NCHO", listOf("co_aldehyde", "ch_aldehyde", "ch_alkane"), "C=O (1675), C-H (2920)", "73.09", "Amid", nndimethylformamide()),
+            CookbookCompound("DMSO", "(CH₃)₂SO", listOf("ch_alkane"), "S=O (1050), C-H (2920)", "78.13", "Sülfoksit", dimethylsulfoxide())
         )
 
         val SAMPLE_TYPES = listOf(
@@ -469,12 +560,17 @@ class FTIRSimulatorView @JvmOverloads constructor(
     private var tapTime = 0L; private var lastTapTime = 0L
     private var scanLineX = 0f; private var scanLineActive = false
     private var animProgress = 0f
+    private var completedTextAlpha = 0f
 
     private val handler = Handler(Looper.getMainLooper())
     private val ticker = object : Runnable {
         override fun run() {
             time += 0.025f
-            if (scanLineActive) { scanLineX += 0.015f; if (scanLineX >= 1f) { scanLineActive = false; scanLineX = 1f } }
+            if (scanLineActive) {
+                scanLineX += 0.012f
+                if (scanLineX >= 1f) { scanLineActive = false; scanLineX = 1f; completedTextAlpha = 1f; isScanning = false }
+            }
+            if (completedTextAlpha > 0f) completedTextAlpha = (completedTextAlpha - 0.02f).coerceAtLeast(0f)
             if (animProgress < 1f) animProgress = (animProgress + 0.02f).coerceAtMost(1f)
             updateData(); invalidate()
             handler.postDelayed(this, 16L)
@@ -534,7 +630,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
     fun setThemeColors(c: ThemeColors) { themeColors = c; bgPaint.color = c.bg; generateSpectrum(); invalidate() }
 
     private fun updateData() {
-        if (isScanning) { scanProgress += 0.005f; if (scanProgress >= 1f) { scanProgress = 1f; isScanning = false } }
+        if (isScanning) { scanProgress += 0.005f; if (scanProgress >= 1f) { scanProgress = 1f } }
         val zpd = interferogramData.size / 2
         val opdScale = 0.5f + scanCount * 0.05f
         for (i in interferogramData.indices) {
@@ -597,19 +693,25 @@ class FTIRSimulatorView @JvmOverloads constructor(
         canvas.restore()
 
         if (scanLineActive) {
-            val sx = w * scanLineX
-            val scanGlow = Paint(Paint.ANTI_ALIAS_FLAG).apply { shader = LinearGradient(sx - 20f, 0f, sx + 20f, 0f, intArrayOf(Color.TRANSPARENT, Color.argb(180, 0, 255, 200), Color.TRANSPARENT), floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP) }
-            canvas.drawRect(sx - 20f, 0f, sx + 20f, h, scanGlow); scanGlow.shader = null
-            scanLinePaint.color = Color.argb(230, 0, 255, 200); scanLinePaint.strokeWidth = 2.5f; canvas.drawLine(sx, 0f, sx, h, scanLinePaint)
+            val scX = w * scanLineX
+            val scanGlow = Paint(Paint.ANTI_ALIAS_FLAG).apply { shader = LinearGradient(scX - 25f, 0f, scX + 25f, 0f, intArrayOf(Color.TRANSPARENT, Color.argb(150, 0, 255, 200), Color.TRANSPARENT), floatArrayOf(0f, 0.5f, 1f), Shader.TileMode.CLAMP) }
+            canvas.drawRect(scX - 25f, 0f, scX + 25f, h, scanGlow); scanGlow.shader = null
+            scanLinePaint.color = Color.argb(230, 0, 255, 200); scanLinePaint.strokeWidth = 2.5f; canvas.drawLine(scX, 0f, scX, h, scanLinePaint)
             val pct = (scanLineX * 100).toInt().coerceAtMost(100)
             val sp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 14f; textAlign = Paint.Align.CENTER; color = Color.WHITE; typeface = Typeface.MONOSPACE; isFakeBoldText = true }
-            val sBg = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(180, 10, 14, 20) }
-            canvas.drawRoundRect(w * 0.3f, 4f, w * 0.7f, 28f, 8f, 8f, sBg)
-            canvas.drawText("TARANIYOR... %$pct", w * 0.5f, 20f, sp)
-            if (!isScanning && scanLineX >= 1f) {
-                val dp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 12f; textAlign = Paint.Align.CENTER; color = C_GREEN; typeface = Typeface.MONOSPACE }
-                canvas.drawText("TARAMA TAMAMLANDI", w * 0.5f, 20f, dp)
-            }
+            val sBg = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(200, 10, 14, 20) }
+            canvas.drawRoundRect(w * 0.25f, 4f, w * 0.75f, 30f, 10f, 10f, sBg)
+            canvas.drawText("TARANIYOR... %$pct", w * 0.5f, 22f, sp)
+            val barBg = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(60, 0, 255, 200) }
+            canvas.drawRoundRect(w * 0.25f, 32f, w * 0.75f, 36f, 2f, 2f, barBg)
+            val barFg = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = C_GREEN }
+            canvas.drawRoundRect(w * 0.25f, 32f, w * 0.25f + (w * 0.5f) * scanLineX, 36f, 2f, 2f, barFg)
+        }
+        if (completedTextAlpha > 0.01f) {
+            val cp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 13f; textAlign = Paint.Align.CENTER; color = colorWithAlpha(C_GREEN, (completedTextAlpha * 255).toInt()); typeface = Typeface.MONOSPACE; isFakeBoldText = true }
+            val cbg = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = colorWithAlpha(Color.rgb(10, 14, 20), (completedTextAlpha * 200).toInt()) }
+            canvas.drawRoundRect(w * 0.3f, 4f, w * 0.7f, 28f, 8f, 8f, cbg)
+            canvas.drawText("TARAMA TAMAMLANDI", w * 0.5f, 20f, cp)
         }
         if (showInfo) drawInfo(canvas, w, h)
     }
@@ -646,7 +748,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
         for (at in s.atoms) {
             val ax = cx + (at.x * cos(rot) - at.y * sin(rot)) * scale * br
             val ay = cy + (at.x * sin(rot) + at.y * cos(rot)) * scale * br
-            val r = when (at.symbol) { "C" -> 14f; "O" -> 16f; "N" -> 16f; "Cl" -> 18f; "H" -> 9f; else -> 14f } * scale
+            val r = when (at.symbol) { "C" -> 14f; "O" -> 16f; "N" -> 16f; "Cl" -> 18f; "S" -> 18f; "H" -> 9f; else -> 14f } * scale
             val gr = (r * 2.8f).coerceAtLeast(1f)
             val cR = Color.red(at.color); val cG = Color.green(at.color); val cB = Color.blue(at.color)
             glowPaint.shader = RadialGradient(ax, ay, gr, intArrayOf(Color.argb(alpha / 4, cR, cG, cB), Color.argb(0, cR, cG, cB)), floatArrayOf(0f, 1f), Shader.TileMode.CLAMP)
@@ -658,7 +760,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
     }
 
     private fun drawInterferogram(canvas: Canvas, w: Float, h: Float) {
-        val mL = 38f; val mR = 8f; val mT = 28f; val mB = 44f; val pL = mL; val pT = mT; val pR = w - mR; val pB = h - mB; val pW = pR - pL; val pH = pB - pT
+        val mL = 38f; val mR = 8f; val mT = 36f; val mB = 50f; val pL = mL; val pT = mT; val pR = w - mR; val pB = h - mB; val pW = pR - pL; val pH = pB - pT
         rect.set(pL, pT, pR, pB); boxPaint.color = darken(themeColors.bg, 0.9f); canvas.drawRoundRect(rect, 6f, 6f, boxPaint)
         linePaint.color = Color.argb(40, 0, 255, 200); linePaint.strokeWidth = 1f; canvas.drawRoundRect(rect, 6f, 6f, linePaint)
 
@@ -695,7 +797,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
         canvas.drawText("Çözünürlük: ${resolution} cm⁻¹", pR - 4f, pT - 8f, resP)
 
         labelPaint.textSize = 15f; labelPaint.color = C_CYAN; labelPaint.textAlign = Paint.Align.CENTER
-        canvas.drawText("İNTERFEROGRAM", pL + pW / 2f, pT - 18f, labelPaint); labelPaint.textAlign = Paint.Align.LEFT
+        canvas.drawText("İNTERFEROGRAM", pL + pW / 2f, pT - 22f, labelPaint); labelPaint.textAlign = Paint.Align.LEFT
     }
 
     private fun drawSpectrum(canvas: Canvas, left: Float, top: Float, w: Float, h: Float) {
@@ -712,7 +814,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
         labelPaint.textSize = 9f; labelPaint.color = themeColors.muted; labelPaint.textAlign = Paint.Align.CENTER
         canvas.drawText("Wavenumber (cm⁻¹)", pL + pW / 2f, pB + 25f, labelPaint)
         canvas.save(); canvas.rotate(-90f, pL - 30f, pT + pH / 2f); canvas.drawText("Transmittance (%T)", pL - 30f, pT + pH / 2f, labelPaint); canvas.restore()
-        if (selectedGroups.isEmpty()) { labelPaint.textSize = 12f; labelPaint.color = themeColors.muted; canvas.drawText("Fonksiyonel grup seçin veya Library'den bileşik seçin", pL + pW / 2f, pT + pH / 2f, labelPaint); labelPaint.textAlign = Paint.Align.LEFT; return }
+        if (selectedGroups.isEmpty()) { labelPaint.textSize = 12f; labelPaint.color = themeColors.muted; canvas.drawText("Fonksiyonel grup seçin veya Kütüphane'den bileşik seçin", pL + pW / 2f, pT + pH / 2f, labelPaint); labelPaint.textAlign = Paint.Align.LEFT; return }
 
         val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
         fillPaint.shader = LinearGradient(0f, pT, 0f, pB, Color.argb(30, 0, 255, 200), Color.argb(3, 0, 255, 200), Shader.TileMode.CLAMP)
@@ -761,18 +863,23 @@ class FTIRSimulatorView @JvmOverloads constructor(
         c.drawRoundRect(px, py, px + pw, py + ph, 16f, 16f, Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2f; color = C_CYAN; isAntiAlias = true })
         var ty = py + 40f; val hp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 24f; textAlign = Paint.Align.CENTER; color = C_CYAN; isFakeBoldText = true; typeface = Typeface.MONOSPACE }
         c.drawText("FT-IR SİMÜLATÖRÜ", w / 2f, ty, hp); ty += 36f
-        val lp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 16f; textAlign = Paint.Align.LEFT; isAntiAlias = true }
+        val lp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 15f; textAlign = Paint.Align.LEFT; isAntiAlias = true }
         for ((l, cl) in listOf(
             "═══ NE İŞE YARAR? ═══" to C_CYAN,
             "Fourier Transform Infrared Spektroskopisi" to Color.WHITE,
-            "Fonksiyonel grupları tespit eder." to Color.WHITE,
+            "Bileşiklerin fonksiyonel gruplarını" to Color.WHITE,
+            "tespit eden güçlü bir analiz aracıdır." to Color.WHITE,
             "" to Color.TRANSPARENT,
-            "═══ KULLANIM ═══" to C_CYAN,
-            "1. Fonksiyonel grup seç veya Kütüphane'den bileşik seç" to Color.rgb(200, 230, 255),
-            "2. TARA butonuna bas" to Color.rgb(200, 230, 255),
-            "3. DokunarakWN/Ortam sıcaklığını gör" to Color.rgb(200, 230, 255),
-            "4. pinch-to-zoom ile yakınlaştır" to Color.rgb(200, 230, 255)
-        )) { if (l.isEmpty()) { ty += 6f; continue }; lp.color = cl; c.drawText(l, px + 16f, ty, lp); ty += 24f }
+            "═══ NASIL KULLANILIR? ═══" to C_CYAN,
+            "1. Fonksiyonel grup chip'lerine dokunarak seç" to Color.rgb(200, 230, 255),
+            "2. Veya KÜTÜPHANE'den hazır bileşik seç" to Color.rgb(200, 230, 255),
+            "3. TARA'ya basarak taramayı başlat" to Color.rgb(200, 230, 255),
+            "" to Color.TRANSPARENT,
+            "═══ İPUÇLARI ═══" to C_CYAN,
+            "• DokunarakWN ve T değerini gör" to Color.rgb(200, 230, 255),
+            "• Çift tıkla ile yakınlaştırmayı sıfırla" to Color.rgb(200, 230, 255),
+            "• İNTERFEROGRAM ile ham veriyi incele" to Color.rgb(200, 230, 255)
+        )) { if (l.isEmpty()) { ty += 6f; continue }; lp.color = cl; c.drawText(l, px + 16f, ty, lp); ty += 22f }
     }
 
     private fun colorWithAlpha(c: Int, a: Int): Int = Color.argb(a.coerceIn(0, 255), Color.red(c), Color.green(c), Color.blue(c))

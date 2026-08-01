@@ -49,7 +49,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxHeight="240dp"
+        android:maxHeight="280dp"
         android:fillViewport="true"
         android:background="#0D1117">
 
@@ -106,7 +106,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="NONE"
+                    android:text="YOK"
                     android:textColor="#00F0C8"
                     android:textSize="10sp"
                     android:fontFamily="monospace" />
@@ -167,15 +167,6 @@
                 android:fontFamily="monospace"
                 android:visibility="gone"
                 android:layout_marginBottom="2dp" />
-
-            <TextView
-                android:id="@+id/tv_group_desc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#5A6A7A"
-                android:textSize="9sp"
-                android:visibility="gone"
-                android:layout_marginBottom="4dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -286,12 +277,12 @@
                 <Button
                     android:id="@+id/btn_scan"
                     android:layout_width="0dp"
-                    android:layout_height="32dp"
+                    android:layout_height="34dp"
                     android:layout_weight="1"
                     android:text="TARA"
                     android:textColor="#0A0E14"
                     android:backgroundTint="#00F0C8"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     android:fontFamily="monospace"
                     android:textStyle="bold"
                     android:layout_marginEnd="4dp" />
@@ -299,24 +290,24 @@
                 <Button
                     android:id="@+id/btn_cookbook"
                     android:layout_width="0dp"
-                    android:layout_height="32dp"
+                    android:layout_height="34dp"
                     android:layout_weight="1"
                     android:text="KÜTÜPHANE"
                     android:textColor="#0A0E14"
                     android:backgroundTint="#00FF88"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     android:fontFamily="monospace"
                     android:textStyle="bold" />
 
                 <Button
                     android:id="@+id/btn_toggle_interferogram"
                     android:layout_width="0dp"
-                    android:layout_height="32dp"
+                    android:layout_height="34dp"
                     android:layout_weight="1"
                     android:text="İNTERFEROGRAM"
                     android:textColor="#0A0E14"
                     android:backgroundTint="#FF6B6B"
-                    android:textSize="9sp"
+                    android:textSize="10sp"
                     android:fontFamily="monospace"
                     android:textStyle="bold"
                     android:layout_marginStart="4dp" />

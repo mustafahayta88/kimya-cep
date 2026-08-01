@@ -22,8 +22,6 @@ class FTIRSimulatorFragment : Fragment() {
     private lateinit var tvResolution: TextView
     private lateinit var tvScanCount: TextView
     private lateinit var tvActiveSample: TextView
-    private lateinit var tvGroupDesc: TextView
-    private lateinit var btnScan: Button
     private lateinit var groupChipsContainer: LinearLayout
     private var currentCompoundName: String? = null
 
@@ -37,7 +35,6 @@ class FTIRSimulatorFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val v = inflater.inflate(R.layout.fragment_ftir_simulator, container, false)
-
         resolveThemeColors()
 
         ftirView = v.findViewById(R.id.ftir_view)
@@ -45,8 +42,6 @@ class FTIRSimulatorFragment : Fragment() {
         tvResolution = v.findViewById(R.id.tv_resolution)
         tvScanCount = v.findViewById(R.id.tv_scan_count)
         tvActiveSample = v.findViewById(R.id.tv_active_sample)
-        tvGroupDesc = v.findViewById(R.id.tv_group_desc)
-        btnScan = v.findViewById(R.id.btn_scan)
         groupChipsContainer = v.findViewById(R.id.group_chips)
 
         ftirView.setThemeColors(FTIRSimulatorView.ThemeColors(
@@ -59,7 +54,6 @@ class FTIRSimulatorFragment : Fragment() {
         setupControls(v)
 
         v.findViewById<Button>(R.id.btn_ftir_help).setOnClickListener { ftirView.toggleInfo() }
-
         return v
     }
 
@@ -111,35 +105,20 @@ class FTIRSimulatorFragment : Fragment() {
             }
         }
 
-        btnScan.setOnClickListener {
+        v.findViewById<Button>(R.id.btn_scan).setOnClickListener {
             ftirView.startScan()
-            btnScan.isEnabled = false
-            btnScan.text = "TARANIYOR... %0"
-            val startTime = System.currentTimeMillis()
-            val duration = 2000L
-            val updater = object : Runnable {
-                override fun run() {
-                    if (!isAdded) return
-                    val elapsed = System.currentTimeMillis() - startTime
-                    val pct = ((elapsed.toFloat() / duration) * 100).toInt().coerceAtMost(100)
-                    btnScan.text = "TARANIYOR... %$pct"
-                    if (elapsed < duration) {
-                        btnScan.postDelayed(this, 50L)
-                    } else {
-                        btnScan.isEnabled = true
-                        btnScan.text = "TARA"
-                    }
-                }
-            }
-            btnScan.postDelayed(updater, 50L)
+            val btn = v.findViewById<Button>(R.id.btn_scan)
+            btn.isEnabled = false
+            btn.text = "TARANIYOR..."
+            btn.postDelayed({ if (isAdded) { btn.isEnabled = true; btn.text = "TARA" } }, 2500L)
         }
 
         v.findViewById<Button>(R.id.btn_cookbook).setOnClickListener { showCookbook() }
 
-        val btnToggleInterferogram = v.findViewById<Button>(R.id.btn_toggle_interferogram)
-        btnToggleInterferogram?.setOnClickListener {
+        v.findViewById<Button>(R.id.btn_toggle_interferogram)?.setOnClickListener {
             ftirView.showInterferogram = !ftirView.showInterferogram
-            btnToggleInterferogram.text = if (ftirView.showInterferogram) "SPEKTRUM" else "İNTERFEROGRAM"
+            v.findViewById<Button>(R.id.btn_toggle_interferogram)?.text =
+                if (ftirView.showInterferogram) "SPEKTRUM" else "İNTERFEROGRAM"
         }
     }
 
@@ -212,9 +191,7 @@ class FTIRSimulatorFragment : Fragment() {
                 }
             }
 
-            val textCol = LinearLayout(requireContext()).apply {
-                orientation = LinearLayout.VERTICAL
-            }
+            val textCol = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
 
             val name = TextView(requireContext()).apply {
                 text = group.nameTr
@@ -231,11 +208,8 @@ class FTIRSimulatorFragment : Fragment() {
                 setSingleLine(true)
             }
 
-            textCol.addView(name)
-            textCol.addView(wn)
-
-            inner.addView(dot)
-            inner.addView(textCol)
+            textCol.addView(name); textCol.addView(wn)
+            inner.addView(dot); inner.addView(textCol)
             chip.addView(inner)
 
             val lp = LinearLayout.LayoutParams(
@@ -249,7 +223,6 @@ class FTIRSimulatorFragment : Fragment() {
                 currentCompoundName = null
                 updateChipSelection()
                 updateReadings()
-                tvGroupDesc.text = group.description
             }
 
             groupChipsContainer.addView(chip)
@@ -262,10 +235,8 @@ class FTIRSimulatorFragment : Fragment() {
             val innerLayout = chip.getChildAt(0) as? LinearLayout ?: continue
             val textCol = innerLayout.getChildAt(1) as? LinearLayout ?: continue
             val nameText = textCol.getChildAt(0) as? TextView ?: continue
-
             val groupId = FTIRSimulatorView.FUNCTIONAL_GROUPS[i].id
             val selected = ftirView.selectedGroups.contains(groupId)
-
             if (selected) {
                 chip.cardElevation = 6f * resources.displayMetrics.density
                 nameText.setTextColor(FTIRSimulatorView.FUNCTIONAL_GROUPS[i].color)
@@ -287,29 +258,35 @@ class FTIRSimulatorFragment : Fragment() {
                 .map { it.name.split("(").first().trim() }
             tvSelectedGroups.text = names.joinToString(", ")
         }
-
         currentCompoundName?.let {
             tvActiveSample.text = "ÖRNEK: $it"
             tvActiveSample.visibility = View.VISIBLE
-        } ?: run {
-            tvActiveSample.visibility = View.GONE
-        }
+        } ?: run { tvActiveSample.visibility = View.GONE }
     }
 
     private fun showCookbook() {
-        val items = FTIRSimulatorView.COOKBOOK_COMPOUNDS.map { "${it.name} (${it.formula})" }.toTypedArray()
+        val categories = FTIRSimulatorView.COOKBOOK_COMPOUNDS.groupBy { it.category }
+        val categoryNames = categories.keys.toList()
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Library — Yaygın Bileşikler")
-            .setItems(items) { _, which ->
-                val compound = FTIRSimulatorView.COOKBOOK_COMPOUNDS[which]
-                ftirView.selectPreset(compound)
-                currentCompoundName = compound.name
-                updateChipSelection()
-                updateReadings()
-                tvGroupDesc.text = compound.description
-                tvActiveSample.text = "SAMPLE: ${compound.name}"
-                tvActiveSample.visibility = View.VISIBLE
+            .setTitle("Kütüphane — Bileşikler")
+            .setItems(categoryNames.toTypedArray()) { _, which ->
+                val cat = categoryNames[which]
+                val compounds = categories[cat] ?: return@setItems
+                val items = compounds.map { "${it.name} (${it.formula})" }.toTypedArray()
+                AlertDialog.Builder(requireContext())
+                    .setTitle(cat)
+                    .setItems(items) { _, innerWhich ->
+                        val compound = compounds[innerWhich]
+                        ftirView.selectPreset(compound)
+                        currentCompoundName = compound.name
+                        updateChipSelection()
+                        updateReadings()
+                        tvActiveSample.text = "ÖRNEK: ${compound.name}"
+                        tvActiveSample.visibility = View.VISIBLE
+                    }
+                    .setNegativeButton("Geri", null)
+                    .show()
             }
             .setNegativeButton("Kapat", null)
             .show()
@@ -323,32 +300,19 @@ class FTIRSimulatorFragment : Fragment() {
     private fun resolveThemeColors() {
         val ctx = requireContext()
         val tv = TypedValue()
-
-        ctx.theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, tv, true)
-        themePrimary = tv.data
-
-        ctx.theme.resolveAttribute(com.google.android.material.R.attr.colorAccent, tv, true)
-        themeAccent = tv.data
-
-        ctx.theme.resolveAttribute(android.R.attr.textColorPrimary, tv, true)
-        themeText = tv.data
-
-        ctx.theme.resolveAttribute(android.R.attr.textColorSecondary, tv, true)
-        themeMuted = tv.data
-
-        ctx.theme.resolveAttribute(android.R.attr.windowBackground, tv, true)
-        themeBg = tv.data
-
-        ctx.theme.resolveAttribute(com.google.android.material.R.attr.colorSurface, tv, true)
-        themeSurface = tv.data
-
-        ctx.theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, tv, true)
-        themeLine = tv.data
+        ctx.theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, tv, true); themePrimary = tv.data
+        ctx.theme.resolveAttribute(com.google.android.material.R.attr.colorAccent, tv, true); themeAccent = tv.data
+        ctx.theme.resolveAttribute(android.R.attr.textColorPrimary, tv, true); themeText = tv.data
+        ctx.theme.resolveAttribute(android.R.attr.textColorSecondary, tv, true); themeMuted = tv.data
+        ctx.theme.resolveAttribute(android.R.attr.windowBackground, tv, true); themeBg = tv.data
+        ctx.theme.resolveAttribute(com.google.android.material.R.attr.colorSurface, tv, true); themeSurface = tv.data
+        ctx.theme.resolveAttribute(com.google.android.material.R.attr.colorOnSurface, tv, true); themeLine = tv.data
     }
 
     private fun applyThemeToViews(v: View) {
         v.findViewById<Button>(R.id.btn_ftir_help)?.backgroundTintList =
             android.content.res.ColorStateList.valueOf(themePrimary)
-        btnScan.backgroundTintList = android.content.res.ColorStateList.valueOf(themePrimary)
+        v.findViewById<Button>(R.id.btn_scan)?.backgroundTintList =
+            android.content.res.ColorStateList.valueOf(themePrimary)
     }
 }
