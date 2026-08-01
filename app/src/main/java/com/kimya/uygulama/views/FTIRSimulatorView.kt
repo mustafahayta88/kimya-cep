@@ -23,22 +23,158 @@ class FTIRSimulatorView @JvmOverloads constructor(
         val exampleCompound: String
     )
 
+    data class Atom(val symbol: String, val x: Float, val y: Float, val color: Int)
+    data class Bond(val from: Int, val to: Int, val order: Int = 1)
+
+    data class MoleculeStructure(
+        val atoms: List<Atom>,
+        val bonds: List<Bond>,
+        val centerOffsetX: Float = 0f,
+        val centerOffsetY: Float = 0f
+    )
+
     data class CookbookCompound(
         val name: String, val formula: String,
-        val groups: List<String>, val description: String
+        val groups: List<String>, val description: String,
+        val molecularWeight: String = "",
+        val category: String = "",
+        val structure: MoleculeStructure? = null
     )
 
     data class ThemeColors(
-        val bg: Int = Color.rgb(13, 17, 23),
-        val surface: Int = Color.rgb(22, 27, 34),
-        val primary: Int = Color.rgb(0, 240, 255),
-        val text: Int = Color.rgb(230, 237, 243),
-        val muted: Int = Color.rgb(139, 148, 158),
+        val bg: Int = Color.rgb(10, 14, 20),
+        val surface: Int = Color.rgb(18, 24, 32),
+        val primary: Int = Color.rgb(0, 240, 200),
+        val text: Int = Color.rgb(220, 230, 240),
+        val muted: Int = Color.rgb(120, 140, 160),
         val accent: Int = Color.rgb(57, 255, 20),
-        val line: Int = Color.rgb(48, 54, 61)
+        val line: Int = Color.rgb(30, 40, 50)
     )
 
     companion object {
+        val C_GREEN = Color.rgb(0, 220, 160)
+        val C_CYAN = Color.rgb(0, 240, 200)
+        val C_O_RED = Color.rgb(255, 80, 80)
+        val C_N_BLUE = Color.rgb(80, 160, 255)
+        val C_H_GRAY = Color.rgb(160, 170, 180)
+        val C_CL_GREEN = Color.rgb(100, 220, 100)
+        val C_BOND = Color.rgb(0, 200, 150)
+
+        fun eth(): MoleculeStructure {
+            val a = listOf(
+                Atom("C", -30f, 0f, C_GREEN), Atom("C", 30f, 0f, C_GREEN),
+                Atom("O", 90f, 0f, C_O_RED), Atom("H", 130f, -30f, C_H_GRAY),
+                Atom("H", -30f, -40f, C_H_GRAY), Atom("H", -70f, 20f, C_H_GRAY),
+                Atom("H", -30f, 40f, C_H_GRAY), Atom("H", 30f, -40f, C_H_GRAY),
+                Atom("H", 30f, 40f, C_H_GRAY)
+            )
+            val b = listOf(Bond(0, 1), Bond(1, 2), Bond(2, 3), Bond(0, 4), Bond(0, 5), Bond(0, 6), Bond(1, 7), Bond(1, 8))
+            return MoleculeStructure(a, b)
+        }
+        fun acetone(): MoleculeStructure {
+            val a = listOf(
+                Atom("C", 0f, 0f, C_GREEN), Atom("C", -50f, 30f, C_GREEN),
+                Atom("C", 50f, 30f, C_GREEN), Atom("O", 0f, -50f, C_O_RED),
+                Atom("H", -50f, 70f, C_H_GRAY), Atom("H", -90f, 10f, C_H_GRAY),
+                Atom("H", -50f, -10f, C_H_GRAY), Atom("H", 50f, 70f, C_H_GRAY),
+                Atom("H", 90f, 10f, C_H_GRAY), Atom("H", 50f, -10f, C_H_GRAY)
+            )
+            val b = listOf(Bond(0, 1), Bond(0, 2), Bond(0, 3, 2), Bond(1, 4), Bond(1, 5), Bond(1, 6), Bond(2, 7), Bond(2, 8), Bond(2, 9))
+            return MoleculeStructure(a, b)
+        }
+        fun benzene(): MoleculeStructure {
+            val a = mutableListOf<Atom>()
+            val b = mutableListOf<Bond>()
+            for (i in 0 until 6) {
+                val angle = Math.toRadians((60.0 * i - 90.0))
+                a.add(Atom("C", (cos(angle) * 45).toFloat(), (sin(angle) * 45).toFloat(), C_GREEN))
+            }
+            for (i in 0 until 6) b.add(Bond(i, (i + 1) % 6, if (i % 2 == 0) 2 else 1))
+            for (i in 0 until 6) {
+                val angle = Math.toRadians((60.0 * i - 90.0))
+                a.add(Atom("H", (cos(angle) * 80).toFloat(), (sin(angle) * 80).toFloat(), C_H_GRAY))
+                b.add(Bond(i, i + 6))
+            }
+            return MoleculeStructure(a, b)
+        }
+        fun aceticAcid(): MoleculeStructure {
+            val a = listOf(
+                Atom("C", -30f, 0f, C_GREEN), Atom("C", 30f, 0f, C_GREEN),
+                Atom("O", 30f, -50f, C_O_RED), Atom("O", 90f, 20f, C_O_RED),
+                Atom("H", 130f, 0f, C_H_GRAY), Atom("H", -30f, -40f, C_H_GRAY),
+                Atom("H", -70f, 20f, C_H_GRAY), Atom("H", -30f, 40f, C_H_GRAY)
+            )
+            val b = listOf(Bond(0, 1), Bond(1, 2, 2), Bond(1, 3), Bond(3, 4), Bond(0, 5), Bond(0, 6), Bond(0, 7))
+            return MoleculeStructure(a, b)
+        }
+        fun ethanol(): MoleculeStructure = eth()
+        fun methanol(): MoleculeStructure {
+            val a = listOf(
+                Atom("C", 0f, 0f, C_GREEN), Atom("O", 50f, 0f, C_O_RED),
+                Atom("H", 90f, -25f, C_H_GRAY), Atom("H", 0f, -40f, C_H_GRAY),
+                Atom("H", -35f, 20f, C_H_GRAY), Atom("H", 0f, 40f, C_H_GRAY)
+            )
+            val b = listOf(Bond(0, 1), Bond(1, 2), Bond(0, 3), Bond(0, 4), Bond(0, 5))
+            return MoleculeStructure(a, b)
+        }
+        fun phenol(): MoleculeStructure {
+            val a = mutableListOf<Atom>()
+            val b = mutableListOf<Bond>()
+            for (i in 0 until 6) {
+                val angle = Math.toRadians((60.0 * i - 90.0))
+                a.add(Atom("C", (cos(angle) * 40).toFloat(), (sin(angle) * 40).toFloat(), C_GREEN))
+            }
+            for (i in 0 until 6) b.add(Bond(i, (i + 1) % 6, if (i % 2 == 0) 2 else 1))
+            a.add(Atom("O", 0f, -80f, C_O_RED)); b.add(Bond(0, 6))
+            a.add(Atom("H", 0f, -115f, C_H_GRAY)); b.add(Bond(6, 7))
+            for (i in 1 until 6) {
+                val angle = Math.toRadians((60.0 * i - 90.0))
+                a.add(Atom("H", (cos(angle) * 72).toFloat(), (sin(angle) * 72).toFloat(), C_H_GRAY))
+                b.add(Bond(i, i + 7))
+            }
+            return MoleculeStructure(a, b)
+        }
+        fun acetoneMol(): MoleculeStructure = acetone()
+        fun benzeneMol(): MoleculeStructure = benzene()
+        fun toluene(): MoleculeStructure {
+            val a = mutableListOf<Atom>()
+            val b = mutableListOf<Bond>()
+            for (i in 0 until 6) {
+                val angle = Math.toRadians((60.0 * i - 90.0))
+                a.add(Atom("C", (cos(angle) * 40).toFloat(), (sin(angle) * 40).toFloat(), C_GREEN))
+            }
+            for (i in 0 until 6) b.add(Bond(i, (i + 1) % 6, if (i % 2 == 0) 2 else 1))
+            a.add(Atom("C", -72f, 0f, C_GREEN)); b.add(Bond(0, 6))
+            a.add(Atom("H", -100f, -25f, C_H_GRAY)); b.add(Bond(6, 7))
+            a.add(Atom("H", -100f, 25f, C_H_GRAY)); b.add(Bond(6, 8))
+            a.add(Atom("H", -72f, 40f, C_H_GRAY)); b.add(Bond(6, 9))
+            for (i in 1 until 6) {
+                val angle = Math.toRadians((60.0 * i - 90.0))
+                a.add(Atom("H", (cos(angle) * 70).toFloat(), (sin(angle) * 70).toFloat(), C_H_GRAY))
+                b.add(Bond(i, a.size - 1))
+            }
+            return MoleculeStructure(a, b)
+        }
+        fun hexane(): MoleculeStructure {
+            val a = mutableListOf<Atom>()
+            val b = mutableListOf<Bond>()
+            for (i in 0 until 6) {
+                val x = (i - 2.5f) * 40f; val y = if (i % 2 == 0) -15f else 15f
+                a.add(Atom("C", x, y, C_GREEN))
+                if (i > 0) b.add(Bond(i - 1, i))
+            }
+            a.add(Atom("H", -100f, -50f, C_H_GRAY)); b.add(Bond(0, 6))
+            a.add(Atom("H", -100f, 20f, C_H_GRAY)); b.add(Bond(0, 7))
+            a.add(Atom("H", 100f, -50f, C_H_GRAY)); b.add(Bond(5, 8))
+            a.add(Atom("H", 100f, 20f, C_H_GRAY)); b.add(Bond(5, 9))
+            for (i in 1 until 5) {
+                val x = (i - 2.5f) * 40f
+                val y1 = if (i % 2 == 0) -50f else 50f
+                a.add(Atom("H", x, y1, C_H_GRAY)); b.add(Bond(i, a.size - 1))
+            }
+            return MoleculeStructure(a, b)
+        }
+
         val FUNCTIONAL_GROUPS = listOf(
             FunctionalGroup("oh_alcohol", "O-H (Alkol)", "Hidroksil",
                 3200f, 3600f, 3350f, 0.85f, 180f,
@@ -170,160 +306,212 @@ class FTIRSimulatorView @JvmOverloads constructor(
         val COOKBOOK_COMPOUNDS = listOf(
             CookbookCompound("Etanol", "C₂H₅OH",
                 listOf("oh_alcohol", "ch_alkane", "co_alcohol"),
-                "Geniş O-H (3350), C-H (2920), C-O (1100) - Alkolün klasik spektrumu"),
+                "Geniş O-H (3350), C-H (2920), C-O (1100) - Alkolün klasik spektrumu",
+                "46.07 g/mol", "Alkol", eth()),
             CookbookCompound("Metanol", "CH₃OH",
                 listOf("oh_alcohol", "ch_alkane", "co_alcohol"),
-                "O-H (3350), C-H (2920), C-O (1050)"),
+                "O-H (3350), C-H (2920), C-O (1050)",
+                "32.04 g/mol", "Alkol", methanol()),
             CookbookCompound("İzopropanol", "(CH₃)₂CHOH",
                 listOf("oh_alcohol", "ch_alkane", "co_alcohol"),
-                "O-H (3350), C-H (2920), C-O (1150)"),
+                "O-H (3350), C-H (2920), C-O (1150)",
+                "60.10 g/mol", "Alkol"),
             CookbookCompound("1-Butanol", "C₄H₉OH",
                 listOf("oh_alcohol", "ch_alkane", "co_alcohol"),
-                "O-H (3350), C-H (2920), C-O (1070)"),
+                "O-H (3350), C-H (2920), C-O (1070)",
+                "74.12 g/mol", "Alkol"),
             CookbookCompound("Fenol", "C₆H₅OH",
                 listOf("oh_alcohol", "ch_aro", "cc_aro", "co_alcohol"),
-                "O-H (3350), Aromatik C-H (3050), C=C (1500), C-O (1200)"),
+                "O-H (3350), Aromatik C-H (3050), C=C (1500), C-O (1200)",
+                "94.11 g/mol", "Aromatik", phenol()),
             CookbookCompound("Gliserol", "C₃H₈O₃",
                 listOf("oh_alcohol", "co_alcohol", "ch_alkane"),
-                "3x O-H (3350), C-O (1100) - Çok geniş O-H bandı"),
+                "3x O-H (3350), C-O (1100) - Çok geniş O-H bandı",
+                "92.09 g/mol", "Alkol"),
             CookbookCompound("Aseton", "CH₃COCH₃",
                 listOf("co_ketone", "ch_alkane"),
-                "Güçlü C=O (1715), C-H (2920) - Keton referansı"),
+                "Güçlü C=O (1715), C-H (2920) - Keton referansı",
+                "58.08 g/mol", "Keton", acetone()),
             CookbookCompound("2-Butanon (MEK)", "CH₃COC₂H₅",
                 listOf("co_ketone", "ch_alkane"),
-                "C=O (1715), C-H (2920)"),
+                "C=O (1715), C-H (2920)",
+                "72.11 g/mol", "Keton"),
             CookbookCompound("Sikloheksanon", "C₆H₁₀O",
                 listOf("co_ketone", "ch_alkane"),
-                "C=O (1715), C-H (2920) - Halkalı keton"),
+                "C=O (1715), C-H (2920) - Halkalı keton",
+                "98.14 g/mol", "Keton"),
             CookbookCompound("Asetofenon", "C₆H₅COCH₃",
                 listOf("co_ketone", "ch_aro", "cc_aro", "ch_alkane"),
-                "C=O (1715), Aromatik C=C (1500, 1600), C-H (2920)"),
+                "C=O (1715), Aromatik C=C (1500, 1600), C-H (2920)",
+                "120.15 g/mol", "Keton"),
             CookbookCompound("Benzaldehit", "C₆H₅CHO",
                 listOf("co_aldehyde", "ch_aldehyde", "ch_aro", "cc_aro"),
-                "C=O (1730), C-H Fermi çift (2720, 2820), Aromatik (3050, 1500)"),
+                "C=O (1730), C-H Fermi çift (2720, 2820), Aromatik (3050, 1500)",
+                "106.12 g/mol", "Aldehit"),
             CookbookCompound("Asetaldehit", "CH₃CHO",
                 listOf("co_aldehyde", "ch_aldehyde", "ch_alkane"),
-                "C=O (1730), C-H Fermi çift (2720, 2820), C-H (2920)"),
+                "C=O (1730), C-H Fermi çift (2720, 2820), C-H (2920)",
+                "44.05 g/mol", "Aldehit"),
             CookbookCompound("Formaldehit", "HCHO",
                 listOf("co_aldehyde"),
-                "C=O (1745) - En basit aldehit"),
+                "C=O (1745) - En basit aldehit",
+                "30.03 g/mol", "Aldehit"),
             CookbookCompound("Asetik Asit", "CH₃COOH",
                 listOf("oh_acid", "co_acid", "co_alcohol"),
-                "Çok geniş O-H (2500-3300), C=O (1710), C-O (1240)"),
+                "Çok geniş O-H (2500-3300), C=O (1710), C-O (1240)",
+                "60.05 g/mol", "Asit", aceticAcid()),
             CookbookCompound("Propiyonik Asit", "C₂H₅COOH",
                 listOf("oh_acid", "co_acid", "ch_alkane", "co_alcohol"),
-                "Geniş O-H, C=O (1710), C-H (2920), C-O (1240)"),
+                "Geniş O-H, C=O (1710), C-H (2920), C-O (1240)",
+                "74.08 g/mol", "Asit"),
             CookbookCompound("Benzoik Asit", "C₆H₅COOH",
                 listOf("oh_acid", "co_acid", "ch_aro", "cc_aro"),
-                "Geniş O-H, C=O (1690), Aromatik C=C (1500)"),
+                "Geniş O-H, C=O (1690), Aromatik C=C (1500)",
+                "122.12 g/mol", "Asit"),
             CookbookCompound("Etil Asetat", "CH₃COOC₂H₅",
                 listOf("co_ester", "co_ester_coc", "ch_alkane"),
-                "C=O (1740), C-O-C (1240), C-H (2920)"),
+                "C=O (1740), C-O-C (1240), C-H (2920)",
+                "88.11 g/mol", "Ester"),
             CookbookCompound("Metil Benzoat", "C₆H₅COOCH₃",
                 listOf("co_ester", "co_ester_coc", "ch_aro", "cc_aro"),
-                "C=O (1724), C-O-C (1275), Aromatik C=C (1500)"),
+                "C=O (1724), C-O-C (1275), Aromatik C=C (1500)",
+                "136.15 g/mol", "Ester"),
             CookbookCompound("Etil Benzoat", "C₆H₅COOC₂H₅",
                 listOf("co_ester", "co_ester_coc", "ch_aro", "cc_aro", "ch_alkane"),
-                "C=O (1720), C-O-C (1270), Aromatik + Alkil C-H"),
+                "C=O (1720), C-O-C (1270), Aromatik + Alkil C-H",
+                "150.17 g/mol", "Ester"),
             CookbookCompound("Benzen", "C₆H₆",
                 listOf("ch_aro", "cc_aro"),
-                "Aromatik C-H (3050), C=C halka (1500, 1600)"),
+                "Aromatik C-H (3050), C=C halka (1500, 1600)",
+                "78.11 g/mol", "Aromatik", benzene()),
             CookbookCompound("Toluen", "C₆H₅CH₃",
                 listOf("ch_aro", "cc_aro", "ch_alkane"),
-                "Aromatik C-H (3050), C=C (1500, 1600), CH₃ (2920)"),
+                "Aromatik C-H (3050), C=C (1500, 1600), CH₃ (2920)",
+                "92.14 g/mol", "Aromatik", toluene()),
             CookbookCompound("Hekzan", "C₆H₁₄",
                 listOf("ch_alkane"),
-                "Sadece C-H (2920, 2850) absorpsiyonları - Basit spektrum"),
+                "Sadece C-H (2920, 2850) absorpsiyonları - Basit spektrum",
+                "86.18 g/mol", "Alkan", hexane()),
             CookbookCompound("Sikloheksan", "C₆H₁₂",
                 listOf("ch_alkane"),
-                "C-H (2920, 2850) - Halkalı alkan"),
+                "C-H (2920, 2850) - Halkalı alkan",
+                "84.16 g/mol", "Alkan"),
             CookbookCompound("1-Heksen", "C₆H₁₂",
                 listOf("ch_alkane", "ch_alkene", "cc_alkene"),
-                "C-H alkane (2920), =C-H (3080), C=C (1650)"),
+                "C-H alkane (2920), =C-H (3080), C=C (1650)",
+                "84.16 g/mol", "Alken"),
             CookbookCompound("Stiren", "C₆H₅CH=CH₂",
                 listOf("ch_aro", "cc_aro", "ch_alkene", "cc_alkene"),
-                "Aromatik + Alken C-H, C=C (1630), Aromatik C=C (1500)"),
+                "Aromatik + Alken C-H, C=C (1630), Aromatik C=C (1500)",
+                "104.15 g/mol", "Alken"),
             CookbookCompound("Anilin", "C₆H₅NH₂",
                 listOf("nh_primary", "ch_aro", "cc_aro"),
-                "N-H çift pik (3400), Aromatik C-H (3050), C=C (1500)"),
+                "N-H çift pik (3400), Aromatik C-H (3050), C=C (1500)",
+                "93.13 g/mol", "Amin"),
             CookbookCompound("Dietilamin", "(C₂H₅)₂NH",
                 listOf("nh_secondary", "ch_alkane", "co_alcohol"),
-                "N-H tek pik (3330), C-H (2920)"),
+                "N-H tek pik (3330), C-H (2920)",
+                "73.14 g/mol", "Amin"),
             CookbookCompound("Asetonitril", "CH₃CN",
                 listOf("cn_nitrile", "ch_alkane"),
-                "C≡N (2250), C-H (2920)"),
+                "C≡N (2250), C-H (2920)",
+                "41.05 g/mol", "Nitril"),
             CookbookCompound("Benzonitril", "C₆H₅CN",
                 listOf("cn_nitrile", "ch_aro", "cc_aro"),
-                "C≡N (2230), Aromatik C-H (3050), C=C (1500)"),
+                "C≡N (2230), Aromatik C-H (3050), C=C (1500)",
+                "103.12 g/mol", "Nitril"),
             CookbookCompound("Kloroform", "CHCl₃",
                 listOf("c_cl", "ch_alkane"),
-                "C-Cl (760), C-H (3020) - Çözücü"),
+                "C-Cl (760), C-H (3020) - Çözücü",
+                "119.38 g/mol", "Halojen"),
             CookbookCompound("Diklorometan", "CH₂Cl₂",
                 listOf("c_cl", "ch_alkane"),
-                "C-Cl (700), C-H (2920)"),
+                "C-Cl (700), C-H (2920)",
+                "84.93 g/mol", "Halojen"),
             CookbookCompound("Karbon Tetraklorür", "CCl₄",
                 listOf("c_cl"),
-                "C-Cl (780, 820) - Sadece C-Cl absorpsiyonu"),
+                "C-Cl (780, 820) - Sadece C-Cl absorpsiyonu",
+                "153.82 g/mol", "Halojen"),
             CookbookCompound("Asetamid", "CH₃CONH₂",
                 listOf("nh_amide", "co_amide1", "nh_bend", "ch_alkane"),
-                "N-H (3300), Amid I (1660), Amid II (1540), C-H (2920)"),
+                "N-H (3300), Amid I (1660), Amid II (1540), C-H (2920)",
+                "59.07 g/mol", "Amid"),
             CookbookCompound("Naylon 6,6", "(C₁₂H₂₂N₂O₂)ₙ",
                 listOf("nh_amide", "co_amide1", "nh_bend", "ch_alkane"),
-                "N-H (3300), Amid I (1660), Amid II (1540), C-H (2920)"),
+                "N-H (3300), Amid I (1660), Amid II (1540), C-H (2920)",
+                "226.32 g/mol", "Polimer"),
             CookbookCompound("Nitrobenzen", "C₆H₅NO₂",
                 listOf("no2", "ch_aro", "cc_aro"),
-                "NO₂ (1540), Aromatik C-H (3050), C=C (1500)"),
+                "NO₂ (1540), Aromatik C-H (3050), C=C (1500)",
+                "123.11 g/mol", "Nitro"),
             CookbookCompound("Dietil Eter", "(C₂H₅)₂O",
                 listOf("ch_alkane", "co_alcohol"),
-                "C-H (2920), C-O (1120) - Eter bandı"),
+                "C-H (2920), C-O (1120) - Eter bandı",
+                "74.12 g/mol", "Eter"),
             CookbookCompound("Tetrahidrofuran (THF)", "C₄H₈O",
                 listOf("ch_alkane", "co_alcohol"),
-                "C-H (2920), C-O (1070) - Halkalı eter"),
+                "C-H (2920), C-O (1070) - Halkalı eter",
+                "72.11 g/mol", "Eter"),
             CookbookCompound("Difenil Metan", "(C₆H₅)₂CH₂",
                 listOf("ch_aro", "cc_aro", "ch_alkane"),
-                "Aromatik C-H (3050), C=C (1500, 1600), CH₂ (2920)"),
+                "Aromatik C-H (3050), C=C (1500, 1600), CH₂ (2920)",
+                "166.22 g/mol", "Aromatik"),
             CookbookCompound("Kağıt (Selüloz)", "(C₆H₁₀O₅)ₙ",
                 listOf("oh_alcohol", "co_alcohol", "ch_alkane"),
-                "Geniş O-H (3350), C-O (1050), C-H (2920) - Selüloz iskeleti"),
+                "Geniş O-H (3350), C-O (1050), C-H (2920) - Selüloz iskeleti",
+                "—", "Polimer"),
             CookbookCompound("PET Plastik", "(C₁₀H₈O₄)ₙ",
                 listOf("co_ester", "co_ester_coc", "ch_aro", "cc_aro", "ch_alkane"),
-                "C=O (1720), C-O-C (1240), Aromatik C=C (1500), C-H (2920)"),
+                "C=O (1720), C-O-C (1240), Aromatik C=C (1500), C-H (2920)",
+                "—", "Polimer"),
             CookbookCompound("Polietilen (PE)", "(C₂H₄)ₙ",
                 listOf("ch_alkane"),
-                "Yoğun C-H (2920, 2850, 1470, 1370) - Sadece alkan bantları"),
+                "Yoğun C-H (2920, 2850, 1470, 1370) - Sadece alkan bantları",
+                "—", "Polimer"),
             CookbookCompound("Polipropilen (PP)", "(C₃H₆)ₙ",
                 listOf("ch_alkane"),
-                "C-H (2920, 2840, 1378) - Metil dalgalanması belirgin"),
+                "C-H (2920, 2840, 1378) - Metil dalgalanması belirgin",
+                "—", "Polimer"),
             CookbookCompound("PVC", "(C₂H₃Cl)ₙ",
                 listOf("ch_alkane", "c_cl"),
-                "C-H (2920), C-Cl (690, 615) - Polivinil klorür"),
+                "C-H (2920), C-Cl (690, 615) - Polivinil klorür",
+                "—", "Polimer"),
             CookbookCompound("Polistiren (PS)", "(C₈H₈)ₙ",
                 listOf("ch_aro", "cc_aro", "ch_alkane"),
-                "Aromatik C-H (3025), C=C (1600, 1492, 1452), C-H (2920)"),
+                "Aromatik C-H (3025), C=C (1600, 1492, 1452), C-H (2920)",
+                "—", "Polimer"),
             CookbookCompound("Naylon (PA6)", "(C₆H₁₁NO)ₙ",
                 listOf("nh_amide", "co_amide1", "nh_bend", "ch_alkane"),
-                "N-H (3300), Amid I (1640), Amid II (1540), C-H (2930)"),
+                "N-H (3300), Amid I (1640), Amid II (1540), C-H (2930)",
+                "—", "Polimer"),
             CookbookCompound("Lastik (Doğal Kauçuk)", "(C₅H₈)ₙ",
                 listOf("ch_alkane", "ch_alkene", "cc_alkene"),
-                "C-H (2920), =C-H (3040), C=C (1660) - Poliizopren"),
+                "C-H (2920), =C-H (3040), C=C (1660) - Poliizopren",
+                "—", "Polimer"),
             CookbookCompound("Naylon Çorap (Elastan)", "(C₁₅H₂₂N₂O₂)ₙ",
                 listOf("nh_amide", "co_amide1", "co_alcohol", "ch_alkane"),
-                "N-H (3330), Amid I (1700), Amid II (1540), C-O (1100)"),
+                "N-H (3330), Amid I (1700), Amid II (1540), C-O (1100)",
+                "—", "Polimer"),
             CookbookCompound("Şeker (Sucroz)", "C₁₂H₂₂O₁₁",
                 listOf("oh_alcohol", "co_alcohol", "ch_alkane"),
-                "Yoğun O-H (3400), C-O (1000-1100), C-H (2920)"),
+                "Yoğun O-H (3400), C-O (1000-1100), C-H (2920)",
+                "342.30 g/mol", "Karbonhidrat"),
             CookbookCompound("Tuz (NaCl)", "NaCl",
                 listOf("c_cl"),
-                "Na-Cl absorpsiyonu (600 civarı) - Basit inorganik tuz"),
+                "Na-Cl absorpsiyonu (600 civarı) - Basit inorganik tuz",
+                "58.44 g/mol", "Inorganik"),
             CookbookCompound("Sirke (Asetik Asit Ç.)", "CH₃COOH + H₂O",
                 listOf("oh_acid", "co_acid", "oh_alcohol", "co_alcohol"),
-                "Geniş O-H, C=O (1710), C-O (1240) - Seyreltik asit"),
+                "Geniş O-H, C=O (1710), C-O (1240) - Seyreltik asit",
+                "—", "Çözelti"),
             CookbookCompound("Yağ (Trigliserit)", "C₅₅H₉₈O₆",
                 listOf("ch_alkane", "co_ester"),
-                "C-H (2920, 2850), C=O (1745), C-O (1160) - Uzun zincirli ester"),
+                "C-H (2920, 2850), C=O (1745), C-O (1160) - Uzun zincirli ester",
+                "—", "Lipit"),
             CookbookCompound("E Vitamini", "C₂₉H₅₀O₂",
                 listOf("oh_alcohol", "ch_alkane", "ch_aro", "cc_aro"),
-                "O-H (3400), C-H (2920), Aromatik C=C (1500)")
+                "O-H (3400), C-H (2920), Aromatik C=C (1500)",
+                "430.71 g/mol", "Vitamin")
         )
 
         val SAMPLE_TYPES = listOf(
@@ -349,25 +537,34 @@ class FTIRSimulatorView @JvmOverloads constructor(
     var showInterferogram = false
     var showInfo = false
 
+    var currentCompound: CookbookCompound? = null
+        private set
+    var compoundName: String = ""
+        private set
+
     private var time = 0f
     private var themeColors = ThemeColors()
     private val spectrumData = FloatArray(2000)
     private val interferogramData = FloatArray(200)
 
-    // Zoom & Pan
     private var zoomScale = 1f; private var panX = 0f; private var panY = 0f
     private var lastTx = 0f; private var lastTy = 0f; private var touchMode = 0
     private val sDetector: ScaleGestureDetector
-
-    // Cursor
     private var cursorX = 0f; private var cursorY = 0f; private var showCursor = false
     private var tapTime = 0L; private var lastTapTime = 0L
+
+    private var scanLineX = 0f
+    private var scanLineActive = false
 
     private val handler = Handler(Looper.getMainLooper())
     private val ticker = object : Runnable {
         override fun run() {
-            time += 0.03f
+            time += 0.025f
             updateData()
+            if (scanLineActive) {
+                scanLineX += 2f
+                if (scanLineX > 1f) { scanLineActive = false; scanLineX = 0f }
+            }
             invalidate()
             handler.postDelayed(this, 16L)
         }
@@ -375,14 +572,12 @@ class FTIRSimulatorView @JvmOverloads constructor(
 
     init {
         sDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScaleBegin(d: ScaleGestureDetector): Boolean { return true }
+            override fun onScaleBegin(d: ScaleGestureDetector): Boolean = true
             override fun onScale(d: ScaleGestureDetector): Boolean {
                 val factor = d.scaleFactor
                 val pivotX = d.focusX; val pivotY = d.focusY
-                // Zoom around the pinch point
                 val newScale = (zoomScale * factor).coerceIn(0.5f, 4f)
                 val scaleChange = newScale / zoomScale
-                // Adjust pan so the pivot point stays fixed
                 panX = pivotX - (pivotX - panX) * scaleChange
                 panY = pivotY - (pivotY - panY) * scaleChange
                 zoomScale = newScale
@@ -394,13 +589,15 @@ class FTIRSimulatorView @JvmOverloads constructor(
             sDetector.onTouchEvent(e)
             if (e.pointerCount == 1) when (e.action) {
                 0 -> { lastTx = e.x; lastTy = e.y; touchMode = 0; tapTime = System.currentTimeMillis() }
-                2 -> { val dx = e.x - lastTx; val dy = e.y - lastTy; if (abs(dx) > 5 || abs(dy) > 5) touchMode = 1; if (touchMode == 1) { panX += dx; panY += dy; lastTx = e.x; lastTy = e.y } }
+                2 -> {
+                    val dx = e.x - lastTx; val dy = e.y - lastTy
+                    if (abs(dx) > 5 || abs(dy) > 5) touchMode = 1
+                    if (touchMode == 1) { panX += dx; panY += dy; lastTx = e.x; lastTy = e.y }
+                }
                 1, 3 -> {
                     if (touchMode == 0 && System.currentTimeMillis() - tapTime < 300) {
-                        // Double tap detection
                         val now = System.currentTimeMillis()
                         if (now - lastTapTime < 300) {
-                            // Double tap: reset zoom and pan
                             zoomScale = 1f; panX = 0f; panY = 0f; invalidate()
                         }
                         lastTapTime = now
@@ -430,22 +627,28 @@ class FTIRSimulatorView @JvmOverloads constructor(
     private val smallLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textSize = 10f; textAlign = Paint.Align.CENTER
     }
-    private val tinyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = 9f; textAlign = Paint.Align.CENTER
-    }
     private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val laserPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val atomPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val atomTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        textAlign = Paint.Align.CENTER; isFakeBoldText = true
+    }
+    private val bondPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND
+    }
     private val peakLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE; strokeWidth = 1f
     }
     private val peakBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     private val peakLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = 11f; textAlign = Paint.Align.CENTER; isFakeBoldText = true
+        textSize = 13f; textAlign = Paint.Align.CENTER; isFakeBoldText = true
     }
     private val peakWnPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = 9f; textAlign = Paint.Align.CENTER
+        textSize = 11f; textAlign = Paint.Align.CENTER
     }
     private val peakDotPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val scanLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; strokeWidth = 2f
+    }
     private val path = Path()
     private val rect = RectF()
     private val labelBgRect = RectF()
@@ -458,6 +661,8 @@ class FTIRSimulatorView @JvmOverloads constructor(
 
     fun selectPreset(compound: CookbookCompound) {
         selectedGroups.clear(); selectedGroups.addAll(compound.groups)
+        currentCompound = compound; compoundName = compound.name
+        scanLineX = 0f; scanLineActive = true
         generateSpectrum(); invalidate()
     }
 
@@ -555,6 +760,8 @@ class FTIRSimulatorView @JvmOverloads constructor(
         val w = width.toFloat(); val h = height.toFloat()
         canvas.drawRect(0f, 0f, w, h, bgPaint)
 
+        drawHolographicOverlay(canvas, w, h)
+
         canvas.save()
         canvas.scale(zoomScale, zoomScale, w / 2, h / 2)
         canvas.translate(panX / zoomScale, panY / zoomScale)
@@ -562,14 +769,153 @@ class FTIRSimulatorView @JvmOverloads constructor(
         if (showInterferogram) {
             drawInterferogram(canvas, w, h)
         } else {
-            drawSchematic(canvas, w, h * 0.06f)
-            drawSpectrum(canvas, 0f, h * 0.07f, w, h * 0.93f)
+            val compound = currentCompound
+            if (compound != null && compound.structure != null) {
+                drawCompoundInfo(canvas, w, h * 0.12f)
+                drawMolecule(canvas, 0f, h * 0.12f, w, h * 0.30f, compound)
+                drawSpectrum(canvas, 0f, h * 0.42f, w, h * 0.58f)
+            } else if (compound != null) {
+                drawCompoundInfo(canvas, w, h * 0.08f)
+                drawSpectrum(canvas, 0f, h * 0.09f, w, h * 0.91f)
+            } else {
+                drawSpectrum(canvas, 0f, 0f, w, h)
+            }
         }
 
         canvas.restore()
 
-        // Info overlay
+        if (scanLineActive) drawScanLine(canvas, w, h)
         if (showInfo) drawInfo(canvas, w, h)
+    }
+
+    private fun drawHolographicOverlay(canvas: Canvas, w: Float, h: Float) {
+        val scanAlpha = (15 + sin(time * 0.5f) * 10).toInt().coerceIn(5, 25)
+        val grad = LinearGradient(0f, 0f, 0f, h,
+            Color.argb(scanAlpha, 0, 255, 200), Color.argb(0, 0, 255, 200),
+            Shader.TileMode.CLAMP)
+        val overlayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { shader = grad; style = Paint.Style.FILL }
+        canvas.drawRect(0f, 0f, w, h, overlayPaint)
+        overlayPaint.shader = null
+
+        val lineY = (h * 0.5f + sin(time * 0.3f) * h * 0.3f)
+        val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE; strokeWidth = 1f
+            color = Color.argb(20, 0, 255, 200)
+        }
+        canvas.drawLine(0f, lineY, w, lineY, linePaint)
+    }
+
+    private fun drawScanLine(canvas: Canvas, w: Float, h: Float) {
+        val x = w * scanLineX
+        scanLinePaint.color = Color.argb(180, 0, 255, 200)
+        scanLinePaint.pathEffect = null
+        canvas.drawLine(x, 0f, x, h, scanLinePaint)
+
+        val glowGrad = LinearGradient(x - 40f, 0f, x, 0f,
+            Color.TRANSPARENT, Color.argb(60, 0, 255, 200), Shader.TileMode.CLAMP)
+        val glowPaintLocal = Paint(Paint.ANTI_ALIAS_FLAG).apply { shader = glowGrad }
+        canvas.drawRect(x - 40f, 0f, x, h, glowPaintLocal)
+        glowPaintLocal.shader = null
+    }
+
+    private fun drawCompoundInfo(canvas: Canvas, w: Float, h: Float) {
+        val compound = currentCompound ?: return
+        val pad = 16f
+
+        labelPaint.textSize = 22f; labelPaint.color = Color.WHITE; labelPaint.textAlign = Paint.Align.LEFT
+        labelPaint.isFakeBoldText = true
+        canvas.drawText(compound.name.uppercase(), pad, pad + 18f, labelPaint)
+
+        labelPaint.textSize = 13f; labelPaint.color = C_CYAN
+        canvas.drawText(compound.formula, pad, pad + 38f, labelPaint)
+
+        var infoX = pad
+        val infoY = pad + 56f
+        smallLabelPaint.textAlign = Paint.Align.LEFT; smallLabelPaint.textSize = 11f
+
+        if (compound.molecularWeight.isNotEmpty()) {
+            smallLabelPaint.color = C_GREEN
+            canvas.drawText(compound.molecularWeight, infoX, infoY, smallLabelPaint)
+            infoX += smallLabelPaint.measureText(compound.molecularWeight) + 20f
+        }
+        if (compound.category.isNotEmpty()) {
+            smallLabelPaint.color = themeColors.muted
+            canvas.drawText(compound.category, infoX, infoY, smallLabelPaint)
+        }
+
+        val descY = infoY + 18f
+        smallLabelPaint.color = themeColors.muted; smallLabelPaint.textSize = 10f
+        val descText = compound.description
+        if (descText.length > 80) {
+            canvas.drawText(descText.substring(0, 80) + "...", pad, descY, smallLabelPaint)
+        } else {
+            canvas.drawText(descText, pad, descY, smallLabelPaint)
+        }
+
+        val lineY = h - 2f
+        linePaint.color = Color.argb(40, 0, 255, 200); linePaint.strokeWidth = 1f
+        canvas.drawLine(pad, lineY, w - pad, lineY, linePaint)
+    }
+
+    private fun drawMolecule(canvas: Canvas, left: Float, top: Float, w: Float, h: Float, compound: CookbookCompound) {
+        val structure = compound.structure ?: return
+        val cx = left + w / 2f + structure.centerOffsetX
+        val cy = top + h / 2f + structure.centerOffsetY
+        val scale = minOf(w, h) / 280f
+
+        val rotAngle = time * 0.3f
+        val breathe = 1f + sin(time * 0.8f) * 0.03f
+
+        for (bond in structure.bonds) {
+            if (bond.from >= structure.atoms.size || bond.to >= structure.atoms.size) continue
+            val a1 = structure.atoms[bond.from]; val a2 = structure.atoms[bond.to]
+            val x1 = cx + (a1.x * cos(rotAngle) - a1.y * sin(rotAngle)) * scale * breathe
+            val y1 = cy + (a1.x * sin(rotAngle) + a1.y * cos(rotAngle)) * scale * breathe
+            val x2 = cx + (a2.x * cos(rotAngle) - a2.y * sin(rotAngle)) * scale * breathe
+            val y2 = cy + (a2.x * sin(rotAngle) + a2.y * cos(rotAngle)) * scale * breathe
+
+            bondPaint.strokeWidth = 3f
+            bondPaint.color = Color.argb(120, 0, 200, 150)
+            canvas.drawLine(x1, y1, x2, y2, bondPaint)
+
+            if (bond.order == 2) {
+                val dx = x2 - x1; val dy = y2 - y1
+                val len = sqrt(dx * dx + dy * dy)
+                if (len > 0) {
+                    val nx = -dy / len * 4f; val ny = dx / len * 4f
+                    bondPaint.strokeWidth = 2f
+                    bondPaint.color = Color.argb(80, 0, 200, 150)
+                    canvas.drawLine(x1 + nx, y1 + ny, x2 + nx, y2 + ny, bondPaint)
+                }
+            }
+        }
+
+        for (atom in structure.atoms) {
+            val ax = cx + (atom.x * cos(rotAngle) - atom.y * sin(rotAngle)) * scale * breathe
+            val ay = cy + (atom.x * sin(rotAngle) + atom.y * cos(rotAngle)) * scale * breathe
+            val radius = when (atom.symbol) {
+                "C" -> 10f; "O" -> 12f; "N" -> 12f; "H" -> 6f; "Cl" -> 14f; else -> 10f
+            } * scale
+
+            val glowR = radius * 2.5f
+            glowPaint.shader = RadialGradient(ax, ay, glowR,
+                intArrayOf(colorWithAlpha(atom.color, 60), Color.TRANSPARENT),
+                floatArrayOf(0f, 1f), Shader.TileMode.CLAMP)
+            canvas.drawCircle(ax, ay, glowR, glowPaint)
+            glowPaint.shader = null
+
+            atomPaint.color = Color.argb(200, Color.red(atom.color), Color.green(atom.color), Color.blue(atom.color))
+            canvas.drawCircle(ax, ay, radius, atomPaint)
+
+            atomPaint.color = atom.color
+            canvas.drawCircle(ax, ay, radius * 0.7f, atomPaint)
+
+            if (atom.symbol != "C") {
+                atomTextPaint.textSize = (11f * scale).coerceIn(8f, 16f)
+                atomTextPaint.color = Color.WHITE
+                canvas.drawText(atom.symbol, ax, ay + 4f * scale, atomTextPaint)
+            }
+        }
     }
 
     private fun drawInterferogram(canvas: Canvas, w: Float, h: Float) {
@@ -592,7 +938,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
         smallLabelPaint.textAlign = Paint.Align.RIGHT
         canvas.drawText("ZPD", plotL - 4f, plotT + plotH * 0.5f + 4f, smallLabelPaint)
 
-        spectrumPaint.color = themeColors.accent; spectrumPaint.strokeWidth = 1.8f; spectrumPaint.style = Paint.Style.STROKE; spectrumPaint.strokeCap = Paint.Cap.ROUND
+        spectrumPaint.color = C_GREEN; spectrumPaint.strokeWidth = 1.8f; spectrumPaint.style = Paint.Style.STROKE; spectrumPaint.strokeCap = Paint.Cap.ROUND
         path.reset()
         for (i in interferogramData.indices) {
             val x = plotL + plotW * i / interferogramData.size
@@ -601,99 +947,48 @@ class FTIRSimulatorView @JvmOverloads constructor(
         }
         canvas.drawPath(path, spectrumPaint)
 
-        labelPaint.textSize = 13f; labelPaint.color = themeColors.primary; labelPaint.textAlign = Paint.Align.CENTER
+        labelPaint.textSize = 13f; labelPaint.color = C_CYAN; labelPaint.textAlign = Paint.Align.CENTER
         canvas.drawText("İnterferogram", plotL + plotW / 2f, plotT - 4f, labelPaint)
         labelPaint.textAlign = Paint.Align.LEFT
     }
 
-    private fun drawSchematic(canvas: Canvas, w: Float, h: Float) {
-        val cy = h * 0.55f; val dotR = h * 0.2f; val seg = w / 7f
-        val irPulse = (0.6f + sin(time * 3f) * 0.2f).coerceIn(0.4f, 0.9f); val irAlpha = (irPulse * 255).toInt()
-
-        laserPaint.strokeWidth = 2f; laserPaint.color = Color.argb(irAlpha, 255, 130, 60)
-        canvas.drawLine(seg * 0.4f, cy, seg * 6.6f, cy, laserPaint)
-
-        val xS = seg * 0.5f
-        glowPaint.shader = RadialGradient(xS, cy, dotR, intArrayOf(Color.argb(irAlpha, 255, 120, 40), Color.TRANSPARENT), floatArrayOf(0f, 1f), Shader.TileMode.CLAMP)
-        canvas.drawCircle(xS, cy, dotR, glowPaint); glowPaint.shader = null
-        labelPaint.textSize = 7f; labelPaint.color = themeColors.primary; canvas.drawText("Kaynak", xS, cy + h * 0.4f, labelPaint)
-
-        val xB = seg * 1.8f
-        path.reset(); path.moveTo(xB, cy - dotR * 0.8f); path.lineTo(xB + dotR * 0.8f, cy)
-        path.lineTo(xB, cy + dotR * 0.8f); path.lineTo(xB - dotR * 0.8f, cy); path.close()
-        boxPaint.color = colorWithAlpha(themeColors.accent, 90); canvas.drawPath(path, boxPaint)
-        labelPaint.textSize = 6f; labelPaint.color = themeColors.accent; canvas.drawText("Bölücü", xB, cy + h * 0.4f, labelPaint)
-
-        val xM = seg * 2.6f
-        rect.set(xM - dotR * 0.9f, cy - 2f, xM + dotR * 0.9f, cy + 2f)
-        boxPaint.color = themeColors.muted; canvas.drawRect(rect, boxPaint)
-        labelPaint.textSize = 6f; labelPaint.color = themeColors.muted; canvas.drawText("Aynalar", xM, cy + h * 0.4f, labelPaint)
-
-        val xSm = seg * 3.8f
-        rect.set(xSm - dotR, cy - dotR * 0.7f, xSm + dotR, cy + dotR * 0.7f)
-        boxPaint.color = Color.argb(40, 180, 180, 180); canvas.drawRoundRect(rect, 3f, 3f, boxPaint)
-        labelPaint.textSize = 6f; labelPaint.color = themeColors.text; canvas.drawText("Numune", xSm, cy + h * 0.4f, labelPaint)
-
-        val xD = seg * 5.5f
-        rect.set(xD - dotR * 0.8f, cy - dotR * 0.6f, xD + dotR * 0.8f, cy + dotR * 0.6f)
-        boxPaint.color = themeColors.surface; canvas.drawRoundRect(rect, 4f, 4f, boxPaint)
-        if (selectedGroups.isNotEmpty() && !isScanning) {
-            val dA = (90 + sin(time * 4f) * 40).toInt().coerceIn(50, 180)
-            glowPaint.shader = RadialGradient(xD, cy, dotR * 0.7f, intArrayOf(colorWithAlpha(themeColors.primary, dA), Color.TRANSPARENT), floatArrayOf(0f, 1f), Shader.TileMode.CLAMP)
-            canvas.drawCircle(xD, cy, dotR * 0.7f, glowPaint); glowPaint.shader = null
-        }
-        labelPaint.textSize = 6f; labelPaint.color = themeColors.primary; canvas.drawText("Dedektör", xD, cy + h * 0.4f, labelPaint)
-
-        if (isScanning) {
-            val barW = w * 0.35f; val barH = 3f; val barX = (w - barW) / 2f; val barY = h - 4f
-            rect.set(barX, barY, barX + barW, barY + barH)
-            boxPaint.color = darken(themeColors.surface, 0.5f); canvas.drawRoundRect(rect, 1f, 1f, boxPaint)
-            rect.set(barX, barY, barX + barW * scanProgress, barY + barH)
-            boxPaint.color = themeColors.primary; canvas.drawRoundRect(rect, 1f, 1f, boxPaint)
-        }
-    }
-
     private fun drawSpectrum(canvas: Canvas, left: Float, top: Float, w: Float, h: Float) {
-        val mL = 38f; val mR = 8f; val mT = 16f; val mB = 28f
+        val mL = 42f; val mR = 10f; val mT = 18f; val mB = 30f
         val pL = left + mL; val pT = top + mT; val pR = left + w - mR; val pB = top + h - mB
         val pW = pR - pL; val pH = pB - pT
 
         rect.set(pL, pT, pR, pB)
-        boxPaint.color = darken(themeColors.bg, 0.85f); canvas.drawRoundRect(rect, 4f, 4f, boxPaint)
-        linePaint.color = themeColors.line; linePaint.strokeWidth = 1f; canvas.drawRoundRect(rect, 4f, 4f, linePaint)
+        boxPaint.color = darken(themeColors.bg, 0.85f); canvas.drawRoundRect(rect, 6f, 6f, boxPaint)
+        linePaint.color = Color.argb(60, 0, 255, 200); linePaint.strokeWidth = 1f; canvas.drawRoundRect(rect, 6f, 6f, linePaint)
 
-        // Grid
-        gridPaint.color = colorWithAlpha(themeColors.line, 50); gridPaint.strokeWidth = 0.8f
+        gridPaint.color = Color.argb(25, 0, 255, 200); gridPaint.strokeWidth = 0.6f
         for (pct in listOf(0f, 0.2f, 0.4f, 0.6f, 0.8f, 1f)) canvas.drawLine(pL, pT + pH * pct, pR, pT + pH * pct, gridPaint)
         for (wn in listOf(4000f, 3500f, 3000f, 2500f, 2000f, 1500f, 1000f, 500f)) {
             val x = pL + pW * (1f - (wn - 400f) / 3600f); canvas.drawLine(x, pT, x, pB, gridPaint)
         }
 
-        // Labels
-        smallLabelPaint.color = themeColors.muted; smallLabelPaint.textSize = 11f; smallLabelPaint.textAlign = Paint.Align.CENTER
+        smallLabelPaint.color = themeColors.muted; smallLabelPaint.textSize = 10f; smallLabelPaint.textAlign = Paint.Align.CENTER
         for (wn in listOf(4000f, 3500f, 3000f, 2500f, 2000f, 1500f, 1000f, 500f)) {
             val x = pL + pW * (1f - (wn - 400f) / 3600f); canvas.drawText("${wn.toInt()}", x, pB + 14f, smallLabelPaint)
         }
         smallLabelPaint.textAlign = Paint.Align.RIGHT
         for (t in listOf(100, 80, 60, 40, 20, 0)) {
-            val y = pT + pH * (1f - t / 100f); canvas.drawText("$t", pL - 4f, y + 4f, smallLabelPaint)
+            val y = pT + pH * (1f - t / 100f); canvas.drawText("$t", pL - 6f, y + 4f, smallLabelPaint)
         }
 
-        // Axis titles
-        labelPaint.textSize = 11f; labelPaint.color = themeColors.muted; labelPaint.textAlign = Paint.Align.CENTER
-        canvas.drawText("Dalga Sayısı (cm⁻¹)", pL + pW / 2f, pB + 24f, labelPaint)
-        canvas.save(); canvas.rotate(-90f, pL - 30f, pT + pH / 2f)
-        canvas.drawText("İletim (%)", pL - 30f, pT + pH / 2f, labelPaint); canvas.restore()
+        labelPaint.textSize = 10f; labelPaint.color = themeColors.muted; labelPaint.textAlign = Paint.Align.CENTER
+        canvas.drawText("Wavenumber (cm⁻¹)", pL + pW / 2f, pB + 26f, labelPaint)
+        canvas.save(); canvas.rotate(-90f, pL - 32f, pT + pH / 2f)
+        canvas.drawText("Transmittance (%T)", pL - 32f, pT + pH / 2f, labelPaint); canvas.restore()
 
         if (selectedGroups.isEmpty()) {
-            labelPaint.textSize = 14f; labelPaint.color = themeColors.muted
+            labelPaint.textSize = 13f; labelPaint.color = themeColors.muted; labelPaint.textAlign = Paint.Align.CENTER
             canvas.drawText("Fonksiyonel grup seçin veya Kitap'tan hazır bileşik seçin", pL + pW / 2f, pT + pH / 2f, labelPaint)
             labelPaint.textAlign = Paint.Align.LEFT; return
         }
 
-        // Spectrum fill gradient
         val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; isAntiAlias = true }
-        fillPaint.shader = LinearGradient(0f, pT, 0f, pB, Color.argb(30, 0, 200, 255), Color.argb(5, 0, 200, 255), Shader.TileMode.CLAMP)
+        fillPaint.shader = LinearGradient(0f, pT, 0f, pB, Color.argb(35, 0, 255, 200), Color.argb(5, 0, 255, 200), Shader.TileMode.CLAMP)
         val fillPath = Path()
         fillPath.moveTo(pL, pB)
         var firstFill = true
@@ -707,8 +1002,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
         fillPath.lineTo(pR, pB); fillPath.close()
         canvas.drawPath(fillPath, fillPaint)
 
-        // Spectrum line
-        spectrumPaint.color = themeColors.primary; spectrumPaint.strokeWidth = 2.5f
+        spectrumPaint.color = C_CYAN; spectrumPaint.strokeWidth = 2.5f
         spectrumPaint.style = Paint.Style.STROKE; spectrumPaint.strokeCap = Paint.Cap.ROUND; spectrumPaint.strokeJoin = Paint.Join.ROUND
         path.reset(); var first = true
         for (i in spectrumData.indices) {
@@ -720,8 +1014,8 @@ class FTIRSimulatorView @JvmOverloads constructor(
         }
         canvas.drawPath(path, spectrumPaint)
 
-        // Peak labels with lines
         val labelPositions = mutableListOf<Pair<Float, Float>>()
+        var peakIdx = 1
         for (group in FUNCTIONAL_GROUPS) {
             if (!selectedGroups.contains(group.id)) continue
             val x = pL + pW * (1f - (group.peakCenter - 400f) / 3600f)
@@ -729,82 +1023,80 @@ class FTIRSimulatorView @JvmOverloads constructor(
             val y = pT + pH * (1f - spectrumData[idx])
             if (x < pL || x > pR) continue
 
-            // Vertical line from peak to label area
-            peakLinePaint.color = colorWithAlpha(group.color, 100); peakLinePaint.strokeWidth = 1f
+            peakLinePaint.color = colorWithAlpha(group.color, 80); peakLinePaint.strokeWidth = 1f
             peakLinePaint.pathEffect = DashPathEffect(floatArrayOf(4f, 3f), 0f)
             canvas.drawLine(x, y, x, pT + 2f, peakLinePaint)
             peakLinePaint.pathEffect = null
 
-            peakDotPaint.color = group.color; canvas.drawCircle(x, y, 7f, peakDotPaint)
-            peakDotPaint.color = Color.argb(60, Color.red(group.color), Color.green(group.color), Color.blue(group.color))
-            canvas.drawCircle(x, y, 13f, peakDotPaint)
+            peakDotPaint.color = group.color; canvas.drawCircle(x, y, 6f, peakDotPaint)
+            peakDotPaint.color = Color.argb(50, Color.red(group.color), Color.green(group.color), Color.blue(group.color))
+            canvas.drawCircle(x, y, 12f, peakDotPaint)
 
-            val shortName = group.nameTr; val wnText = "${group.peakCenter.toInt()} cm⁻¹"
-            peakLabelPaint.textSize = 15f; peakLabelPaint.color = group.color
-            peakWnPaint.textSize = 13f; peakWnPaint.color = colorWithAlpha(Color.WHITE, 200)
-
-            val nameW = peakLabelPaint.measureText(shortName); val wnW = peakWnPaint.measureText(wnText)
-            val boxW = maxOf(nameW, wnW) + 16f; val boxH = 38f
+            val idxText = "$peakIdx"
+            peakLabelPaint.textSize = 11f; peakLabelPaint.color = Color.WHITE
+            val idxW = peakLabelPaint.measureText(idxText) + 10f
+            val idxH = 18f
             var labelY = pT + 2f; var tries = 0
             while (tries < 12) {
-                val collision = labelPositions.any { (lx, ly) -> abs(lx - x) < boxW * 0.85f && abs(ly - labelY) < boxH + 2f }
+                val collision = labelPositions.any { (lx, ly) -> abs(lx - x) < idxW * 0.9f && abs(ly - labelY) < idxH + 2f }
                 if (!collision) break
-                labelY += boxH + 3f; tries++
+                labelY += idxH + 2f; tries++
             }
             labelPositions.add(Pair(x, labelY))
 
-            peakBgPaint.color = Color.argb(220, 10, 13, 20)
-            labelBgRect.set(x - boxW / 2f, labelY, x + boxW / 2f, labelY + boxH)
-            canvas.drawRoundRect(labelBgRect, 3f, 3f, peakBgPaint)
+            peakBgPaint.color = Color.argb(200, 10, 14, 20)
+            labelBgRect.set(x - idxW / 2f, labelY, x + idxW / 2f, labelY + idxH)
+            canvas.drawRoundRect(labelBgRect, 4f, 4f, peakBgPaint)
+            canvas.drawText(idxText, x, labelY + 13f, peakLabelPaint)
 
-            canvas.drawText(shortName, x, labelY + 16f, peakLabelPaint)
-            canvas.drawText(wnText, x, labelY + 32f, peakWnPaint)
+            peakIdx++
         }
 
-        // Cursor crosshair
         if (showCursor && cursorX >= pL && cursorX <= pR && cursorY >= pT && cursorY <= pB) {
-            val cursorP = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 1f; color = Color.argb(60, 255, 255, 255); pathEffect = DashPathEffect(floatArrayOf(5f, 4f), 0f) }
+            val cursorP = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE; strokeWidth = 1f; color = Color.argb(60, 255, 255, 255)
+                pathEffect = DashPathEffect(floatArrayOf(5f, 4f), 0f)
+            }
             canvas.drawLine(cursorX, pT, cursorX, pB, cursorP)
             canvas.drawLine(pL, cursorY, pR, cursorY, cursorP)
             val cWn = 4000f - (cursorX - pL) / pW * 3600f
             val cT = 100f - (cursorY - pT) / pH * 100f
-            val infoBg = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(180, 22, 27, 34); isAntiAlias = true }
+            val infoBg = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(180, 18, 24, 32); isAntiAlias = true }
             canvas.drawRoundRect(pL + 4f, pB + 16f, pR - 4f, pB + 32f, 6f, 6f, infoBg)
-            smallLabelPaint.textSize = 10f; smallLabelPaint.color = themeColors.primary; smallLabelPaint.textAlign = Paint.Align.CENTER
+            smallLabelPaint.textSize = 10f; smallLabelPaint.color = C_CYAN; smallLabelPaint.textAlign = Paint.Align.CENTER
             canvas.drawText("WN: ${"%.0f".format(cWn)} cm⁻¹  |  T: ${"%.1f".format(cT)}%", pL + pW / 2, pB + 28f, smallLabelPaint)
         }
 
-        // Title
-        labelPaint.textSize = 13f; labelPaint.color = themeColors.primary; labelPaint.textAlign = Paint.Align.CENTER
-        canvas.drawText("FT-IR Spektrumu", pL + pW / 2f, top + 12f, labelPaint)
+        labelPaint.textSize = 12f; labelPaint.color = C_CYAN; labelPaint.textAlign = Paint.Align.CENTER
+        canvas.drawText("FT-IR Spektrumu", pL + pW / 2f, top + 14f, labelPaint)
         labelPaint.textAlign = Paint.Align.LEFT
     }
 
     private fun drawInfo(c: Canvas, w: Float, h: Float) {
         val px = w * 0.03f; val py = 8f; val pw = w * 0.94f; val ph = h - 16f
-        c.drawRoundRect(px, py, px + pw, py + ph, 20f, 20f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(17, 24, 39); isAntiAlias = true })
-        c.drawRoundRect(px, py, px + pw, py + ph, 20f, 20f, Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2f; color = Color.rgb(0, 200, 255); isAntiAlias = true })
+        c.drawRoundRect(px, py, px + pw, py + ph, 20f, 20f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(10, 14, 20); isAntiAlias = true })
+        c.drawRoundRect(px, py, px + pw, py + ph, 20f, 20f, Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2f; color = C_CYAN; isAntiAlias = true })
         var ty = py + 40f
-        val hp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 22f; textAlign = Paint.Align.CENTER; color = Color.rgb(0, 240, 255); isFakeBoldText = true; isAntiAlias = true }
+        val hp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 22f; textAlign = Paint.Align.CENTER; color = C_CYAN; isFakeBoldText = true; isAntiAlias = true }
         c.drawText("FT-IR Simülatörü", w / 2f, ty, hp); ty += 38f
         val lp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 16f; textAlign = Paint.Align.LEFT; isAntiAlias = true }
         val lines = listOf(
-            Pair("═══ NEDİR? ═══", Color.rgb(0, 240, 255)),
+            Pair("═══ NEDİR? ═══", C_CYAN),
             Pair("Fourier Dönüşümle Kızılötesi Spektroskopisi", Color.rgb(220, 220, 220)),
             Pair("Moleküllerin fonksiyonel gruplarını belirler.", Color.rgb(220, 220, 220)),
             Pair("", Color.TRANSPARENT),
-            Pair("═══ NASIL ÇALIŞIR? ═══", Color.rgb(0, 240, 255)),
+            Pair("═══ NASIL ÇALIŞIR? ═══", C_CYAN),
             Pair("1. IR Kaynak: Kızılötesi ışık yayar", Color.rgb(170, 204, 255)),
             Pair("2. Michelson İnterferometresi: Işığı ikiye böler", Color.rgb(170, 204, 255)),
             Pair("3. Sabit ve Hareketli Aynalar", Color.rgb(170, 204, 255)),
             Pair("4. Numune: IR ışığını emer", Color.rgb(170, 204, 255)),
             Pair("5. Dedektör: Geçen ışığı ölçer", Color.rgb(170, 204, 255)),
             Pair("", Color.TRANSPARENT),
-            Pair("═══ BÖLGELER ═══", Color.rgb(0, 240, 255)),
+            Pair("═══ BÖLGELER ═══", C_CYAN),
             Pair("Fonksiyonel Bölge: 4000-1500 cm⁻¹", Color.rgb(100, 255, 160)),
             Pair("Parmak İzi: 1500-400 cm⁻¹", Color.rgb(255, 200, 100)),
             Pair("", Color.TRANSPARENT),
-            Pair("═══ KULLANIM ═══", Color.rgb(0, 240, 255)),
+            Pair("═══ KULLANIM ═══", C_CYAN),
             Pair("1. Fonksiyonel grupları seçin veya Kitap'tan", Color.rgb(200, 230, 255)),
             Pair("2. Tarama Başlat ile spektrum oluşturun", Color.rgb(200, 230, 255)),
             Pair("3. Çimdikleme ile yakınlaştırın", Color.rgb(200, 230, 255)),

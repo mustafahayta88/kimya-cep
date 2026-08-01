@@ -27,13 +27,13 @@ class FTIRSimulatorFragment : Fragment() {
     private lateinit var groupChipsContainer: LinearLayout
     private var currentCompoundName: String? = null
 
-    private var themePrimary = Color.rgb(0, 240, 255)
+    private var themePrimary = Color.rgb(0, 240, 200)
     private var themeAccent = Color.rgb(57, 255, 20)
-    private var themeText = Color.rgb(230, 237, 243)
-    private var themeMuted = Color.rgb(139, 148, 158)
-    private var themeBg = Color.rgb(13, 17, 23)
-    private var themeSurface = Color.rgb(22, 27, 34)
-    private var themeLine = Color.rgb(48, 54, 61)
+    private var themeText = Color.rgb(220, 230, 240)
+    private var themeMuted = Color.rgb(90, 106, 122)
+    private var themeBg = Color.rgb(10, 14, 20)
+    private var themeSurface = Color.rgb(21, 28, 36)
+    private var themeLine = Color.rgb(30, 40, 50)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val v = inflater.inflate(R.layout.fragment_ftir_simulator, container, false)
@@ -114,7 +114,7 @@ class FTIRSimulatorFragment : Fragment() {
         btnScan.setOnClickListener {
             ftirView.startScan()
             btnScan.isEnabled = false
-            btnScan.text = "Taranıyor... %{0}"
+            btnScan.text = "SCANNING... %0"
             val startTime = System.currentTimeMillis()
             val duration = 2000L
             val updater = object : Runnable {
@@ -122,12 +122,12 @@ class FTIRSimulatorFragment : Fragment() {
                     if (!isAdded) return
                     val elapsed = System.currentTimeMillis() - startTime
                     val pct = ((elapsed.toFloat() / duration) * 100).toInt().coerceAtMost(100)
-                    btnScan.text = "Taranıyor... %$pct"
+                    btnScan.text = "SCANNING... %$pct"
                     if (elapsed < duration) {
                         btnScan.postDelayed(this, 50L)
                     } else {
                         btnScan.isEnabled = true
-                        btnScan.text = "Tarama Başlat"
+                        btnScan.text = "SCAN"
                     }
                 }
             }
@@ -139,7 +139,7 @@ class FTIRSimulatorFragment : Fragment() {
         val btnToggleInterferogram = v.findViewById<Button>(R.id.btn_toggle_interferogram)
         btnToggleInterferogram?.setOnClickListener {
             ftirView.showInterferogram = !ftirView.showInterferogram
-            btnToggleInterferogram.text = if (ftirView.showInterferogram) "Spektrum Göster" else "İnterferogram Göster"
+            btnToggleInterferogram.text = if (ftirView.showInterferogram) "SPECTRUM" else "INTERFEROGRAM"
         }
     }
 
@@ -219,14 +219,14 @@ class FTIRSimulatorFragment : Fragment() {
             val name = TextView(requireContext()).apply {
                 text = group.nameTr
                 setTextColor(Color.WHITE)
-                textSize = 13f
+                textSize = 12f
                 setSingleLine(true)
             }
 
             val wn = TextView(requireContext()).apply {
                 text = "${group.peakCenter.toInt()} cm⁻¹"
                 setTextColor(group.color)
-                textSize = 11f
+                textSize = 10f
                 paint.isFakeBoldText = true
                 setSingleLine(true)
             }
@@ -279,7 +279,7 @@ class FTIRSimulatorFragment : Fragment() {
     private fun updateReadings() {
         val groups = ftirView.selectedGroups
         if (groups.isEmpty()) {
-            tvSelectedGroups.text = "Yok"
+            tvSelectedGroups.text = "NONE"
             tvActiveSample.visibility = View.GONE
         } else {
             val names = FTIRSimulatorView.FUNCTIONAL_GROUPS
@@ -289,7 +289,7 @@ class FTIRSimulatorFragment : Fragment() {
         }
 
         currentCompoundName?.let {
-            tvActiveSample.text = "Aktif Numune: $it"
+            tvActiveSample.text = "SAMPLE: $it"
             tvActiveSample.visibility = View.VISIBLE
         } ?: run {
             tvActiveSample.visibility = View.GONE
@@ -300,7 +300,7 @@ class FTIRSimulatorFragment : Fragment() {
         val items = FTIRSimulatorView.COOKBOOK_COMPOUNDS.map { "${it.name} (${it.formula})" }.toTypedArray()
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Kitap - Yaygın Organik Bileşikler")
+            .setTitle("Library — Yaygın Bileşikler")
             .setItems(items) { _, which ->
                 val compound = FTIRSimulatorView.COOKBOOK_COMPOUNDS[which]
                 ftirView.selectPreset(compound)
@@ -308,37 +308,10 @@ class FTIRSimulatorFragment : Fragment() {
                 updateChipSelection()
                 updateReadings()
                 tvGroupDesc.text = compound.description
-                tvActiveSample.text = "Aktif Numune: ${compound.name}"
+                tvActiveSample.text = "SAMPLE: ${compound.name}"
                 tvActiveSample.visibility = View.VISIBLE
             }
             .setNegativeButton("Kapat", null)
-            .show()
-    }
-
-    private fun showHelp() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("FT-IR Simülatörü")
-            .setMessage(
-                "Fourier Dönüşümle Kızılötesi Spektroskopisi (FT-IR), moleküllerin" +
-                " fonksiyonel gruplarını belirlemek için kullanılır.\n\n" +
-                "Nasıl Çalışır:\n" +
-                "1. IR Kaynak: Kızılötesi ışık yayar\n" +
-                "2. Michelson İnterferometresi: Işığı ikiye böler\n" +
-                "3. Sabit Ayna: Işığı yansıtır\n" +
-                "4. Hareketli Ayna: Hareket ederek optik yol farkı oluşturur\n" +
-                "5. Numune: IR ışığını emer\n" +
-                "6. Dedektör: Geçen ışığı ölçer\n\n" +
-                "Bölgeler:\n" +
-                "- Fonksiyonel Bölge: 4000-1500 cm⁻¹\n" +
-                "- Parmak İzi: 1500-400 cm⁻¹\n\n" +
-                "Beer-Lambert Yasası: T = I/I₀\n" +
-                "İletim (%) = (I/I₀) × 100\n\n" +
-                "Kullanım:\n" +
-                "- Fonksiyonel grupları seçin\n" +
-                "- veya Kitap'tan hazır bileşik seçin\n" +
-                "- Tarama Başlat ile spektrum oluşturun"
-            )
-            .setPositiveButton("Tamam", null)
             .show()
     }
 
