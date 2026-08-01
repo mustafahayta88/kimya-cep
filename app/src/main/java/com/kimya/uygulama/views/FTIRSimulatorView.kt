@@ -624,7 +624,7 @@ class FTIRSimulatorView @JvmOverloads constructor(
             val ax = cx + (at.x * cos(rot) - at.y * sin(rot)) * scale * br
             val ay = cy + (at.x * sin(rot) + at.y * cos(rot)) * scale * br
             val r = when (at.symbol) { "C" -> 11f; "O" -> 13f; "N" -> 13f; "Cl" -> 15f; "H" -> 7f; else -> 11f } * scale
-            val gr = r * 2.8f
+            val gr = (r * 2.8f).coerceAtLeast(1f)
             val cR = Color.red(at.color); val cG = Color.green(at.color); val cB = Color.blue(at.color)
             glowPaint.shader = RadialGradient(ax, ay, gr, intArrayOf(Color.argb(alpha / 4, cR, cG, cB), Color.argb(0, cR, cG, cB)), floatArrayOf(0f, 1f), Shader.TileMode.CLAMP)
             canvas.drawCircle(ax, ay, gr, glowPaint); glowPaint.shader = null
