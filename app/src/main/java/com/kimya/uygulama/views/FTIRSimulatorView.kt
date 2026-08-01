@@ -580,9 +580,9 @@ class FTIRSimulatorView @JvmOverloads constructor(
         if (showInterferogram) { drawInterferogram(canvas, w, h) } else {
             val c = currentCompound
             if (c != null) {
-                drawCompoundHeader(canvas, w, h * 0.13f)
-                if (c.structure != null) drawMolecule(canvas, 0f, h * 0.13f, w, h * 0.30f, c)
-                drawSpectrum(canvas, 0f, if (c.structure != null) h * 0.43f else h * 0.14f, w, if (c.structure != null) h * 0.57f else h * 0.86f)
+                drawCompoundHeader(canvas, w, h * 0.16f)
+                if (c.structure != null) drawMolecule(canvas, 0f, h * 0.16f, w, h * 0.38f, c)
+                drawSpectrum(canvas, 0f, if (c.structure != null) h * 0.54f else h * 0.14f, w, if (c.structure != null) h * 0.46f else h * 0.86f)
             } else drawSpectrum(canvas, 0f, 0f, w, h)
         }
         canvas.restore()
@@ -593,21 +593,21 @@ class FTIRSimulatorView @JvmOverloads constructor(
 
     private fun drawCompoundHeader(canvas: Canvas, w: Float, h: Float) {
         val c = currentCompound ?: return; val pad = 14f; val a = (animProgress * 255).toInt().coerceIn(0, 255)
-        val tP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 20f; textAlign = Paint.Align.LEFT; isFakeBoldText = true; color = Color.argb(a, 255, 255, 255); typeface = Typeface.MONOSPACE }
-        canvas.drawText(c.name.uppercase(), pad, pad + 16f, tP)
-        val fP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 13f; textAlign = Paint.Align.LEFT; color = Color.argb(a, 0, 240, 200); typeface = Typeface.MONOSPACE }
-        canvas.drawText(c.formula, pad, pad + 34f, fP)
-        val iP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 10f; textAlign = Paint.Align.LEFT; color = Color.argb(a, 120, 140, 160); typeface = Typeface.MONOSPACE }
+        val tP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 26f; textAlign = Paint.Align.LEFT; isFakeBoldText = true; color = Color.argb(a, 255, 255, 255); typeface = Typeface.MONOSPACE }
+        canvas.drawText(c.name.uppercase(), pad, pad + 22f, tP)
+        val fP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 17f; textAlign = Paint.Align.LEFT; color = Color.argb(a, 0, 240, 200); typeface = Typeface.MONOSPACE }
+        canvas.drawText(c.formula, pad, pad + 42f, fP)
+        val iP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 13f; textAlign = Paint.Align.LEFT; color = Color.argb(a, 120, 140, 160); typeface = Typeface.MONOSPACE }
         var ix = pad
-        if (c.molecularWeight.isNotEmpty()) { canvas.drawText("${c.molecularWeight} g/mol", ix, pad + 50f, iP); ix += iP.measureText("${c.molecularWeight} g/mol") + 16f }
-        if (c.category.isNotEmpty()) canvas.drawText(c.category, ix, pad + 50f, iP)
+        if (c.molecularWeight.isNotEmpty()) { canvas.drawText("${c.molecularWeight} g/mol", ix, pad + 60f, iP); ix += iP.measureText("${c.molecularWeight} g/mol") + 18f }
+        if (c.category.isNotEmpty()) canvas.drawText(c.category, ix, pad + 60f, iP)
         val sep = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 1f; color = Color.argb(30, 0, 255, 200) }
         canvas.drawLine(pad, h - 3f, w - pad, h - 3f, sep)
     }
 
     private fun drawMolecule(canvas: Canvas, left: Float, top: Float, w: Float, h: Float, compound: CookbookCompound) {
         val s = compound.structure ?: return; val cx = left + w / 2f; val cy = top + h / 2f
-        val scale = minOf(w, h) / 300f * animProgress; val rot = time * 0.25f; val br = 1f + sin(time * 0.6f) * 0.02f
+        val scale = minOf(w, h) / 240f * animProgress; val rot = time * 0.25f; val br = 1f + sin(time * 0.6f) * 0.02f
         val alpha = (animProgress * 255).toInt().coerceIn(0, 255)
         for (bnd in s.bonds) {
             if (bnd.from >= s.atoms.size || bnd.to >= s.atoms.size) continue
@@ -616,21 +616,21 @@ class FTIRSimulatorView @JvmOverloads constructor(
             val y1 = cy + (a1.x * sin(rot) + a1.y * cos(rot)) * scale * br
             val x2 = cx + (a2.x * cos(rot) - a2.y * sin(rot)) * scale * br
             val y2 = cy + (a2.x * sin(rot) + a2.y * cos(rot)) * scale * br
-            bondPaint.strokeWidth = 2.5f; bondPaint.color = Color.argb(alpha, 0, 200, 150)
+            bondPaint.strokeWidth = 3.5f; bondPaint.color = Color.argb(alpha, 0, 200, 150)
             canvas.drawLine(x1, y1, x2, y2, bondPaint)
-            if (bnd.order == 2) { val dx = x2 - x1; val dy = y2 - y1; val len = sqrt(dx * dx + dy * dy); if (len > 0) { val nx = -dy / len * 4f; val ny = dx / len * 4f; bondPaint.strokeWidth = 1.5f; bondPaint.color = Color.argb(alpha / 2, 0, 200, 150); canvas.drawLine(x1 + nx, y1 + ny, x2 + nx, y2 + ny, bondPaint) } }
+            if (bnd.order == 2) { val dx = x2 - x1; val dy = y2 - y1; val len = sqrt(dx * dx + dy * dy); if (len > 0) { val nx = -dy / len * 5f; val ny = dx / len * 5f; bondPaint.strokeWidth = 2.5f; bondPaint.color = Color.argb(alpha / 2, 0, 200, 150); canvas.drawLine(x1 + nx, y1 + ny, x2 + nx, y2 + ny, bondPaint) } }
         }
         for (at in s.atoms) {
             val ax = cx + (at.x * cos(rot) - at.y * sin(rot)) * scale * br
             val ay = cy + (at.x * sin(rot) + at.y * cos(rot)) * scale * br
-            val r = when (at.symbol) { "C" -> 11f; "O" -> 13f; "N" -> 13f; "Cl" -> 15f; "H" -> 7f; else -> 11f } * scale
+            val r = when (at.symbol) { "C" -> 14f; "O" -> 16f; "N" -> 16f; "Cl" -> 18f; "H" -> 9f; else -> 14f } * scale
             val gr = (r * 2.8f).coerceAtLeast(1f)
             val cR = Color.red(at.color); val cG = Color.green(at.color); val cB = Color.blue(at.color)
             glowPaint.shader = RadialGradient(ax, ay, gr, intArrayOf(Color.argb(alpha / 4, cR, cG, cB), Color.argb(0, cR, cG, cB)), floatArrayOf(0f, 1f), Shader.TileMode.CLAMP)
             canvas.drawCircle(ax, ay, gr, glowPaint); glowPaint.shader = null
             atomPaint.color = Color.argb(alpha, Color.red(at.color), Color.green(at.color), Color.blue(at.color)); canvas.drawCircle(ax, ay, r, atomPaint)
             atomPaint.color = Color.argb(alpha / 2, Color.red(at.color), Color.green(at.color), Color.blue(at.color)); canvas.drawCircle(ax, ay, r * 1.3f, atomPaint)
-            if (at.symbol != "C") { atomTextPaint.textSize = (10f * scale).coerceIn(7f, 14f); atomTextPaint.color = Color.argb(alpha, 255, 255, 255); canvas.drawText(at.symbol, ax, ay + 4f * scale, atomTextPaint) }
+            if (at.symbol != "C") { atomTextPaint.textSize = (13f * scale).coerceIn(9f, 18f); atomTextPaint.color = Color.argb(alpha, 255, 255, 255); canvas.drawText(at.symbol, ax, ay + 5f * scale, atomTextPaint) }
         }
     }
 
@@ -677,15 +677,15 @@ class FTIRSimulatorView @JvmOverloads constructor(
             val x = pL + pW * (1f - (g.peakCenter - 400f) / 3600f); val idx = ((4000f - g.peakCenter) / 3600f * spectrumData.size).toInt().coerceIn(0, spectrumData.size - 1); val y = pT + pH * (1f - spectrumData[idx])
             if (x < pL || x > pR) continue
             peakLinePaint.color = colorWithAlpha(g.color, 70); peakLinePaint.pathEffect = DashPathEffect(floatArrayOf(3f, 3f), 0f); canvas.drawLine(x, y, x, pT + 4f, peakLinePaint); peakLinePaint.pathEffect = null
-            peakDotPaint.color = g.color; canvas.drawCircle(x, y, 5f, peakDotPaint)
-            peakDotPaint.color = Color.argb(40, Color.red(g.color), Color.green(g.color), Color.blue(g.color)); canvas.drawCircle(x, y, 11f, peakDotPaint)
+            peakDotPaint.color = g.color; canvas.drawCircle(x, y, 7f, peakDotPaint)
+            peakDotPaint.color = Color.argb(40, Color.red(g.color), Color.green(g.color), Color.blue(g.color)); canvas.drawCircle(x, y, 14f, peakDotPaint)
             val nw = peakNumPaint.measureText("$pIdx") + 10f; var ly = pT + 4f; var tries = 0
             while (tries < 15) { if (!lp.any { abs(it.first - x) < nw * 0.9f && abs(it.second - ly) < 22f }) break; ly += 22f; tries++ }
             lp.add(Pair(x, ly)); peakBgPaint.color = Color.argb(220, 10, 14, 20); labelBgRect.set(x - nw / 2f, ly, x + nw / 2f, ly + 20f); canvas.drawRoundRect(labelBgRect, 4f, 4f, peakBgPaint)
-            peakNumPaint.textSize = 12f; canvas.drawText("$pIdx", x, ly + 14f, peakNumPaint); pIdx++
+            peakNumPaint.textSize = 14f; canvas.drawText("$pIdx", x, ly + 16f, peakNumPaint); pIdx++
         }
         if (pIdx > 1) {
-            val tp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 8f; typeface = Typeface.MONOSPACE; textAlign = Paint.Align.LEFT }
+            val tp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 10f; typeface = Typeface.MONOSPACE; textAlign = Paint.Align.LEFT }
             var tx = pL; var pn = 1; val ty = top + h - 4f
             for (g in FUNCTIONAL_GROUPS) { if (!selectedGroups.contains(g.id)) continue; tp.color = g.color; val txt = "$pn. ${g.nameTr} ${g.peakCenter.toInt()}"; canvas.drawText(txt, tx, ty, tp); tx += tp.measureText(txt) + 14f; if (tx > pR - 40f) { tx = pL }; pn++ }
         }
@@ -695,10 +695,10 @@ class FTIRSimulatorView @JvmOverloads constructor(
             val cWn = 4000f - (cursorX - pL) / pW * 3600f; val cT = 100f - (cursorY - pT) / pH * 100f
             val ibg = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(180, 10, 14, 20) }
             canvas.drawRoundRect(pL + 4f, pB + 14f, pR - 4f, pB + 28f, 4f, 4f, ibg)
-            smallLabelPaint.textSize = 9f; smallLabelPaint.color = C_CYAN; smallLabelPaint.textAlign = Paint.Align.CENTER
+            smallLabelPaint.textSize = 11f; smallLabelPaint.color = C_CYAN; smallLabelPaint.textAlign = Paint.Align.CENTER
             canvas.drawText("WN: ${"%.0f".format(cWn)} cm⁻¹  |  T: ${"%.1f".format(cT)}%", pL + pW / 2, pB + 25f, smallLabelPaint)
         }
-        labelPaint.textSize = 11f; labelPaint.color = C_CYAN; labelPaint.textAlign = Paint.Align.CENTER
+        labelPaint.textSize = 14f; labelPaint.color = C_CYAN; labelPaint.textAlign = Paint.Align.CENTER
         canvas.drawText("FT-IR SPEKTRUMU", pL + pW / 2f, top + 13f, labelPaint); labelPaint.textAlign = Paint.Align.LEFT
     }
 
@@ -706,10 +706,10 @@ class FTIRSimulatorView @JvmOverloads constructor(
         val px = w * 0.03f; val py = 8f; val pw = w * 0.94f; val ph = h - 16f
         c.drawRoundRect(px, py, px + pw, py + ph, 16f, 16f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(10, 14, 20); isAntiAlias = true })
         c.drawRoundRect(px, py, px + pw, py + ph, 16f, 16f, Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2f; color = C_CYAN; isAntiAlias = true })
-        var ty = py + 36f; val hp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 20f; textAlign = Paint.Align.CENTER; color = C_CYAN; isFakeBoldText = true; typeface = Typeface.MONOSPACE }
-        c.drawText("FT-IR SIMULATOR", w / 2f, ty, hp); ty += 32f
-        val lp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 14f; textAlign = Paint.Align.LEFT; isAntiAlias = true }
-        for ((l, cl) in listOf("═══ WHAT IS IT? ═══" to C_CYAN, "Fourier Transform Infrared Spectroscopy" to Color.WHITE, "Identifies functional groups." to Color.WHITE, "" to Color.TRANSPARENT, "═══ USAGE ═══" to C_CYAN, "1. Select groups or Library compound" to Color.rgb(200, 230, 255), "2. Press SCAN" to Color.rgb(200, 230, 255), "3. Pinch to zoom" to Color.rgb(200, 230, 255), "4. Touch to see WN/T" to Color.rgb(200, 230, 255))) { if (l.isEmpty()) { ty += 4f; continue }; lp.color = cl; c.drawText(l, px + 14f, ty, lp); ty += 20f }
+        var ty = py + 40f; val hp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 24f; textAlign = Paint.Align.CENTER; color = C_CYAN; isFakeBoldText = true; typeface = Typeface.MONOSPACE }
+        c.drawText("FT-IR SIMULATOR", w / 2f, ty, hp); ty += 36f
+        val lp = Paint(Paint.ANTI_ALIAS_FLAG).apply { textSize = 16f; textAlign = Paint.Align.LEFT; isAntiAlias = true }
+        for ((l, cl) in listOf("═══ WHAT IS IT? ═══" to C_CYAN, "Fourier Transform Infrared Spectroscopy" to Color.WHITE, "Identifies functional groups." to Color.WHITE, "" to Color.TRANSPARENT, "═══ USAGE ═══" to C_CYAN, "1. Select groups or Library compound" to Color.rgb(200, 230, 255), "2. Press SCAN" to Color.rgb(200, 230, 255), "3. Pinch to zoom" to Color.rgb(200, 230, 255), "4. Touch to see WN/T" to Color.rgb(200, 230, 255))) { if (l.isEmpty()) { ty += 6f; continue }; lp.color = cl; c.drawText(l, px + 16f, ty, lp); ty += 24f }
     }
 
     private fun colorWithAlpha(c: Int, a: Int): Int = Color.argb(a.coerceIn(0, 255), Color.red(c), Color.green(c), Color.blue(c))
