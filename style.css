@@ -191,3 +191,14 @@ body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif
     .hero-buttons{flex-direction:column;align-items:center}
     .download-logo{width:140px;height:140px;border-radius:28px}
 }
+/* Kimya Cep sayaç kutusu */
+#counter-box{
+    position:fixed;bottom:10px;left:10px;z-index:60;
+    background:rgba(13,17,23,.88);border:1px solid #30363d;border-radius:8px;
+    padding:5px 9px;font-size:11px;color:#8B949E;line-height:1.6;
+    font-family:-apple-system,system-ui,'Segoe UI',sans-serif;
+    box-shadow:0 4px 14px rgba(0,0,0,.4);backdrop-filter:blur(6px);
+}
+#counter-box .counter-item{display:flex;align-items:center;gap:6px;white-space:nowrap}
+#counter-box .counter-item img{vertical-align:middle;border-radius:3px}
+@media(max-width:480px){#counter-box{font-size:10px;padding:4px 7px}}
