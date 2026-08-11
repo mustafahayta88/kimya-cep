@@ -432,21 +432,6 @@
         </div>
     </footer>
 
-    <div id="counter-box">
-        <div class="counter-item">Ziyaret <img id="cnt-view" src="https://visitor-badge.laobi.icu/badge?page_id=kimya-cep.site" alt="ziyaret sayaci" loading="lazy"></div>
-        <div class="counter-item">İndirme <img id="cnt-dl" src="https://visitor-badge.laobi.icu/badge?page_id=kimya-cep.indir" alt="indirme sayaci" loading="lazy"></div>
-    </div>
-
     <script src="script.js"></script>
-    <script>
-        var DL_URL = "https://visitor-badge.laobi.icu/badge?page_id=kimya-cep.indir";
-        document.querySelectorAll('a[href$="kimya-cep.apk"]').forEach(function(a){
-            a.addEventListener('click', function(){
-                var i = new Image();
-                i.onload = function(){ document.getElementById('cnt-dl').src = DL_URL + '&_=' + Date.now(); };
-                i.src = DL_URL;
-            });
-        });
-    </script>
 </body>
 </html>
