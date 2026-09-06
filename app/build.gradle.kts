@@ -11,11 +11,15 @@ android {
         applicationId = "com.kimya.uygulama"
         minSdk = 24
         targetSdk = 35
-        versionCode = 4
-        versionName = "3.1"
+        versionCode = 5
+        versionName = "3.2"
     }
 
     buildFeatures { viewBinding = true }
+
+    // Motor testlerinde android.graphics.Color gibi saf veri renkleri
+    // JVM'de çalışsın diye varsayılan değer döner (renkler test dışıdır)
+    testOptions { unitTests.isReturnDefaultValues = true }
 
     buildTypes {
         release {
@@ -47,9 +51,11 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.5")
 
-    // PDF generation
-    implementation("com.itextpdf:itext7-core:8.0.5")
+    // Not: PDF üretimi için Android yerleşik android.graphics.pdf kullanılıyor (harici bağımlılık yok)
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+
+    // Birim testleri (motor doğrulama paketi)
+    testImplementation("junit:junit:4.13.2")
 }

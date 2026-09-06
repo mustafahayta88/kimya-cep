@@ -1,381 +1,364 @@
 package com.kimya.uygulama.features
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.core.content.ContextCompat
+import android.view.*
+import android.util.AttributeSet
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.LinearInterpolator
+import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.appcompat.app.AlertDialog
 import com.kimya.uygulama.R
 import kotlin.math.*
 
-class BioCanvasView(context: Context) : View(context) {
-    private var bioType = 0
-    private var zoomScale = 1f; private var panX = 0f; private var panY = 0f
-    private var lastTx = 0f; private var lastTy = 0f; private var tMode = 0
-    private val sDetector: ScaleGestureDetector
-    private val bgP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF0D1117.toInt(); style = Paint.Style.FILL }
-    private val bP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF8B949E.toInt(); strokeWidth = 3f; style = Paint.Style.STROKE }
-    private val tP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF00F0FF.toInt(); textSize = 0f; textAlign = Paint.Align.CENTER; isFakeBoldText = true }
-    private val sP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFAAAAAA.toInt(); textSize = 0f; textAlign = Paint.Align.CENTER }
-    private val capP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF39FF14.toInt(); textSize = 0f; textAlign = Paint.Align.CENTER; isFakeBoldText = true }
-    private val cP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF6B6B6B.toInt(); style = Paint.Style.FILL }
-    private val oP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFF0000.toInt(); style = Paint.Style.FILL }
-    private val nAt = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF3050F8.toInt(); style = Paint.Style.FILL }
-    private val hP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt(); style = Paint.Style.FILL }
-    private val pP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFA500.toInt(); style = Paint.Style.FILL }
-    private val bdr = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF444444.toInt(); style = Paint.Style.STROKE; strokeWidth = 3f }
-    private val elT = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt(); textSize = 0f; textAlign = Paint.Align.CENTER; isFakeBoldText = true }
-    private val highP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFA500.toInt(); textSize = 0f; textAlign = Paint.Align.CENTER; isFakeBoldText = true }
-    private val arrowP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF39FF14.toInt(); strokeWidth = 4f; style = Paint.Style.STROKE; pathEffect = DashPathEffect(floatArrayOf(8f, 4f), 0f) }
-    private val arrowFill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF39FF14.toInt(); style = Paint.Style.FILL }
-    private val condP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFA500.toInt(); textSize = 0f; textAlign = Paint.Align.CENTER }
-    private val lineP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF334455.toInt(); strokeWidth = 1f }
+class BiomoleculesFlatView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : View(context, attrs, defStyle) {
 
-    init { isClickable = true; isFocusable = true
-        sDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(d: ScaleGestureDetector): Boolean { zoomScale *= d.scaleFactor; zoomScale = zoomScale.coerceIn(0.3f, 4f); invalidate(); return true }
-        })
+    private var bioType = 0
+    private var fadeAlpha = 0f
+    private var fadeAnimator: ValueAnimator? = null
+    private var breathe = 0f
+    private var breatheAnimator: ValueAnimator? = null
+
+    private val bgPaint = Paint().apply { color = 0xFF0D1219.toInt() }
+    private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x08FFFFFF.toInt(); strokeWidth = 0.5f }
+    private val barPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val barBorder = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x22FFFFFF.toInt(); strokeWidth = 1f; style = Paint.Style.STROKE }
+    private val textP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER; isFakeBoldText = true }
+    private val smallP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER }
+    private val labelP = Paint(Paint.ANTI_ALIAS_FLAG).apply { textAlign = Paint.Align.CENTER; isFakeBoldText = true }
+    private val lineP = Paint(Paint.ANTI_ALIAS_FLAG).apply { strokeWidth = 2f; strokeCap = Paint.Cap.ROUND; style = Paint.Style.STROKE }
+    private val boxP = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 1.5f }
+    private var bgBitmap: Bitmap? = null
+
+    fun setType(t: Int, animate: Boolean = true) {
+        bioType = t
+        if (animate) {
+            fadeAnimator?.cancel(); fadeAlpha = 0f
+            fadeAnimator = ValueAnimator.ofFloat(0f, 1f).apply { duration = 350L; interpolator = DecelerateInterpolator(); addUpdateListener { fadeAlpha = it.animatedValue as Float; postInvalidate() }; start() }
+        } else { fadeAlpha = 1f; postInvalidate() }
     }
 
-    fun setBio(type: Int) { bioType = type; invalidate() }
-
-    override fun onTouchEvent(e: MotionEvent): Boolean {
-        sDetector.onTouchEvent(e)
-        when (e.action and MotionEvent.ACTION_MASK) {
-            MotionEvent.ACTION_DOWN -> { lastTx = e.x; lastTy = e.y; tMode = 1; return true }
-            MotionEvent.ACTION_POINTER_DOWN -> { tMode = 2 }
-            MotionEvent.ACTION_MOVE -> { if (tMode == 1 && zoomScale > 1f) { panX += e.x - lastTx; panY += e.y - lastTy }; lastTx = e.x; lastTy = e.y; invalidate() }
-            MotionEvent.ACTION_UP -> { tMode = 0; return true }
+    init {
+        isClickable = true; isFocusable = true
+        breatheAnimator = ValueAnimator.ofFloat(0f, (2 * PI).toFloat()).apply {
+            duration = 6000L; interpolator = LinearInterpolator(); repeatCount = ValueAnimator.INFINITE
+            addUpdateListener { breathe = it.animatedValue as Float; postInvalidate() }; start()
         }
-        return true
+    }
+
+    override fun onAttachedToWindow() { super.onAttachedToWindow(); breatheAnimator?.start() }
+    override fun onDetachedFromWindow() { breatheAnimator?.cancel(); fadeAnimator?.cancel(); bgBitmap?.recycle(); bgBitmap = null; super.onDetachedFromWindow() }
+
+    override fun onSizeChanged(w: Int, h: Int, ow: Int, oh: Int) {
+        super.onSizeChanged(w, h, ow, oh)
+        bgBitmap?.recycle()
+        val bmp = Bitmap.createBitmap(w.coerceAtLeast(1), h.coerceAtLeast(1), Bitmap.Config.ARGB_8888)
+        val c = Canvas(bmp); c.drawRect(0f, 0f, w.toFloat(), h.toFloat(), bgPaint)
+        val gs = 40f; val cols = (w / gs).toInt() + 1; val rows = (h / gs).toInt() + 1
+        for (i in 0 until cols) c.drawLine(i * gs, 0f, i * gs, h.toFloat(), gridPaint)
+        for (i in 0 until rows) c.drawLine(0f, i * gs, w.toFloat(), i * gs, gridPaint)
+        bgBitmap = bmp
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val w = width.toFloat(); val h = height.toFloat()
-        canvas.drawRect(0f, 0f, w, h, bgP)
-        canvas.save(); canvas.scale(zoomScale, zoomScale, w / 2f, h / 2f); canvas.translate(panX / zoomScale, panY / zoomScale)
-        val c = canvas
-        val ar = (w * 0.032f).coerceAtMost(h * 0.045f).coerceAtMost(22f); val sp = ar * 4f; val cx = w / 2f
-        tP.textSize = h * 0.055f; sP.textSize = h * 0.035f; capP.textSize = h * 0.04f; highP.textSize = h * 0.04f; elT.textSize = ar * 0.9f
-
-        fun da(x: Float, y: Float, e: String, p: Paint = cP) { c.drawCircle(x, y, ar, p); c.drawCircle(x, y, ar, bdr); elT.textSize = ar * 0.9f; c.drawText(e, x, y + elT.textSize / 3f, elT) }
-        fun db(x1: Float, y1: Float, x2: Float, y2: Float, t: Int = 1) { c.drawLine(x1, y1, x2, y2, if (t == 2) bP else bP) }
-
+        bgBitmap?.let { canvas.drawBitmap(it, 0f, 0f, null) }
+        canvas.save(); canvas.clipRect(0f, 0f, width.toFloat(), height.toFloat())
         when (bioType) {
-            0 -> {
-                c.drawText("Karbonhidratlar", cx, h * 0.05f, tP)
-                c.drawText("Cn(H2O)n - sekerler, nisasta, seluloz", cx, h * 0.10f, sP)
-                c.drawText("Monosakkarit: 1 seker | Disakkarit: 2 | Polisakkarit: cok", cx, h * 0.14f, sP)
-
-                val rc = cx - w * 0.15f; val ry = h * 0.38f; val rr = sp * 1.3f
-                val pang = 2f * PI.toFloat() / 6f
-                val hexPts = (0 until 6).map { i -> Pair(rc + rr * cos(i * pang - PI.toFloat() / 2f), ry + rr * sin(i * pang - PI.toFloat() / 2f)) }
-                for (pt in hexPts) da(pt.first, pt.second, "C")
-                for (i in 0 until 6) { val n = (i + 1) % 6; db(hexPts[i].first, hexPts[i].second, hexPts[n].first, hexPts[n].second) }
-                da(hexPts[0].first - sp * 0.8f, hexPts[0].second + sp * 0.4f, "O", oP)
-                da(hexPts[1].first - sp * 0.3f, hexPts[1].second - sp * 0.6f, "OH")
-                da(hexPts[2].first + sp * 0.3f, hexPts[2].second - sp * 0.6f, "OH")
-                da(hexPts[3].first + sp * 0.8f, hexPts[3].second + sp * 0.1f, "O", oP)
-                da(hexPts[4].first + sp * 0.6f, hexPts[4].second + sp * 0.6f, "OH")
-                da(hexPts[5].first - sp * 0.3f, hexPts[5].second + sp * 0.6f, "OH")
-                db(hexPts[0].first, hexPts[0].second, hexPts[0].first - sp * 0.8f, hexPts[0].second + sp * 0.4f)
-                c.drawText("Glukoz (C6H12O6)", rc, ry + rr + sp * 0.5f, capP)
-                c.drawText("Kan sekeri, ana enerji", rc, ry + rr + sp, sP)
-
-                c.drawText("Sukroz = Glukoz+Fruktoz", cx + w * 0.18f, h * 0.35f, highP)
-                c.drawText("Nisasta: 100-1000 glukoz", cx + w * 0.18f, h * 0.48f, highP)
-                c.drawText("Seluloz: bitki duvari", cx + w * 0.18f, h * 0.58f, highP)
-                c.drawText("Glikozid bagi", cx + w * 0.18f, h * 0.68f, sP)
-                c.drawText("Enerji depo + yapi", cx + w * 0.18f, h * 0.80f, sP)
-            }
-            1 -> {
-                c.drawText("Proteinler", cx, h * 0.05f, tP)
-                c.drawText("Amino asit polimerleri - 20 standart aa", cx, h * 0.10f, sP)
-
-                val aa_x = cx - sp * 3f
-                da(aa_x, h * 0.28f, "H2N", nAt); db(aa_x, h * 0.28f, aa_x + sp, h * 0.28f); da(aa_x + sp, h * 0.28f, "C")
-                da(aa_x + sp, h * 0.28f - sp * 0.8f, "H", hP); da(aa_x + sp, h * 0.28f + sp * 0.8f, "R")
-                db(aa_x + sp, h * 0.28f, aa_x + sp * 2f, h * 0.28f); da(aa_x + sp * 2f, h * 0.28f, "C")
-                da(aa_x + sp * 2f, h * 0.28f + sp * 0.7f, "O", oP); da(aa_x + sp * 2f, h * 0.28f - sp * 0.8f, "OH")
-                c.drawText("Amino asit genel: NH2-C(R)-COOH", cx - sp, h * 0.52f, sP)
-
-                val pepP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF00F0FF.toInt(); strokeWidth = 5f; style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND }
-                val path = Path(); path.moveTo(w * 0.12f, h * 0.62f)
-                for (i in 0 until 6) { path.lineTo(w * 0.12f + i * w * 0.11f, h * 0.62f + sin(i * 0.6f) * 6f) }; c.drawPath(path, pepP)
-                c.drawText("-[NH-CO]n- polipeptid zinciri (protein)", cx, h * 0.72f, capP)
-                c.drawText("1: aa dizisi | 2: a-heliks, b-tabaka | 3: 3D katlanma | 4: alt birim", cx, h * 0.80f, sP)
-                c.drawText("Enzim, antikor, kas, kolajen - 4 kcal/g", cx, h * 0.88f, sP)
-            }
-            2 -> {
-                c.drawText("Yaglar (Lipitler)", cx, h * 0.05f, tP)
-                c.drawText("Gliserol + 3 yag asidi = Trigliserit", cx, h * 0.10f, sP)
-
-                val glyY = h * 0.28f; val s5 = sp * 0.8f
-                da(cx, glyY, "C"); da(cx - s5, glyY + s5, "C"); da(cx + s5, glyY + s5, "C")
-                db(cx, glyY, cx - s5, glyY + s5); db(cx, glyY, cx + s5, glyY + s5)
-                da(cx - s5, glyY + s5 + s5, "O", oP); da(cx + s5, glyY + s5 + s5, "O", oP); da(cx, glyY - s5, "O", oP)
-
-                for ((dx, dy) in listOf(cx - s5 to glyY + s5 + s5, cx + s5 to glyY + s5 + s5, cx to glyY - s5)) {
-                    for (j in 0 until 3) {
-                        val ex = dx + s5 * (j + 1) * if (dx < cx) -1f else 1f
-                        da(ex, dy + s5 * 0.3f * j, "C")
-                        if (j > 0) db(ex - s5 * if (dx < cx) -1f else 1f, dy + s5 * 0.3f * (j - 1), ex, dy + s5 * 0.3f * j)
-                    }
-                }
-                c.drawText("Gliserol + 3 yag asidi zinciri", cx, h * 0.66f, sP)
-
-                c.drawText("Doymus yag: hayvansal, kati (tereyagi)", cx, h * 0.76f, highP)
-                c.drawText("Doymamis yag: bitkisel, sivi (zeytinyagi)", cx, h * 0.82f, capP)
-                c.drawText("Hucrre zari, enerji depo (9 kcal/g), hormon", cx, h * 0.89f, sP)
-            }
-            3 -> {
-                c.drawText("Vitaminler", cx, h * 0.05f, tP)
-                c.drawText("Organik bilesikler - Eksikliginde hastalik", cx, h * 0.10f, sP)
-                c.drawText("Yagda cozunen: A, D, E, K | Suda cozunen: B, C", cx, h * 0.14f, sP)
-
-                data class Vit(val name: String, val source: String, val fn: String, val def: String)
-                val vits = listOf(
-                    Vit("A", "Havuc ispanak", "Gorme bagisiklik", "Gece korlugu"),
-                    Vit("C", "Portakal limon", "Kollajen antioksidan", "Iskorbüt"),
-                    Vit("D", "Gunes balik", "Kalsiyum emilimi", "Rasitizm"),
-                    Vit("B12", "Et sut yumurta", "Sinir sistemi", "Anemi"),
-                    Vit("E", "Findik aycicek", "Hucre koruma", "Noropati"),
-                )
-                val tableTop = h * 0.20f; val rowH = h * 0.10f; val colW = w * 0.22f
-                val headerP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF00F0FF.toInt(); textSize = h * 0.035f; textAlign = Paint.Align.CENTER; isFakeBoldText = true }
-                val dataP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt(); textSize = h * 0.025f; textAlign = Paint.Align.CENTER }
-                val defP2 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFF4444.toInt(); textSize = h * 0.025f; textAlign = Paint.Align.CENTER }
-                val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF334455.toInt(); strokeWidth = 1f }
-
-                val hdrs = listOf("Vitamin", "Kaynak", "Gorev", "Eksiklik")
-                for ((ci, hdr) in hdrs.withIndex()) { c.drawText(hdr, cx - colW * 1.5f + ci * colW, tableTop - 6f, headerP) }
-                for ((ri, vit) in vits.withIndex()) {
-                    val y = tableTop + (ri + 1) * rowH
-                    c.drawLine(w * 0.08f, y, w * 0.92f, y, linePaint)
-                    c.drawText(vit.name, cx - colW * 1.5f, y + rowH * 0.6f, dataP)
-                    c.drawText(vit.source, cx - colW * 0.5f, y + rowH * 0.6f, dataP)
-                    c.drawText(vit.fn, cx + colW * 0.5f, y + rowH * 0.6f, dataP)
-                    c.drawText(vit.def, cx + colW * 1.5f, y + rowH * 0.6f, defP2)
-                }
-            }
-            4 -> {
-                c.drawText("DNA / RNA", cx, h * 0.05f, tP)
-                c.drawText("Nukleik asitler - Genetik bilgi", cx, h * 0.10f, sP)
-                c.drawText("Nukleotid: fosfat + seker + baz (A,T,G,C/U)", cx, h * 0.14f, sP)
-
-                val helP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF00F0FF.toInt(); strokeWidth = 5f; style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND }
-                val helP2 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFF69B4.toInt(); strokeWidth = 5f; style = Paint.Style.STROKE; strokeCap = Paint.Cap.ROUND }
-                val baseP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFA500.toInt(); strokeWidth = 3f; style = Paint.Style.STROKE }
-
-                val path1 = Path(); val path2 = Path(); val cx1 = w * 0.35f; val cx2 = w * 0.65f
-                val topY = h * 0.22f; val botY = h * 0.68f; val steps = 80
-                for (i in 0..steps) {
-                    val frac = i.toFloat() / steps; val y = topY + (botY - topY) * frac
-                    val amp = h * 0.07f; val a1x = cx1 + sin(frac * PI.toFloat() * 5f) * amp
-                    val a2x = cx2 + sin(frac * PI.toFloat() * 5f + PI.toFloat()) * amp
-                    if (i == 0) { path1.moveTo(a1x, y); path2.moveTo(a2x, y) }
-                    else { path1.lineTo(a1x, y); path2.lineTo(a2x, y) }
-                }
-                c.drawPath(path1, helP); c.drawPath(path2, helP2)
-
-                val ar2 = ar * 0.5f
-                for (i in 0 until 6) {
-                    val frac = (i + 0.5f) / 6; val y = topY + (botY - topY) * frac
-                    val bx1 = cx1 + sin(frac * PI.toFloat() * 5f) * h * 0.07f
-                    val bx2 = cx2 + sin(frac * PI.toFloat() * 5f + PI.toFloat()) * h * 0.07f
-                    c.drawLine(bx1, y, bx2, y, baseP)
-                    c.drawCircle(bx1 + (bx2 - bx1) * 0.3f, y, ar2, hP)
-                    c.drawCircle(bx1 + (bx2 - bx1) * 0.7f, y, ar2, nAt)
-                }
-
-                c.drawText("DNA: Cift sarmal (Watson-Crick)", cx, h * 0.78f, capP)
-                c.drawText("Eslesme: A=T (2 H bagi), G=C (3 H bagi)", cx, h * 0.84f, highP)
-                c.drawText("Insan: ~3 milyar bc, ~20.000 gen", cx, h * 0.90f, sP)
-                c.drawText("RNA: Tek sarmal, U (urasil), protein sentezi", cx, h * 0.96f, sP)
-            }
-            5 -> {
-                c.drawText("Enzimler", cx, h * 0.05f, tP)
-                c.drawText("Biyolojik katalizorler - reaksiyon hizini artirir", cx, h * 0.10f, sP)
-                c.drawText("Aktif bolge: substrat baglanir, urune donusur", cx, h * 0.14f, sP)
-
-                val ey = h * 0.28f; val er = sp * 2.2f
-                val enzP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFF69B4.toInt(); style = Paint.Style.FILL }
-                val subP2 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFA500.toInt(); style = Paint.Style.FILL }
-                c.drawCircle(cx, ey, er, enzP)
-                c.drawCircle(cx, ey, er, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFF69B4.toInt(); style = Paint.Style.STROKE; strokeWidth = 3f })
-                c.drawText("Enzim", cx, ey - er - sp * 0.4f, capP)
-
-                c.drawCircle(cx, ey + sp * 0.3f, ar * 0.7f, bP)
-                c.drawText("Aktif", cx, ey + sp * 0.3f + ar * 0.1f, elT)
-                c.drawText("bolge", cx, ey + sp * 0.3f + ar * 0.7f, elT)
-
-                da(cx - sp * 0.5f, ey + sp * 1.5f, "S", subP2)
-                c.drawText("Substrat", cx - sp * 0.5f, ey + sp * 2.5f, sP)
-
-                c.drawLine(cx - sp * 2f, h * 0.65f, cx + sp * 2f, h * 0.65f, arrowP)
-                val ap = Path(); ap.moveTo(cx + sp * 2f, h * 0.65f); ap.lineTo(cx + sp * 2f - 14f, h * 0.65f - 8f); ap.lineTo(cx + sp * 2f - 14f, h * 0.65f + 8f); ap.close()
-                c.drawPath(ap, arrowFill)
-                c.drawText("Enzim-substrat kompleksi", cx, h * 0.63f, condP)
-
-                da(cx - ar * 0.5f, h * 0.78f, "P", subP2); da(cx + ar * 0.5f, h * 0.78f, "P", subP2)
-                c.drawText("Urun", cx, h * 0.86f, capP)
-                c.drawText("Enzim degismeden kalir, tekrar kullanilir", cx, h * 0.94f, highP)
-
-                c.drawText("Anahtar-Kilit + Induced Fit modelleri | Aktivasyon enerjisini dusurur", cx, h * 0.04f, sP)
-            }
-            6 -> {
-                c.drawText("Hormonlar", cx, h * 0.05f, tP)
-                c.drawText("Kimyasal haberci molekuller - endokrin sistem", cx, h * 0.10f, sP)
-                c.drawText("Kan yoluyla tasinir, hedef hucrede etki gosterir", cx, h * 0.14f, sP)
-
-                val horY = h * 0.20f; val colW = w * 0.22f; val rowH = h * 0.10f
-                val hdrP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF00F0FF.toInt(); textSize = h * 0.03f; textAlign = Paint.Align.CENTER; isFakeBoldText = true }
-                val dP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt(); textSize = h * 0.025f; textAlign = Paint.Align.CENTER }
-                val lP2 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFAAAAAA.toInt(); textSize = h * 0.025f; textAlign = Paint.Align.CENTER }
-
-                data class Hormon(val name: String, val src: String, val fn: String, val def: String)
-                val hormons = listOf(
-                    Hormon("Insulin", "Pankreas", "Kan sekerini dusurur", "Diyabet"),
-                    Hormon("Adrenalin", "Bobrek ustu", "Savas/kac tepkisi", "Yuksek tansiyon"),
-                    Hormon("Testosteron", "Testis", "Erkek ozellikler", "Hipogonadizm"),
-                    Hormon("Ostrojen", "Yumurtalik", "Kadin ozellikler", "Menopoz"),
-                    Hormon("Tiroksin", "Tiroid", "Metabolizma hizi", "Guatr"),
-                )
-                val hdrs = listOf("Hormon", "Kaynak", "Gorev", "Eksiklik")
-                for ((ci, hdr) in hdrs.withIndex()) { c.drawText(hdr, cx - colW * 1.5f + ci * colW, horY - 6f, hdrP) }
-                for ((ri, h) in hormons.withIndex()) {
-                    val y = horY + (ri + 1) * rowH
-                    c.drawLine(w * 0.08f, y, w * 0.92f, y, lineP)
-                    c.drawText(h.name, cx - colW * 1.5f, y + rowH * 0.6f, dP)
-                    c.drawText(h.src, cx - colW * 0.5f, y + rowH * 0.6f, dP)
-                    c.drawText(h.fn, cx + colW * 0.5f, y + rowH * 0.6f, dP)
-                    c.drawText(h.def, cx + colW * 1.5f, y + rowH * 0.6f, lP2)
-                }
-
-                c.drawText("Insulin: 51 aa polipeptid | Steroid hormonlar: kolesterolden turetilir", cx, h * 0.82f, highP)
-                c.drawText("Geri bildirim mekanizmasi ile kontrol (negatif feedback)", cx, h * 0.88f, sP)
-                c.drawText("Hormon bozukluklari: diyabet, guatr, buyume geriligi, kisirlik", cx, h * 0.94f, sP)
-            }
-            7 -> {
-                c.drawText("Metabolizma", cx, h * 0.05f, tP)
-                c.drawText("Hucredeki tum kimyasal reaksiyonlarin toplami", cx, h * 0.10f, sP)
-                c.drawText("Katabolizma (yikim) + Anabolizma (yapim)", cx, h * 0.14f, sP)
-
-                val metaY = h * 0.20f; val metaH = h * 0.72f
-                val metaP = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFF4444.toInt(); style = Paint.Style.FILL }
-                val metaP2 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF39FF14.toInt(); style = Paint.Style.FILL }
-                val metaLine = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF555555.toInt(); strokeWidth = 2f; style = Paint.Style.STROKE }
-                val metaT = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt(); textSize = h * 0.035f; textAlign = Paint.Align.CENTER; isFakeBoldText = true }
-                val metaS = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFCCCCCC.toInt(); textSize = h * 0.025f; textAlign = Paint.Align.CENTER }
-
-                c.drawRoundRect(w * 0.06f, metaY, w * 0.46f, metaY + metaH, 16f, 16f, metaP)
-                c.drawRoundRect(w * 0.06f, metaY, w * 0.46f, metaY + metaH, 16f, 16f, metaLine)
-                c.drawText("Katabolizma", w * 0.26f, metaY + 20f, metaT)
-                c.drawText("Bilesik -> Enerji", w * 0.26f, metaY + metaH * 0.12f, metaS)
-                c.drawText("Glikoz ->", w * 0.26f, metaY + metaH * 0.22f, metaS)
-                c.drawText("Piruvat", w * 0.26f, metaY + metaH * 0.28f, metaS)
-                c.drawText("Asetil-CoA ->", w * 0.26f, metaY + metaH * 0.36f, metaS)
-                c.drawText("Krebs ->", w * 0.26f, metaY + metaH * 0.44f, metaS)
-                c.drawText("Elek. Tasima ->", w * 0.26f, metaY + metaH * 0.52f, metaS)
-                c.drawText("ATP (~36 mol)", w * 0.26f, metaY + metaH * 0.60f, metaS)
-                c.drawText("Glikoliz: 10 enzimatik adim", w * 0.26f, metaY + metaH * 0.72f, metaS)
-                c.drawText("Oksijenli solunum", w * 0.26f, metaY + metaH * 0.82f, metaS)
-                c.drawText("(aerobik)", w * 0.26f, metaY + metaH * 0.88f, metaS)
-
-                c.drawRoundRect(w * 0.54f, metaY, w * 0.94f, metaY + metaH, 16f, 16f, metaP2)
-                c.drawRoundRect(w * 0.54f, metaY, w * 0.94f, metaY + metaH, 16f, 16f, metaLine)
-                c.drawText("Anabolizma", w * 0.74f, metaY + 20f, metaT)
-                c.drawText("Enerji -> Bilesik", w * 0.74f, metaY + metaH * 0.12f, metaS)
-                c.drawText("Fotosentez:", w * 0.74f, metaY + metaH * 0.22f, metaS)
-                c.drawText("CO2 + H2O ->", w * 0.74f, metaY + metaH * 0.30f, metaS)
-                c.drawText("Glikoz + O2", w * 0.74f, metaY + metaH * 0.38f, metaS)
-                c.drawText("Protein sentezi:", w * 0.74f, metaY + metaH * 0.50f, metaS)
-                c.drawText("aa -> polipeptid", w * 0.74f, metaY + metaH * 0.58f, metaS)
-                c.drawText("Yag sentezi:", w * 0.74f, metaY + metaH * 0.68f, metaS)
-                c.drawText("Gliserol + FA", w * 0.74f, metaY + metaH * 0.76f, metaS)
-                c.drawText("ATP gerektirir", w * 0.74f, metaY + metaH * 0.86f, metaS)
-
-                c.drawText("Bazal metabolizma hizi: ~1500-2000 kcal/gun | ATP: hucrenin enerji para birimi", cx, h * 0.96f, highP)
-            }
+            0 -> drawCarb(canvas); 1 -> drawProtein(canvas); 2 -> drawFat(canvas)
+            3 -> drawVitamin(canvas); 4 -> drawDNA(canvas); 5 -> drawEnzyme(canvas)
+            6 -> drawHormone(canvas); 7 -> drawMetabolism(canvas)
         }
         canvas.restore()
     }
+
+    private fun S(v: Float) = v * width / 400f
+    private fun X(f: Float) = width * f
+    private fun Y(f: Float) = height * f
+    private fun A(a: Int) = (a * fadeAlpha).toInt()
+
+    private fun drawBar(c: Canvas, x: Float, yt: Float, yb: Float, w: Float, color: Int, lbl: String = "", val_: String = "") {
+        barPaint.color = Color.argb(A(220), Color.red(color), Color.green(color), Color.blue(color))
+        c.drawRoundRect(x - w / 2, yt, x + w / 2, yb, S(4f), S(4f), barPaint)
+        c.drawRoundRect(x - w / 2, yt, x + w / 2, yb, S(4f), S(4f), barBorder)
+        if (lbl.isNotEmpty()) { textP.color = Color.argb(A(255), 255, 255, 255); textP.textSize = S(9f); c.drawText(lbl, x, yb + S(13f), textP) }
+        if (val_.isNotEmpty()) { smallP.color = Color.argb(A(180), 180, 180, 180); smallP.textSize = S(8f); c.drawText(val_, x, yt - S(4f), smallP) }
+    }
+
+    private fun drawBox(c: Canvas, x: Float, y: Float, w: Float, h: Float, color: Int, txt: String, sub: String = "") {
+        boxP.color = Color.argb(A(100), Color.red(color), Color.green(color), Color.blue(color))
+        c.drawRoundRect(x - w / 2, y - h / 2, x + w / 2, y + h / 2, S(6f), S(6f), boxP)
+        textP.color = Color.argb(A(255), 255, 255, 255); textP.textSize = S(10f); c.drawText(txt, x, y + S(3f), textP)
+        if (sub.isNotEmpty()) { smallP.color = Color.argb(A(160), 160, 160, 160); smallP.textSize = S(8f); c.drawText(sub, x, y + S(16f), smallP) }
+    }
+
+    private fun title(c: Canvas, t: String, y: Float, clr: Int = 0xFFFF69B4.toInt()) {
+        labelP.color = Color.argb(A(220), Color.red(clr), Color.green(clr), Color.blue(clr)); labelP.textSize = S(14f); c.drawText(t, X(0.5f), y, labelP)
+    }
+
+    private fun sub(c: Canvas, t: String, x: Float, y: Float) {
+        smallP.color = Color.argb(A(160), 160, 160, 160); smallP.textSize = S(9f); c.drawText(t, x, y, smallP)
+    }
+
+    private fun hexRing(c: Canvas, cx: Float, cy: Float, r: Float, color: Int) {
+        val ang = 2f * PI.toFloat() / 6f
+        for (i in 0 until 6) {
+            val x1 = cx + r * cos(i * ang - PI.toFloat() / 2f); val y1 = cy + r * sin(i * ang - PI.toFloat() / 2f)
+            val x2 = cx + r * cos((i + 1) * ang - PI.toFloat() / 2f); val y2 = cy + r * sin((i + 1) * ang - PI.toFloat() / 2f)
+            lineP.color = Color.argb(A(200), Color.red(color), Color.green(color), Color.blue(color)); c.drawLine(x1, y1, x2, y2, lineP)
+            barPaint.color = Color.argb(A(180), Color.red(color), Color.green(color), Color.blue(color)); c.drawCircle(x1, y1, S(4f), barPaint)
+        }
+    }
+
+    private fun drawCarb(c: Canvas) {
+        title(c, "Karbonhidratlar", Y(0.08f)); sub(c, "Cn(H2O)n - Enerji kaynagi", X(0.5f), Y(0.15f))
+        hexRing(c, X(0.28f), Y(0.38f), S(35f), 0xFFFF8C00.toInt()); sub(c, "Glikoz (C6H12O6)", X(0.28f), Y(0.38f) + S(50f))
+        hexRing(c, X(0.72f), Y(0.38f), S(28f), 0xFF4DD0E1.toInt()); sub(c, "Fruktoz", X(0.72f), Y(0.38f) + S(42f))
+        val items = arrayOf("Glikoz" to 0xFFFF8C00.toInt(), "Sukroz" to 0xFFFFD700.toInt(), "Nisasta" to 0xFF32CD32.toInt(), "Seluloz" to 0xFF8B4513.toInt())
+        val bw = S(70f); val gap = S(82f); val sx = X(0.5f) - 1.5f * gap; val by = Y(0.85f)
+        for (i in items.indices) { val bh = S(30f) + i * S(8f); drawBox(c, sx + i * gap, by - bh / 2, bw, bh, items[i].second, items[i].first, "") }
+        sub(c, "Monomer -> Disakkarit -> Polisakkarit", X(0.5f), Y(0.95f))
+    }
+
+    private fun drawProtein(c: Canvas) {
+        title(c, "Proteinler", Y(0.08f)); sub(c, "Amino asit zincirleri", X(0.5f), Y(0.15f))
+        val aas = arrayOf("Gli" to 0xFFEF4444.toInt(), "Ala" to 0xFFFF8C00.toInt(), "Val" to 0xFFFFD700.toInt(), "Leu" to 0xFF32CD32.toInt(), "Ile" to 0xFF4DD0E1.toInt(), "Pro" to 0xFF8B5CF6.toInt(), "Phe" to 0xFFFF69B4.toInt())
+        val gap = S(50f); val sx = X(0.5f) - 3f * gap; val cy = Y(0.32f)
+        for (i in aas.indices) {
+            val x = sx + i * gap
+            if (i > 0) { lineP.color = Color.argb(A(150), 100, 100, 100); c.drawLine(x - gap, cy, x, cy, lineP) }
+            barPaint.color = Color.argb(A(200), Color.red(aas[i].second), Color.green(aas[i].second), Color.blue(aas[i].second)); c.drawCircle(x, cy, S(14f), barPaint)
+            textP.color = Color.argb(A(255), 255, 255, 255); textP.textSize = S(8f); c.drawText(aas[i].first, x, cy + S(3f), textP)
+        }
+        sub(c, "Peptit bagi: -CO-NH-", X(0.5f), cy + S(28f))
+        val tp = arrayOf("Enzim" to 0xFFFF4444.toInt(), "Kollajen" to 0xFFFF8C00.toInt(), "Hemoglobin" to 0xFFEF4444.toInt(), "Antikor" to 0xFF3B82F6.toInt())
+        val bw = S(70f); val gap2 = S(82f); val sx2 = X(0.5f) - 1.5f * gap2
+        for (i in tp.indices) drawBox(c, sx2 + i * gap2, Y(0.82f), bw, S(36f), tp[i].second, tp[i].first, "")
+        sub(c, "20 amino asit | Esansiyel: 10, Kalanabilen: 10", X(0.5f), Y(0.95f))
+    }
+
+    private fun drawFat(c: Canvas) {
+        title(c, "Yaglar (Lipitler)", Y(0.08f)); sub(c, "Gliserol + 3 yag asidi", X(0.5f), Y(0.15f))
+        val gx = X(0.22f); val gy = Y(0.35f)
+        lineP.color = Color.argb(A(200), 0xFF, 0x00, 0x80); lineP.strokeWidth = S(3f)
+        c.drawLine(gx, gy - S(30f), gx, gy + S(30f), lineP)
+        sub(c, "Gliserol", gx, gy - S(38f))
+        for (j in 0 until 3) {
+            val sy = gy - S(30f) + j * S(30f)
+            barPaint.color = Color.argb(A(200), 0xFF, 0x00, 0x80); c.drawCircle(gx, sy, S(5f), barPaint)
+            lineP.color = Color.argb(A(180), 0xFF, 0xD7, 0x00); lineP.strokeWidth = S(2f)
+            c.drawLine(gx + S(5f), sy, X(0.75f), sy, lineP)
+            for (k in 1..4) { val kx = gx + S(5f) + k * S(30f); barPaint.color = Color.argb(A(150), 0xFF, 0xD7, 0x00); c.drawCircle(kx, sy, S(3f), barPaint) }
+        }
+        sub(c, "Tekli doymamis: zeytinyagi", X(0.5f), Y(0.62f))
+        sub(c, "Coklu doymamis: balik yagi (Omega-3)", X(0.5f), Y(0.68f))
+        sub(c, "Doymus: tereyagi, palm yagi", X(0.5f), Y(0.74f))
+        sub(c, "9 kcal/g - Enerji depolama | Hucre zar | Isi yalitim", X(0.5f), Y(0.88f))
+        sub(c, "Omega-3: balik, ceviz | Omega-6: bitkisel yag", X(0.5f), Y(0.94f))
+    }
+
+    private fun drawVitamin(c: Canvas) {
+        title(c, "Vitaminler", Y(0.08f)); sub(c, "Az miktarda gerekli - Hayati organik molekuller", X(0.5f), Y(0.15f))
+        val vs = arrayOf("A" to 0xFFFF8C00.toInt(), "B12" to 0xFFEF4444.toInt(), "C" to 0xFF81C784.toInt(), "D" to 0xFFFFD700.toInt(), "E" to 0xFF4DD0E1.toInt(), "K" to 0xFF8B5CF6.toInt())
+        val cols = 3; val cw = S(110f); val ch = S(70f); val sx = X(0.5f) - cols * cw / 2 + cw / 2; val sy = Y(0.30f)
+        for (i in vs.indices) { val col = i % cols; val row = i / cols; drawBox(c, sx + col * cw, sy + row * ch, cw * 0.9f, ch * 0.85f, vs[i].second, vs[i].first, "") }
+        sub(c, "Yagda cozunen: A, D, E, K", X(0.5f), Y(0.78f))
+        sub(c, "Suda cozunen: B kompleks, C", X(0.5f), Y(0.84f))
+        sub(c, "Eksiklik: Avitaminoz | Fazlasi: Hipervitaminoz", X(0.5f), Y(0.90f))
+        sub(c, "A: Gorus | C: Antioksidan | D: Kemik | K: Pih", X(0.5f), Y(0.96f))
+    }
+
+    private fun drawDNA(c: Canvas) {
+        title(c, "DNA - Deoksiribonukleik Asit", Y(0.08f)); sub(c, "Genetik bilgi - Ikili sarmal", X(0.5f), Y(0.15f))
+        val n = 10; val gap = S(30f); val sx = X(0.5f) - (n - 1) * gap / 2; val hy = Y(0.45f); val hh = S(60f)
+        val pairs = arrayOf(0xFF4DD0E1.toInt() to 0xFFFF4444.toInt(), 0xFF81C784.toInt() to 0xFFFFD700.toInt())
+        for (i in 0 until n) {
+            val x = sx + i * gap; val off = sin(i * 0.8f + breathe) * hh * 0.4f; val p = pairs[i % 2]
+            lineP.color = Color.argb(A(150), 100, 100, 100); lineP.strokeWidth = S(1.5f)
+            c.drawLine(x, hy - off - S(20f), x, hy + off + S(20f), lineP)
+            barPaint.color = Color.argb(A(200), Color.red(p.first), Color.green(p.first), Color.blue(p.first)); c.drawCircle(x, hy - off - S(20f), S(7f), barPaint)
+            barPaint.color = Color.argb(A(200), Color.red(p.second), Color.green(p.second), Color.blue(p.second)); c.drawCircle(x, hy + off + S(20f), S(7f), barPaint)
+            val bases = arrayOf("A", "T", "G", "C"); textP.color = Color.argb(A(255), 255, 255, 255); textP.textSize = S(7f)
+            c.drawText(bases[i % 4], x, hy - off - S(17f), textP); c.drawText(bases[(i + 2) % 4], x, hy + off + S(23f), textP)
+        }
+        sub(c, "A=T (2 H-bagi) | G=C (3 H-bagi)", X(0.5f), Y(0.78f))
+        sub(c, "Replikasyon: DNA->DNA | Transkripsiyon: DNA->mRNA", X(0.5f), Y(0.85f))
+        sub(c, "Insan: 46 kromozom | 3 milyar baz cifti", X(0.5f), Y(0.92f))
+    }
+
+    private fun drawEnzyme(c: Canvas) {
+        title(c, "Enzimler", Y(0.08f)); sub(c, "Biyoumzel katalizor", X(0.5f), Y(0.15f))
+        val ex = X(0.35f); val ey = Y(0.38f); val er = S(50f)
+        barPaint.color = Color.argb(A(60), 0x39, 0xFF, 0x14); c.drawCircle(ex, ey, er, barPaint)
+        lineP.color = Color.argb(A(180), 0x39, 0xFF, 0x14); lineP.strokeWidth = S(2f); c.drawCircle(ex, ey, er, lineP)
+        sub(c, "Enzim", ex, ey - er - S(10f))
+        barPaint.color = Color.argb(A(180), 0xFF, 0x44, 0x44); c.drawRoundRect(ex + S(15f) - S(12f), ey - S(18f) - S(8f), ex + S(15f) + S(12f), ey - S(18f) + S(8f), S(4f), S(4f), barPaint)
+        sub(c, "Substrat", ex + S(15f), ey - S(18f) - S(16f))
+        lineP.color = Color.argb(A(100), 200, 200, 200); c.drawLine(X(0.52f), Y(0.38f), X(0.62f), Y(0.38f), lineP)
+        barPaint.color = Color.argb(A(150), 0xFF, 0x44, 0x44); c.drawCircle(X(0.72f), Y(0.32f), S(6f), barPaint)
+        barPaint.color = Color.argb(A(150), 0x00, 0xF0, 0xFF); c.drawCircle(X(0.72f), Y(0.46f), S(6f), barPaint)
+        sub(c, "Urun 1 + Urun 2", X(0.72f), Y(0.54f))
+        sub(c, "Substrat + Enzim -> ES -> Urun + Enzim", X(0.5f), Y(0.70f))
+        val fs = arrayOf("Sicaklik" to 0xFFFF4444.toInt(), "pH" to 0xFF4DD0E1.toInt(), "Inhibitor" to 0xFFFFD700.toInt())
+        val bw = S(100f); val gap = S(115f); val sx = X(0.5f) - gap
+        for (i in fs.indices) drawBox(c, sx + i * gap, Y(0.84f), bw, S(30f), fs[i].second, fs[i].first, "")
+        sub(c, "Opt. 37C | pH 6-8 | Denaturasyon: >60C", X(0.5f), Y(0.95f))
+    }
+
+    private fun drawHormone(c: Canvas) {
+        title(c, "Hormonlar", Y(0.08f)); sub(c, "Iletisim molekulleri - Bezi > Kan > Hedef", X(0.5f), Y(0.15f))
+        val hs = arrayOf("Insulin" to 0xFF4DD0E1.toInt(), "Adrenalin" to 0xFFFF4444.toInt(), "Tiroid" to 0xFFFFD700.toInt(), "Testosteron" to 0xFF81C784.toInt(), "Estrojen" to 0xFFFF69B4.toInt(), "Kortizol" to 0xFFFF8C00.toInt())
+        val cols = 3; val cw = S(110f); val ch = S(70f); val sx = X(0.5f) - cols * cw / 2 + cw / 2; val sy = Y(0.30f)
+        for (i in hs.indices) { val col = i % cols; val row = i / cols; drawBox(c, sx + col * cw, sy + row * ch, cw * 0.9f, ch * 0.85f, hs[i].second, hs[i].first, "") }
+        sub(c, "Peptit: Insulin, GH | Steroid: Kortizol, Testosteron", X(0.5f), Y(0.78f))
+        sub(c, "Amin: Adrenalin, Tiroid", X(0.5f), Y(0.84f))
+        sub(c, "Endokrin bezlerden salgilanir, kana karisir", X(0.5f), Y(0.90f))
+        sub(c, "Geri besleme ile kontrol | Metabolizma regulasyonu", X(0.5f), Y(0.96f))
+    }
+
+    private fun drawMetabolism(c: Canvas) {
+        title(c, "Metabolizma", Y(0.08f)); sub(c, "Katabolizma vs Anabolizma", X(0.5f), Y(0.15f))
+        drawBox(c, X(0.28f), Y(0.30f), S(120f), S(50f), 0xFFEF4444.toInt(), "Katabolizma", "Parcalama")
+        drawBox(c, X(0.72f), Y(0.30f), S(120f), S(50f), 0xFF81C784.toInt(), "Anabolizma", "Olusturma")
+        lineP.color = Color.argb(A(100), 200, 200, 200); c.drawLine(X(0.40f), Y(0.30f), X(0.60f), Y(0.30f), lineP)
+        val kat = arrayOf("Glikoz->CO2" to 0xFFEF4444.toInt(), "Protein->AA" to 0xFFFF8C00.toInt(), "Yag->Gliserol" to 0xFFFFD700.toInt())
+        val ana = arrayOf("CO2->Glikoz" to 0xFF81C784.toInt(), "AA->Protein" to 0xFF4DD0E1.toInt(), "Glikoz->Glikojen" to 0xFF8B5CF6.toInt())
+        val bw = S(105f); val gap = S(115f)
+        for (i in kat.indices) { drawBox(c, X(0.28f), Y(0.52f) + i * S(38f), bw, S(32f), kat[i].second, kat[i].first, ""); drawBox(c, X(0.72f), Y(0.52f) + i * S(38f), bw, S(32f), ana[i].second, ana[i].first, "") }
+        sub(c, "BMR: Bazal Metabolizma Hizi", X(0.5f), Y(0.90f))
+        sub(c, "Katabolizma: enerji cikarir | Anabolizma: enerji harcar", X(0.5f), Y(0.96f))
+    }
+
+    override fun onMeasure(wm: Int, hm: Int) { setMeasuredDimension(MeasureSpec.getSize(wm), MeasureSpec.getSize(hm)) }
 }
 
 class BiomoleculesFragment : Fragment() {
-    private lateinit var bioView: BioCanvasView
-    private val categories = listOf("Karbonhidrat", "Protein", "Yag", "Vitamin", "DNA/RNA", "Enzim", "Hormon", "Metabolizma")
-    private val details = listOf(
-        "Karbonhidratlar: Genel formul Cn(H2O)n. Monosakkarit (glukoz C6H12O6, fruktoz), disakkarit (sukroz C12H22O11, laktoz), polisakkarit (nisasta, seluloz, glikojen). Glikozid bagi ile baglanirlar. Enerji kaynagi (4 kcal/g), yapi maddesi (seluloz). Kan sekeri glukoz.",
-        "Proteinler: 20 standart amino asidin peptid bagi (-CO-NH-) ile polimerlesmesi. Birincil yapi (aa dizisi), ikincil (a-heliks, b-tabaka), ucuncul (3D katlanma), dorduncul (alt birimler). Enzim, antikor, kas proteini, kolajen. 4 kcal/g.",
-        "Yaglar (Lipitler): Gliserol + 3 yag asidi (trigliserit). Ester bagi. Doymus yag: hayvansal, kati. Doymamis yag: bitkisel, sivi. Hucrre zari (fosfolipit), enerji depo (9 kcal/g), hormon (steroid). C18:1 (oleik), C18:2 (linoleik).",
-        "Vitaminler: Organik bilesikler, vucut sentezleyemez. Yagda cozunen: A (gorme), D (Ca emilimi), E (antioksidan), K (pıhtilasma). Suda cozunen: B (metabolizma), C (kollajen). Eksiklik: A -> gece korlugu, C -> iskorbüt, D -> rasitizm, B12 -> anemi.",
-        "DNA/RNA: Nukleotid: fosfat + seker (deoksiriboz/riboz) + baz (A,T,G,C/U). DNA: cift sarmal, A=T (2 H bagi), G=C (3 H bagi). RNA: tek sarmal, U (urasil). mRNA, tRNA, rRNA. Insan: 3 milyar bc, 20000 gen.",
-        "Enzimler: Biyolojik katalizorler (genelde protein). Aktif bolge: substrat baglanir. Anahtar-Kilit ve Induced Fit modelleri. Aktivasyon enerjisini dusurur. Spesifik (bir enzim bir substrat). Orn: Amilaz (nisasta), Lipaz (yag), Proteaz (protein). Kofaktor: vitamin/mineral.",
-        "Hormonlar: Endokrin bezlerden salgilanan kimyasal haberciler. Insulin (kan sekeri), Adrenalin (stres), Testosteron/Ostrojen (cinsiyet), Tiroksin (metabolizma), Kortizol (stres). Kan yoluyla tasinir. Negatif feedback ile kontrol. Eksiklik/fazlalik hastaliga yol acar.",
-        "Metabolizma: Katabolizma (yikim, enerji uretimi) + Anabolizma (yapim, ATP tuketir). Glikoliz: 10 adim, glukoz -> piruvat. Krebs (sitrik asit) dongusu. Elektron tasima zinciri (36 ATP/glukoz). Fotosentez: CO2 + H2O -> glukoz + O2. BMH: ~1500-2000 kcal/gun."
-    )
-    private val formulas = listOf(
-        "Glukoz C6H12O6 | Seluloz: (C6H10O5)n | Nisasta: ~100-1000 glukoz",
-        "Insulin: 51 aa | Kollajen: ~1000 aa | Hemoglobin: 4 alt birim 574 aa",
-        "Doymus: C16-C18 | Doymamis: C18:1 oleik, C18:2 linoleik | 9 kcal/g",
-        "A: gece korlugu | C: iskorbüt | D: rasitizm | B12: anemi",
-        "Insan: 3 milyar bc | DNA: A=T G=C | RNA: Uracil A=U",
-        "Amilaz (nisasta) | Lipaz (yag) | Proteaz (protein) | Kofaktor gerektirir",
-        "Insulin 51 aa | Adrenalin katekolamin | Steroid hormon kolesterolden",
-        "Glikoliz 10 adim | Krebs 8 adim | ETS ~36 ATP | Fotosentez: Calvin"
+    private lateinit var flatView: BiomoleculesFlatView
+    private lateinit var titleTv: TextView; private lateinit var whatTv: TextView
+    private lateinit var howTv: TextView; private lateinit var useTv: TextView
+    private lateinit var examplesTv: TextView; private lateinit var prosTv: TextView
+    private lateinit var consTv: TextView; private lateinit var propsTv: TextView
+
+    private data class BType(val name: String, val color: Int)
+    private val types = arrayOf(
+        BType("Karbonhidrat", 0xFFFF8C00.toInt()), BType("Protein", 0xFFEF4444.toInt()),
+        BType("Yag", 0xFFFFD700.toInt()), BType("Vitamin", 0xFF81C784.toInt()),
+        BType("DNA", 0xFF4DD0E1.toInt()), BType("Enzim", 0xFF8B5CF6.toInt()),
+        BType("Hormon", 0xFFFF69B4.toInt()), BType("Metabolizma", 0xFFFF4444.toInt())
     )
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.fragment_biomolecules, container, false)
-        val placeholder = v.findViewById<View>(R.id.bio_canvas_placeholder)
-        val parent = placeholder.parent as ViewGroup; val idx = parent.indexOfChild(placeholder)
-        parent.removeView(placeholder)
-        bioView = BioCanvasView(requireContext()).apply {
-            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (380 * resources.displayMetrics.density).toInt())
-        }
-        parent.addView(bioView, idx)
+    private val fullInfo = arrayOf(
+        arrayOf("Karbonhidratlar",
+            "Karbonhidratlar Cn(H2O)n formuluyla gosterilen, karbon, hidrojen ve oksijen iceren organik bileşiklerdir. Canlilarin en onemli enerji kaynagidir. Monomer birimleri monosakkarittir (glikoz, fruktoz, galaktoz).",
+            "Monomer: Monosakkarit (glikoz C6H12O6). Disakkarit: 2 monomer + glikozit bagi (sukroz = glikoz + fruktoz). Polisakkarit: yuzlerce monomer (nisasta, seluloz, glikojen). Glikoliz: Glikoz -> 2 piruvat + 2 ATP. Fotosentez: 6CO2 + 6H2O -> C6H12O6 + 6O2.",
+            "Enerji kaynagi (ATP uretimi). Hucre yapisi (seluloz-bitki, kitin-bocek). Hucresel tanima (glikoproteinler). Depo enerji (glikojen-karaciger, nisasta-bitki). Kan grubu belirleme. Sinir sistemi beslemesi (beyin: yalnizca glikoz). Sindirim ve emilim.",
+            "Glikoz: C6H12O6, 4 kcal/g. Sukroz: C12H22O11. Nisasta: (C6H10O5)n. Seluloz: (C6H10O5)n. Kan sekeri: 70-110 mg/dL. Depo: glikojen 100g karaciger, 400g kas.",
+            "Hizli enerji, evrensel enerji kaynagi, cesitli kaynaklar, sindirimi kolay, hayati fonksiyonlar icin zorunlu.",
+            "Fazla tuketim: Obezite, diyabet, dis caruqlari, trigliserid yukselmesi, insul direnci, kronik hastaliklar.",
+            "Glikoz: 4 kcal/g | Kan: 70-110 mg/dL | Depo: glikojen ~500g | Nisasta granul: 1-5 mikron | Seluloz fibril: 3 mikron"),
 
-        val btnRow = v.findViewById<LinearLayout>(R.id.bio_btn_row)
-        val btnIds = mutableListOf<Button>()
-        categories.forEachIndexed { i, name ->
-            Button(requireContext()).apply {
-                text = name; textSize = 12f; setTextColor(-0x1)
-                backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.neon_purp)
-                layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f).apply { setMargins(2, 0, 2, 0) }
-                setOnClickListener {
-                    btnIds.forEach { it.alpha = 0.5f }; alpha = 1f
-                    bioView.setBio(i)
-                    v.findViewById<TextView>(R.id.bio_title).text = categories[i]
-                    v.findViewById<TextView>(R.id.bio_detail).text = details[i]
-                    v.findViewById<TextView>(R.id.bio_facts).text = formulas[i]
-                }
-                btnIds.add(this); btnRow.addView(this)
+        arrayOf("Proteinler",
+            "Proteinler, amino asitlerin peptit baglariyla birlesmesiyle olusan buyuk molekullerdir. 20 farkli amino asit vardir. Her protein ozel bir 3D yapiya sahiptir.",
+            "20 amino asit: H2N-CHR-COOH. 10 kalanamayan (essential): vucut uretemez. 10 kalanabilen: vucut sentezleyebilir. Peptit bagi: -CO-NH- (dekondansasyon). 1.derece: siralama. 2.derece: alfa-heliks, beta-levha. 3.derece: 3D kivrim. 4.derece: alt birimler.",
+            "Enzimler: Tum biyokimyasal reaksiyonlari hizlandirir. Yapi: Kollajen, keratin, aktin. Tasima: Hemoglobin (O2). Savunma: Antikorlar. Sinyal: Insulin. Kas hareketi: Aktin, Miyozin. Kan pihtilasma: Fibrinogen. Depolama: Kazein, ferritin.",
+            "Esansiyel: Val, Leu, Ile, Phe, Trp, Met, Thr, Lys, His, Arg. Proteinde 4 kcal/g. Vucut: ~100.000 farkli protein. Gunde: 0.8-1.2 g/kg vucut agirligi gerekli.",
+            "Hayati fonksiyonlar icin zorunlu, cok yonlu gorev, ozel yapi-fonksiyon iliskisi, enzim aktivitesi, savunma sistemi.",
+            "Eksiklik: Kas kaybi, bagisiklik dusmesi, yara iyilesmesi yavas, Kwashiorkor (karin sisme), Marasmus (kasinma).",
+            "Amino asit: 20 tip | Peptit: 2-50 AA | Protein: 50+ AA | MW: 5.000-1.000.000 | Vucut: ~18% | Gunde: 0.8-1.2 g/kg"),
+
+        arrayOf("Yaglar (Lipitler)",
+            "Lipitler (yaglar), hidrofobik veya amphipatik molekullerdir. Gliserol + 3 yag asidinden olusan trigliseritler en yaygin lipit turudur.",
+            "Trigliserit: Gliserol + 3 yag asidi. Doymus: C-C tekli baglar (tereyagi). Tekli doymamis: 1 C=C (zeytinyagi). Coklu doymamis: 2+ C=C (balik yagi). Omega-3: ALA, EPA, DHA. Omega-6: Linoleik asit. Trans yag: islenmis yaglar (zararli).",
+            "Enerji depolama (9 kcal/g - en yuksek). Hucre zar yapisi (fosfolipit). Isi yalitim (deri alti yag). Organ koruma. Hormon uretimi (testosteron, estrogen). Vitamin emilimi (A, D, E, K). Sinir izolasyonu (miyelin).",
+            "Trigliserit: 9 kcal/g (2.25x karbonhidrat). O-3: 200-500 mg/gun onerilen. Kolesterol: <300 mg/gun. Fosfolipit: hucre zarinin %50'si.",
+            "Enerji depolamada cok verimli, uzun vadeli enerji, hucre yapisinda zorunlu, isinma saglar, vitamin emilimi icin gerekli.",
+            "Fazla tuketim: Obezite, kalp hastaligi, ateroskleroz, yukselmis kolesterol, inflamasyon, insul direnci, kanser riski artisi.",
+            "Enerji: 9 kcal/g | Gunde: 65-80g onerilen | Vucut: ~15-25% | Doymus: <10% kalori | Trans yag: 0% hedefi"),
+
+        arrayOf("Vitaminler",
+            "Vitaminler, vucudun kendi sentezleyemedigi, besinlerle alinmasi gereken organik bileşiklerdir. Az miktarda gerekli olmasina ragmen hayati oneme sahiptir.",
+            "Yagda cozunen: A, D, E, K (sindirim kanali ile emilir, vucutta depolanabilir, fazlasi toksik). Suda cozunen: B kompleks, C (hizli atilir, gunluk alim gerekir). Vitamin provitaminlari: Beta-karoten -> A.",
+            "A: Gorus, bagisiklik. B1: Tiamin, sinir sistemi. B12: Kan yapimi, sinir. C: Kolajen, antioksidan. D: Kalsiyum, kemik. E: Antioksidan, hucre. K: Pıhtilasma, kemik.",
+            "A: 900 mcg/gun. D: 15 mcg/gun. C: 90 mg/gun. E: 15 mg/gun. B12: 2.4 mcg/gun. K: 120 mcg/gun. Avitaminoz: eksiklik. Hipervitaminoz: fazlalik.",
+            "Az miktarda buyuk etki, hayati fonksiyonlar icin zorunlu, cesitli roller, antioksidan koruma, bagisiklik destegi.",
+            "A eksik: Gece kirliligi. C eksik: Skorbut. D eksik: Rikets. B12 eksik: Anemi. K eksik: Kanama bozuklugu.",
+            "A: 900 mcg | C: 90 mg | D: 15 mcg (600 IU) | E: 15 mg | K: 120 mcg | B12: 2.4 mcg"),
+
+        arrayOf("DNA - Deoksiribonukleik Asit",
+            "DNA, genetik bilgiyi saklayan ve nesilden nesile aktaran makromoleküldur. Iki zincirin birbirine sarmaliyla olusan ikili sarmal yapisi vardir.",
+            "Nukleotid: Fosfat + Deoksiriboz + Baz. Baz eslesmesi: A=T (2 hidrojen bagi), G=C (3 hidrojen bagi). Yapi: Sag eli sarmal, 3.4 nm/pitch, 10 baz/pitch. Replikasyon: DNA->DNA (S phase). Transkripsiyon: DNA->mRNA. Tlasyon: mRNA->Protein.",
+            "Genetik bilgi depolama. Protein sentezi talimatlari. Gen ifadesi kontrolu. Hucresi bolunmesi. Evrim ve cesitlilik (mutasyon). Adli tıp (DNA parmakizi). Tibbi tani. Tarimda islahi.",
+            "Insan: 3 milyar baz cifti, 23 kromozom cifti, 20.000-25.000 gen. %1.5 gen kodlama, %98.5 regulator. Baz sayisi: A=T, G=C (Chargaff kurali).",
+            "Evrensel genetik kod, yuksek dogrulukta replikasyon, cesitlilik yaratma, biyolojik programlama, tani ve arastirma.",
+            "Mutasyon: nokta, ekleme, silinme. Genetik: kistik fibrozis, orak hucre. Kanser: somatik mutasyonlar. Yashlanma: telomer kisalmasi.",
+            "DNA: 3.2 milyar bp | Uzunluk: ~2 metre/hucre | Gen: ~20.000 | Mutasyon: ~10^-8/baz/bolunme"),
+
+        arrayOf("Enzimler",
+            "Enzimler, biyokimyasal reaksiyonlari yuzlerce milyon kat hizlandiran protein tabanli katalizorlerdir. Aktif bolge yapisi ile substrata uyum saglar.",
+            "Substrat + Enzim -> ES kompleksi -> Urun + Enzim. 1. Substrat aktif bolgeye baglanir. 2. Gecici ES kompleksi olusur. 3. Urun olusur. 4. Enzim degismez, tekrar kullanilir. Kompetitif inhibitor: aktif bolgeye baglanir. Non-kompetitif: allosterik bolge.",
+            "Tum metabolik reaksiyonlarda kataliz. Sindirim: Amilaz, proteaz, lipaz. Nefes: Sitokrom oksidaz. Fotosentez: Rubisco. DNA: DNA polimeraz. Protein: Ribozom. Kan: Trombin.",
+            "Turnover: 10^2-10^8/sn. Aktivasyon enerjisi dusurme: %50-80. Km: 0.01-100 mM. Opt. sicaklik: 37 C. Opt. pH: 6-8. Verimlilik: kcat/Km.",
+            "Yuksek selectivite, yuksek hiz, yumusak kosullar, geri donusluluk, regule edilebilirlik, enerji tasarrufu.",
+            "Denaturasyon: >60 C veya asidik/temel pH. Eksiklik: metabolik hastaliklar. Fenilketonüri. Laktoz intol. Inhibitor: zehirler (sarin).",
+            "kcat: 10^2-10^8 /sn | Km: 0.01-100 mM | Opt. Sicaklik: 20-60 C | Opt. pH: 3-10 | MW: 10.000-1.000.000"),
+
+        arrayOf("Hormonlar",
+            "Hormonlar, endokrin bezler tarafindan uretilen ve kan yoluyla hedef organlara ulasarak vucut dengesini regule eden kimyasal ileticilerdir.",
+            "3 ana grup: 1. Peptit (insulin, glukagon, GH): suda cozunur, hucre yuzeyine baglanir, cAMP yolu. 2. Steroid (kortizol, testosteron, estrogen): yagda cozunur, hucre icine girer, DNA baglanma. 3. Amin (adrenalin, tiroid): T3/T4 iyot gerektirir.",
+            "Metabolizma regulasyonu (insulin, glukagon). Buyume (GH, tiroid). Stres (kortizol, adrenalin). Cinsel fonksiyon. Su-tuz dengesi. Uyku-uyanik (melatonin). Ruh hali (serotonin, dopamin). Gebelik (progesteron).",
+            "Insulin: 51 amino asit, 2 zincir. Adrenalin: C9H13NO3, MW 183. Testosteron: C19H28O2, MW 288. Estrojen: C18H24O2, MW 272. Kortizol: 362 g/mol.",
+            "Vucut dengesini saglar, uzun sureli etki, dusuk dozda buyuk etki, geri besleme ile kontrol, metabolizma regulasyonu.",
+            "Hiper/Hipofonksiyon: Diabetes, Hiperaktivite (tiroid), Cushing, Addison. Hormonal bozukluklar: Obezite, infertilite.",
+            "Insulin: 51 AA | Kan sekeri: Insulin dusurur | Kortizol: Sabah en yuksek | Melatonin: Gece en yuksek | Dongu: 10-120 dk"),
+
+        arrayOf("Metabolizma",
+            "Metabolizma, vucutta gerceklesen tum kimyasal reaksiyonlarin toplamidir. Katabolizma (parcalama, enerji) ve Anabolizma (olusturma, enerji) olmak uzere 2 surecten olusur.",
+            "Katabolizma: Buyuk->kucuk parcalama, enerji cikarir. Glikoliz: Glikoz->2 piruvat+2 ATP. Beta-oksidasyon: Yag asidi parcalama. Sitrat dongusu: Asetil-CoA->CO2+enerji. Elektron tasiyici: O2 ile ATP. Anabolizma: Kucuk->buyuk olusturma, ATP harcar.",
+            "Enerji uretimi (ATP). Buyume ve onarim. Hucresi bolunmesi. Protein sentezi. Depo enerji. Hucre diferansiyesi. Bagisiklik. Sinir besleme. Vucut sicakligi. Metabolik hiz regulasyonu.",
+            "BMR: 1.400-1.800 kcal/gun. Toplam: 2.000-2.500 kcal/gun. ATP: ~40 kg/gun uretilir. Glikoliz: 10 enzim. Sitrat: 8 adim. Teorik: ~38 ATP/glikoz. Gercek: ~30-32 ATP.",
+            "Her canlida calisir, enerji uretimi, yapi onarim, homeostaz, uyum, buyume, ureme icin zorunlu.",
+            "Metabolik: Diabetes, gut, fenilketonuriu. Metabolik sendrom: Obezite+hipertansiyon+insul direnci. Yashlanma: Metabolizma yavaslar. Egzersiz: Hiz artar.",
+            "BMR: 1.400-1.800 kcal/gun | ATP: 30-38/glikoz | Beyin: ~20% O2 | Isi: ~37 C sabit | Kalp: ~5 L/dk")
+    )
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return inflater.inflate(R.layout.fragment_biomolecules, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        flatView = view.findViewById(R.id.bio_canvas)
+        titleTv = view.findViewById(R.id.bio_title); whatTv = view.findViewById(R.id.bio_what)
+        howTv = view.findViewById(R.id.bio_how); useTv = view.findViewById(R.id.bio_use)
+        examplesTv = view.findViewById(R.id.bio_examples); prosTv = view.findViewById(R.id.bio_pros)
+        consTv = view.findViewById(R.id.bio_cons); propsTv = view.findViewById(R.id.bio_props)
+        val btnRow = view.findViewById<LinearLayout>(R.id.bio_btn_row)
+        types.forEachIndexed { idx, t ->
+            val btn = TextView(requireContext()).apply {
+                text = t.name; textSize = 11f; setTextColor(if (idx == 0) 0xFF0D1219.toInt() else t.color)
+                setPadding(24, 12, 24, 12)
+                background = resources.getDrawable(if (idx == 0) R.drawable.bg_chip_dark_sel else R.drawable.bg_chip_dark, null)
+                isClickable = true; isFocusable = true
+                setOnTouchListener { v, e -> when (e.action) { android.view.MotionEvent.ACTION_DOWN -> v.animate().scaleX(0.92f).scaleY(0.92f).setDuration(60).start(); android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> v.animate().scaleX(1f).scaleY(1f).setDuration(60).start() }; false }
+                setOnClickListener { selectType(idx) }
             }
+            btnRow.addView(btn, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { marginEnd = 6 })
         }
-        v.findViewById<Button>(R.id.btn_help)?.setOnClickListener {
-            AlertDialog.Builder(requireContext())
-                .setTitle("Biyomolekuller")
-                .setMessage("Biyomolekuller, canlilarin yapisinda bulunan buyuk molekullerdir.\n\n" +
-                    "Bu bolumde 4 kategori incelenir:\n" +
-                    "- Karbonhidratlar: Enerji kaynagi (seker, nisastase)\n" +
-                    "- Proteinler: Enzimler, yapi taslari\n" +
-                    "- Lipitler: Yaglar, enerji depolari\n" +
-                    "- Nukleik Asitler: DNA ve RNA, genetik bilgi tasiticisi\n\n" +
-                    "Her kategoride molekullerin yapisi ve ozellikleri gosterilir.")
-                .setPositiveButton("Anladim") { d, _ -> d.dismiss() }
-                .show()
+        selectType(0)
+    }
+
+    private fun selectType(idx: Int) {
+        flatView.setType(idx)
+        val btnRow = view?.findViewById<LinearLayout>(R.id.bio_btn_row) ?: return
+        for (i in 0 until btnRow.childCount) {
+            val child = btnRow.getChildAt(i) as? TextView ?: continue
+            child.background = resources.getDrawable(if (i == idx) R.drawable.bg_chip_dark_sel else R.drawable.bg_chip_dark, null)
+            child.setTextColor(if (i == idx) 0xFF0D1219.toInt() else types[i].color)
         }
-        return v
+        val info = fullInfo[idx]; titleTv.text = info[0]; titleTv.setTextColor(types[idx].color)
+        whatTv.text = info[1]; howTv.text = info[2]; useTv.text = info[3]
+        examplesTv.text = info[4]; prosTv.text = info[5]; consTv.text = info[6]; propsTv.text = info[7]
     }
 }

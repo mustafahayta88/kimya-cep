@@ -1,52 +1,60 @@
 package com.kimya.uygulama.fragments
 
+import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Shader
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.view.animation.DecelerateInterpolator
 import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.kimya.uygulama.R
+import com.kimya.uygulama.utils.AnimUtils
+import com.kimya.uygulama.utils.HelpDialog
 import com.kimya.uygulama.utils.KimyaData
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
 
-class SolutionView @JvmOverloads constructor(context: Context, attrs: android.util.AttributeSet? = null) : View(context, attrs) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+class SolutionView(context: Context, attrs: android.util.AttributeSet? = null) : View(context, attrs) {
     private var fillPercent = 0f
+    private var targetFill = 0f
     private var volumeLabel = ""
+    private var fillAnimator: ValueAnimator? = null
 
-    private var zoomScale = 1f; private var panX = 0f; private var panY = 0f
-    private var lastTx = 0f; private var lastTy = 0f; private var tMode = 0
-    private val sDetector: ScaleGestureDetector
-
-    init { isClickable = true; isFocusable = true
-        sDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(d: ScaleGestureDetector): Boolean { zoomScale *= d.scaleFactor; zoomScale = zoomScale.coerceIn(0.3f, 4f); invalidate(); return true }
-        })
+    private val glassPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFF4DD0E1.toInt(); strokeWidth = 4f; style = Paint.Style.STROKE
+    }
+    private val liquidPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val meniscusPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFF4DD0E1.toInt(); strokeWidth = 2.5f; style = Paint.Style.STROKE
+    }
+    private val markPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFF81C784.toInt(); strokeWidth = 2f; style = Paint.Style.STROKE
+    }
+    private val markTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFFE6EDF3.toInt(); textSize = 24f * resources.displayMetrics.scaledDensity; textAlign = Paint.Align.LEFT
+    }
+    private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFFE6EDF3.toInt(); textSize = 30f * resources.displayMetrics.scaledDensity; textAlign = Paint.Align.CENTER; isFakeBoldText = true
     }
 
-    private fun dp(n: Int): Int = (n * context.resources.displayMetrics.density).toInt()
+    private fun dp(n: Int): Float = (n * context.resources.displayMetrics.density).toFloat()
 
     fun setLiquidLevel(percent: Float, label: String) {
-        fillPercent = percent.coerceIn(0f, 1f)
+        targetFill = percent.coerceIn(0f, 1f)
         volumeLabel = label
-        invalidate()
-    }
-
-    override fun onTouchEvent(e: MotionEvent): Boolean {
-        sDetector.onTouchEvent(e)
-        when (e.action and MotionEvent.ACTION_MASK) {
-            MotionEvent.ACTION_DOWN -> { lastTx = e.x; lastTy = e.y; tMode = 1; return true }
-            MotionEvent.ACTION_POINTER_DOWN -> { tMode = 2 }
-            MotionEvent.ACTION_MOVE -> { if (tMode == 1 && zoomScale > 1f) { panX += e.x - lastTx; panY += e.y - lastTy }; lastTx = e.x; lastTy = e.y; invalidate() }
-            MotionEvent.ACTION_UP -> { tMode = 0; return true }
+        fillAnimator?.cancel()
+        fillAnimator = ValueAnimator.ofFloat(fillPercent, targetFill).apply {
+            duration = 800
+            interpolator = DecelerateInterpolator(1.5f)
+            addUpdateListener { fillPercent = it.animatedValue as Float; invalidate() }
+            start()
         }
-        return true
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -55,75 +63,60 @@ class SolutionView @JvmOverloads constructor(context: Context, attrs: android.ut
         val h = height.toFloat()
         val cx = w / 2f
 
-        val beakerW = w * 0.55f
-        val beakerH = h * 0.65f
+        val beakerW = w * 0.5f
+        val beakerH = h * 0.62f
         val left = cx - beakerW / 2f
         val right = cx + beakerW / 2f
-        val top = h * 0.1f
+        val top = h * 0.12f
         val bottom = top + beakerH
+        val corner = dp(6).toInt()
 
-        paint.style = Paint.Style.FILL
-        paint.color = 0x0D00F0FF.toInt()
-        canvas.drawRoundRect(left, top, right, bottom, dp(6).toFloat(), dp(6).toFloat(), paint)
-        canvas.save(); canvas.scale(zoomScale, zoomScale, w / 2f, h / 2f); canvas.translate(panX / zoomScale, panY / zoomScale)
+        canvas.drawRoundRect(left, top, right, bottom, corner.toFloat(), corner.toFloat(), glassPaint)
 
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = dp(3).toFloat()
-        paint.color = 0xFF00F0FF.toInt()
-        canvas.drawRoundRect(left, top, right, bottom, dp(6).toFloat(), dp(6).toFloat(), paint)
-
-        val lipExt = dp(8).toFloat()
-        val lipH = dp(4).toFloat()
-        paint.strokeWidth = dp(3).toFloat()
-        canvas.drawLine(left - lipExt, top, left - lipExt, top + lipH, paint)
-        canvas.drawLine(left - lipExt, top + lipH, right + lipExt, top + lipH, paint)
-        canvas.drawLine(right + lipExt, top, right + lipExt, top + lipH, paint)
-
-        paint.color = 0xFF39FF14.toInt()
-        paint.strokeWidth = dp(2).toFloat()
-        val numMarks = 4
-        for (i in 0..numMarks) {
-            val t = i.toFloat() / numMarks
+        for (i in 0..4) {
+            val t = i.toFloat() / 4f
             val y = bottom - beakerH * t
-            val longMark = i % 2 == 0
-            val markLen = if (longMark) beakerW * 0.2f else beakerW * 0.12f
-            canvas.drawLine(left + dp(8).toFloat(), y, left + dp(8).toFloat() + markLen, y, paint)
-            if (longMark && t > 0) {
-                paint.textSize = dp(10).toFloat()
-                paint.style = Paint.Style.FILL
-                paint.color = 0xFFE6EDF3.toInt()
-                canvas.drawText("${((1 - t) * 100).toInt()}%", left + dp(12).toFloat() + markLen, y + dp(4).toFloat(), paint)
-                paint.style = Paint.Style.STROKE
-                paint.strokeWidth = dp(2).toFloat()
-                paint.color = 0xFF39FF14.toInt()
+            val markLen = if (i % 2 == 0) beakerW * 0.18f else beakerW * 0.1f
+            canvas.drawLine(left + dp(8), y, left + dp(8) + markLen, y, markPaint)
+            if (i % 2 == 0 && t > 0) {
+                canvas.drawText("${((1 - t) * 100).toInt()}%", left + dp(14) + markLen, y + dp(4), markTextPaint)
             }
         }
 
-        if (fillPercent > 0) {
+        if (fillPercent > 0.01f) {
             val liquidY = bottom - beakerH * fillPercent
-            paint.style = Paint.Style.FILL
-            paint.color = 0x6600F0FF.toInt()
-            canvas.drawRoundRect(left + dp(3).toFloat(), liquidY, right - dp(3).toFloat(), bottom - dp(3).toFloat(), dp(4).toFloat(), dp(4).toFloat(), paint)
+            val lGrad = LinearGradient(left, liquidY, left, bottom,
+                0x4400F0FF.toInt(), 0x7700F0FF.toInt(), Shader.TileMode.CLAMP)
+            liquidPaint.shader = lGrad
+            canvas.drawRoundRect(left + dp(3), liquidY + dp(3), right - dp(3), bottom - dp(3),
+                corner.toFloat() / 2, corner.toFloat() / 2, liquidPaint)
 
-            paint.style = Paint.Style.STROKE
-            paint.strokeWidth = dp(2).toFloat()
-            paint.color = 0xFF00F0FF.toInt()
-            canvas.drawLine(left + dp(6).toFloat(), liquidY, right - dp(6).toFloat(), liquidY, paint)
+            val mPath = Path()
+            mPath.moveTo(left + dp(8), liquidY + dp(6))
+            mPath.quadTo(cx, liquidY, right - dp(8), liquidY + dp(6))
+            canvas.drawPath(mPath, meniscusPaint)
         }
 
         if (volumeLabel.isNotEmpty()) {
-            paint.color = 0xFFE6EDF3.toInt()
-            paint.textSize = dp(14).toFloat()
-            paint.style = Paint.Style.FILL
-            paint.textAlign = Paint.Align.CENTER
-            canvas.drawText(volumeLabel, cx, bottom + dp(28).toFloat(), paint)
+            canvas.drawText(volumeLabel, cx, bottom + dp(26), labelPaint)
         }
-        canvas.restore()
     }
 }
 
 class CozeltiFragment : Fragment() {
     private fun dp(n: Int): Int = (n * resources.displayMetrics.density).toInt()
+
+    private fun animateValue(tv: TextView, target: Double, start: Double = 0.0) {
+        ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 700
+            interpolator = DecelerateInterpolator(1.5f)
+            addUpdateListener { a -> tv.text = (start + (target - start) * (a.animatedValue as Float)).let { "%.4f".format(it) } }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) { tv.text = "%.4f".format(target) }
+            })
+            start()
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.fragment_cozelti, container, false)
@@ -134,64 +127,130 @@ class CozeltiFragment : Fragment() {
         val yuzde = v.findViewById<EditText>(R.id.coz_yuzde)
         val yogunluk = v.findViewById<EditText>(R.id.coz_yogunluk)
         val sonuc = v.findViewById<TextView>(R.id.coz_sonuc)
+        val resultCard = v.findViewById<View>(R.id.coz_result_card)
+        val resultNote = v.findViewById<TextView>(R.id.coz_result_note)
+        val resultValue = v.findViewById<TextView>(R.id.coz_result_value)
+
         val dcmYuzde = v.findViewById<EditText>(R.id.dcm_yuzde)
         val dcmYogunluk = v.findViewById<EditText>(R.id.dcm_yogunluk)
         val dcmmK = v.findViewById<EditText>(R.id.dcm_mK)
         val dcmSonuc = v.findViewById<TextView>(R.id.dcm_sonuc)
+        val dcmResultCard = v.findViewById<View>(R.id.dcm_result_card)
+        val dcmResultNote = v.findViewById<TextView>(R.id.dcm_result_note)
+        val dcmResultValue = v.findViewById<TextView>(R.id.dcm_result_value)
+
         val solutionView = v.findViewById<SolutionView>(R.id.solution_view)
 
-        v.findViewById<Button>(R.id.preset_1M_NaCl).setOnClickListener {
+        val chips = listOf(
+            v.findViewById<TextView>(R.id.preset_1M_NaCl),
+            v.findViewById<TextView>(R.id.preset_01M_HCl),
+            v.findViewById<TextView>(R.id.preset_2M_H2SO4),
+            v.findViewById<TextView>(R.id.preset_05M_NaOH)
+        )
+        fun selectChip(c: TextView) { chips.forEach { it.isSelected = it === c } }
+
+        fun hazirla(animate: Boolean) {
+            val M = hedefM.text.toString().toDoubleOrNull()
+            val V = hedefV.text.toString().toDoubleOrNull()
+            val mID = mK.text.toString().toDoubleOrNull()
+            if (M == null || V == null || mID == null || M <= 0 || V <= 0 || mID <= 0) {
+                resultCard.visibility = View.VISIBLE
+                resultNote.text = "uyari"
+                sonuc.visibility = View.VISIBLE
+                sonuc.text = "M, V ve Ma alanlarini doldurun (pozitif degerler)"
+                return
+            }
+            val n = M * V
+            val gereKutle = n * mID
+            resultCard.visibility = View.VISIBLE
+            resultNote.text = "gerekli kutle"
+            if (animate) animateValue(resultValue, gereKutle) else resultValue.text = "%.4f".format(gereKutle)
+            sonuc.visibility = View.VISIBLE
+            sonuc.text = "Mol: ${"%.4f".format(n)} mol | Hacim: ${"%.2f".format(V)} L"
+
+            val y = yuzde.text.toString().toDoubleOrNull()
+            val d = yogunluk.text.toString().toDoubleOrNull()
+            if (y != null && d != null && y > 0 && d > 0) {
+                val Vstok = gereKutle / (d * y / 100.0)
+                val cozucu = maxOf(0.0, V * 1000 - Vstok)
+                sonuc.text = sonuc.text.toString() + "\nStok: ${"%.2f".format(Vstok)} mL alinip ${"%.2f".format(cozucu)} mL cozucu ile tamamlanir" + if (Vstok > V * 1000) "\nUyari: stok hacmi hedefi aşıyor" else ""
+            }
+            AnimUtils.popIn(resultCard)
+            AnimUtils.flash(sonuc)
+            solutionView.setLiquidLevel((V / 2.0).toFloat(), "${"%.2f".format(V)} L")
+        }
+
+        v.findViewById<TextView>(R.id.coz_hazirla).setOnClickListener {
+            AnimUtils.press(it); hazirla(true)
+        }
+
+        v.findViewById<TextView>(R.id.preset_1M_NaCl).setOnClickListener {
+            AnimUtils.press(it); selectChip(it as TextView)
             hedefM.setText("1.0"); hedefV.setText("1.0"); mK.setText("58.44")
+            hazirla(true)
         }
-        v.findViewById<Button>(R.id.preset_01M_HCl).setOnClickListener {
+        v.findViewById<TextView>(R.id.preset_01M_HCl).setOnClickListener {
+            AnimUtils.press(it); selectChip(it as TextView)
             hedefM.setText("0.1"); hedefV.setText("0.5"); mK.setText("36.46")
+            hazirla(true)
         }
-        v.findViewById<Button>(R.id.preset_2M_H2SO4).setOnClickListener {
+        v.findViewById<TextView>(R.id.preset_2M_H2SO4).setOnClickListener {
+            AnimUtils.press(it); selectChip(it as TextView)
             hedefM.setText("2.0"); hedefV.setText("0.25"); mK.setText("98.08")
+            hazirla(true)
         }
-        v.findViewById<Button>(R.id.preset_05M_NaOH).setOnClickListener {
+        v.findViewById<TextView>(R.id.preset_05M_NaOH).setOnClickListener {
+            AnimUtils.press(it); selectChip(it as TextView)
             hedefM.setText("0.5"); hedefV.setText("1.0"); mK.setText("40.0")
+            hazirla(true)
         }
 
-        v.findViewById<Button>(R.id.coz_hazirla).setOnClickListener {
-            try {
-                val M = hedefM.text.toString().toDoubleOrNull() ?: 0.0
-                val V = hedefV.text.toString().toDoubleOrNull() ?: 0.0
-                val mID = mK.text.toString().toDoubleOrNull() ?: 0.0
-                if (M <= 0 || V <= 0 || mID <= 0) {
-                    sonuc.text = "Hedef M, V ve mK pozitif olmali"; return@setOnClickListener
-                }
-                val n = M * V
-                val gereIliKutle = n * mID
-                val sI = StringBuilder()
-                sI.append("Gerekli Cozunen: ${"%.4f".format(gereIliKutle)} g\n")
-                sI.append("Mol sayisi: ${"%.4f".format(n)} mol\n")
-                sI.append("Hacim: ${"%.4f".format(V)} L")
-
-                val y = yuzde.text.toString().toDoubleOrNull()
-                val d = yogunluk.text.toString().toDoubleOrNull()
-                if (y != null && d != null && y > 0 && d > 0) {
-                    val VstoI = gereIliKutle / (d * y / 100.0)
-                    sI.append("\n\nStok Cozeltiden:\n${"%.4f".format(VstoI)} mL alinip ${"%.4f".format(V * 1000 - VstoI)} mL cozucu ile tamamlanir")
-                }
-                sonuc.text = sI.toString()
-
-                val maxVol = 2.0
-                solutionView.setLiquidLevel((V / maxVol).toFloat(), "${"%.2f".format(V)} L")
-            } catch (e: Exception) { sonuc.text = "Hata: ${e.message}" }
+        v.findViewById<TextView>(R.id.dcm_hesapla).setOnClickListener {
+            AnimUtils.press(it)
+            val y = dcmYuzde.text.toString().toDoubleOrNull()
+            val d = dcmYogunluk.text.toString().toDoubleOrNull()
+            val mID = dcmmK.text.toString().toDoubleOrNull()
+            if (y == null || d == null || mID == null || y <= 0 || d <= 0 || mID <= 0) {
+                dcmResultCard.visibility = View.VISIBLE
+                dcmResultNote.text = "uyari"
+                dcmSonuc.visibility = View.VISIBLE
+                dcmSonuc.text = "Tum alanlari doldurun (pozitif degerler)"
+                return@setOnClickListener
+            }
+            val M = KimyaData.yogunluktanMolarite(y, d, mID)
+            if (M == null || M.isNaN() || M.isInfinite()) {
+                dcmResultCard.visibility = View.VISIBLE
+                dcmResultNote.text = "hata"
+                dcmSonuc.visibility = View.VISIBLE
+                dcmSonuc.text = "Hesaplama hatasi"
+            } else {
+                dcmResultCard.visibility = View.VISIBLE
+                dcmResultNote.text = "molarite"
+                if (true) animateValue(dcmResultValue, M) else dcmResultValue.text = "%.4f".format(M)
+                dcmSonuc.visibility = View.VISIBLE
+                dcmSonuc.text = "%${"%.1f".format(y)} cozelti, d=${"%.3f".format(d)} g/mL, Ma=${"%.2f".format(mID)} g/mol"
+                AnimUtils.popIn(dcmResultCard)
+                AnimUtils.flash(dcmSonuc)
+            }
         }
 
-        v.findViewById<Button>(R.id.dcm_hesapla).setOnClickListener {
-            try {
-                val y = dcmYuzde.text.toString().toDoubleOrNull() ?: 0.0
-                val d = dcmYogunluk.text.toString().toDoubleOrNull() ?: 0.0
-                val mID = dcmmK.text.toString().toDoubleOrNull() ?: 0.0
-                if (y <= 0 || d <= 0 || mID <= 0) { dcmSonuc.text = "Tum alanlari doldurun"; return@setOnClickListener }
-                val M = KimyaData.yogunluktanMolarite(y, d, mID)
-                if (M == null) dcmSonuc.text = "Hesaplama hatasi"
-                else dcmSonuc.text = "M = ${"%.4f".format(M)} M\n(%${"%.1f".format(y)} cozelti, d=${"%.3f".format(d)} g/mL, mK=${"%.2f".format(mID)} g/mol)"
-            } catch (e: Exception) { dcmSonuc.text = "Hata: ${e.message}" }
+        v.findViewById<TextView>(R.id.coz_help).setOnClickListener {
+            HelpDialog.showGuide(
+                requireContext(),
+                "Cozelti Hazirlama",
+                "Molarite (M) ve gerekli kutle hesaplama.",
+                listOf(
+                    "M = n / V formulu: M molarite, n mol sayisi, V hacim (L).",
+                    "Gerekli kutle: m = M x V x Ma (Ma: molar kutle).",
+                    "Stok cozeltiden hazirlama: yuzde ve yogunluk girin, gerekli stok hacmi hesaplanir.",
+                    "Yogunluktan molarite: % yuzde, yogunluk ve Ma ile M hesaplanir."
+                )
+            )
         }
+
+        AnimUtils.gradientTitle(v.findViewById(R.id.coz_baslik))
+        AnimUtils.slideUpFade(v)
         return v
     }
 }
+

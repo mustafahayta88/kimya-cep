@@ -1,7 +1,6 @@
 package com.kimya.uygulama.utils
 
 import kotlin.math.abs
-import kotlin.math.max
 
 object ReactionBalancer {
 
@@ -9,20 +8,14 @@ object ReactionBalancer {
         val reaktifler: List<Pair<String, Int>>,
         val urunler: List<Pair<String, Int>>,
         val tip: String = "",
-        val deltaH: Double? = null
+        val deltaH: Double? = null,
+        /** false = otomatik denkleştirilemedi, katsayılar güvenilmez */
+        val denkMi: Boolean = true
     )
 
-    private val elementRegex = Regex("([A-Z][a-z]?)(\\d*)")
-    private val formulaRegex = Regex("([A-Z][a-z]?\\d*)+")
-
+    /** Ortak ayrıştırıcıyı kullanır (parantez destekler); hatalı formülde boş döner */
     fun parseBilesif(formul: String): Map<String, Int> {
-        val map = mutableMapOf<String, Int>()
-        for (m in elementRegex.findAll(formul)) {
-            val el = m.groupValues[1]
-            val cnt = m.groupValues[2].toIntOrNull() ?: 1
-            map[el] = (map[el] ?: 0) + cnt
-        }
-        return map
+        return KimyaData.formulAyristir(formul.trim()) ?: emptyMap()
     }
 
     fun dene(formulStr: String): BalancedReaction? {
@@ -43,7 +36,6 @@ object ReactionBalancer {
         if (tumElementler.isEmpty()) return null
 
         val nReact = reaktifler.size
-        _nReact = nReact
         val nProd = urunler.size
         val nTotal = nReact + nProd
         val nEq = tumElementler.size
@@ -66,18 +58,52 @@ object ReactionBalancer {
         }
 
         val coeffs = solveLinearSystem(matrix, nTotal)
-        if (coeffs == null || coeffs.any { it <= 0 }) {
-            return fallbackBalance(reaktifler, urunler, reaktifBilesikler, urunBilesiIler, tumElementler)
+        val finalCoeffs = smallestIntegers(coeffs)
+        if (finalCoeffs != null && atomlarDenkMi(reaktifBilesikler, urunBilesiIler, finalCoeffs, nReact)) {
+            return BalancedReaction(
+                reaktifler = reaktifler.zip(finalCoeffs.take(nReact)),
+                urunler = urunler.zip(finalCoeffs.drop(nReact)),
+                tip = tipBul(reaktifler, urunler),
+                denkMi = true
+            )
         }
 
-        val scale = findLCM(coeffs.map { it.toInt() })
-        val finalCoeffs = coeffs.map { (it * scale).toInt() }
-
+        // Denkleştirilemedi: 1'li katsayı + UYARI bayrağı (sessizce doğruymuş gibi gösterme!)
         return BalancedReaction(
-            reaktifler = reaktifler.zip(finalCoeffs.take(nReact)),
-            urunler = urunler.zip(finalCoeffs.drop(nReact)),
-            tip = tipBul(reaktifler, urunler)
+            reaktifler = reaktifler.zip(List(nReact) { 1 }),
+            urunler = urunler.zip(List(nProd) { 1 }),
+            tip = tipBul(reaktifler, urunler),
+            denkMi = false
         )
+    }
+
+    /** Çözümü doğrulanmış en küçük tam sayı katsayılara çevirir; olmazsa null */
+    private fun smallestIntegers(coeffs: DoubleArray?): List<Int>? {
+        if (coeffs == null || coeffs.any { it <= 1e-9 }) return null
+        val minPos = coeffs.minOrNull()!!
+        val normed = coeffs.map { it / minPos }
+        for (m in 1..12) {
+            val scaled = normed.map { it * m }
+            if (scaled.all { abs(it - kotlin.math.round(it)) < 0.02 && it < 500 }) {
+                return scaled.map { kotlin.math.round(it).toInt() }
+            }
+        }
+        return null
+    }
+
+    private fun atomlarDenkMi(
+        reaktifBilesikler: List<Map<String, Int>>, urunBilesiIler: List<Map<String, Int>>,
+        coeffs: List<Int>, nReact: Int
+    ): Boolean {
+        val sol = mutableMapOf<String, Int>()
+        val sag = mutableMapOf<String, Int>()
+        reaktifBilesikler.forEachIndexed { i, mp ->
+            for ((el, n) in mp) sol[el] = (sol[el] ?: 0) + n * coeffs[i]
+        }
+        urunBilesiIler.forEachIndexed { i, mp ->
+            for ((el, n) in mp) sag[el] = (sag[el] ?: 0) + n * coeffs[nReact + i]
+        }
+        return (sol.keys + sag.keys).all { (sol[it] ?: 0) == (sag[it] ?: 0) }
     }
 
     private fun solveLinearSystem(matrix: Array<DoubleArray>, nVars: Int): DoubleArray? {
@@ -87,6 +113,7 @@ object ReactionBalancer {
             if (i < m) matrix[i].copyOf(n + 1) else DoubleArray(n + 1)
         }
 
+        augmented[m][n - 1] = 1.0 // sabitleme: son katsayı = 1 (ölçek çapası)
         augmented[m][n] = 1.0
 
         var row = 0
@@ -140,74 +167,13 @@ object ReactionBalancer {
         return result
     }
 
-    private fun fallbackBalance(
-        reaktifler: List<String>, urunler: List<String>,
-        reaktifBilesikler: List<Map<String, Int>>, urunBilesiIler: List<Map<String, Int>>,
-        tumElementler: List<String>
-    ): BalancedReaction? {
-        val allReact = reaktifler.zip(reaktifBilesikler)
-        val allProd = urunler.zip(urunBilesiIler)
-        var coeffs = IntArray(reaktifler.size + urunler.size) { 1 }
-        val totalAtoms = tumElementler.associateWith { el ->
-            val left = allReact.sumOf { p -> p.second[el] ?: 0 }
-            val right = allProd.sumOf { p -> p.second[el] ?: 0 }
-            left to right
-        }
-        if (totalAtoms.all { (_, v) -> v.first == v.second }) {
-            return BalancedReaction(
-                reaktifler = reaktifler.zip(coeffs.take(reaktifler.size)),
-                urunler = urunler.zip(coeffs.drop(reaktifler.size)),
-                tip = tipBul(reaktifler, urunler)
-            )
-        }
-        return simpleGuessBalance(reaktifler, urunler, reaktifBilesikler, urunBilesiIler, tumElementler)
-    }
-
-    private fun simpleGuessBalance(
-        reaktifler: List<String>, urunler: List<String>,
-        reaktifBilesikler: List<Map<String, Int>>, urunBilesiIler: List<Map<String, Int>>,
-        tumElementler: List<String>
-    ): BalancedReaction? {
-        val allReact = reaktifler.zip(reaktifBilesikler)
-        val allProd = urunler.zip(urunBilesiIler)
-        val n = reaktifler.size + urunler.size
-        for (guess in 1..20) {
-            val coeffs = IntArray(n) { guess }
-            val leftCounts = mutableMapOf<String, Int>()
-            val rightCounts = mutableMapOf<String, Int>()
-            for (ri in allReact.indices) {
-                val map = allReact[ri].second
-                for ((el, cnt) in map) leftCounts[el] = (leftCounts[el] ?: 0) + cnt * coeffs[ri]
-            }
-            for (pi in allProd.indices) {
-                val map = allProd[pi].second
-                for ((el, cnt) in map) rightCounts[el] = (rightCounts[el] ?: 0) + cnt * coeffs[_nReact + pi]
-            }
-            if (tumElementler.all { (leftCounts[it] ?: 0) == (rightCounts[it] ?: 0) }) {
-                return BalancedReaction(
-                    reaktifler = reaktifler.zip(coeffs.take(reaktifler.size)),
-                    urunler = urunler.zip(coeffs.drop(reaktifler.size)),
-                    tip = tipBul(reaktifler, urunler)
-                )
-            }
-        }
-        return BalancedReaction(
-            reaktifler = reaktifler.zip(List(reaktifler.size) { 1 }),
-            urunler = urunler.zip(List(urunler.size) { 1 }),
-            tip = tipBul(reaktifler, urunler)
-        )
-    }
-
-    private var _nReact = 0
-    private fun nReact(): Int = _nReact
-
     private fun tipBul(reaktifler: List<String>, urunler: List<String>): String {
         val all = reaktifler + urunler
         return when {
             "O2" in reaktifler && all.any { "CO2" in it || "H2O" in it } -> "Yanma"
             reaktifler.size == 1 && urunler.size > 1 -> "Bozunma"
             reaktifler.size > 1 && urunler.size == 1 -> "Sentez"
-            "HCl" in reaktifler && "NaOH" in reaktifler || "H2SO4" in reaktifler && "NaOH" in reaktifler -> "Nötrleşme"
+            ("HCl" in reaktifler && "NaOH" in reaktifler) || ("H2SO4" in reaktifler && "NaOH" in reaktifler) -> "Nötrleşme"
             reaktifler.any { it.length <= 2 } && urunler.any { it.length <= 2 } -> "Yer değiştirme"
             reaktifler.filter { it.contains("Cl") || it.contains("NO3") }.size >= 2 && urunler.any { it.contains("Cl") || it.contains("NO3") } -> "Çökelme"
             "e-" in all -> "Redox"
@@ -219,15 +185,12 @@ object ReactionBalancer {
         val reaktifStr = r.reaktifler.joinToString(" + ") { (I, c) -> if (c == 1) I else "$c$I" }
         val urunStr = r.urunler.joinToString(" + ") { (I, c) -> if (c == 1) I else "$c$I" }
         val tipStr = if (r.tip.isNotEmpty()) " [${r.tip}]" else ""
-        val entalpiStr = if (r.deltaH != null) "  ΔH=${r.deltaH} IJ/mol" else ""
-        return "$reaktifStr -> $urunStr$tipStr$entalpiStr"
+        val uyariStr = if (!r.denkMi) "  ⚠ otomatik denkleştirilemedi" else ""
+        val entalpiStr = if (r.deltaH != null) "  ΔH=${r.deltaH} kJ/mol" else ""
+        return "$reaktifStr -> $urunStr$tipStr$entalpiStr$uyariStr"
     }
 
-    private fun findLCM(nums: List<Int>): Int {
-        if (nums.isEmpty()) return 1
-        fun lcm(a: Int, I: Int): Int = if (a == 0 || I == 0) max(a, I) else a * I / gcd(a, I)
-        return nums.reduce { a, I -> lcm(a, I) }
-    }
+    // findLCM/gcd kaldırıldı: smallestIntegers + atomlarDenkMi kullanılıyor
 
-    private fun gcd(a: Int, I: Int): Int = if (I == 0) a else gcd(I, a % I)
+    // ÖLÜ KOD (findLCM ile birlikte kaldırıldı) -- private fun gcdX(a: Int, I: Int): Int = if (I == 0) a else gcd(I, a % I)
 }
